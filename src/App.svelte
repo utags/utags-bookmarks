@@ -2,6 +2,7 @@
   import { persisted } from 'svelte-persisted-store'
   import VirtualList from 'svelte-virtual-list'
   import AddBookmark from './AddBookmark.svelte'
+  import Sidebar from './components/Sidebar.svelte'
 
   // 初始化书签存储
   const bookmarks = persisted('utags', { data: {} })
@@ -10,14 +11,20 @@
   let showAddModal = false
   let selectedTags = new Set()
   let selectedDomains = new Set()
+  let filteredBookmarks = []
+  let filteredBookmarks1 = []
+  let allTags
+  let allDomains
 
-  $: allTags = new Set(
-    Object.values($bookmarks.data).flatMap((entry) => entry.tags)
-  )
-
-  $: allDomains = new Set(
-    Object.keys($bookmarks.data).map((url) => new URL(url).hostname)
-  )
+  $: stats = {
+    totalBookmarks: filteredBookmarks.length,
+    selectedTagsCount: new Set(
+      filteredBookmarks.flatMap(([_, entry]) => entry.tags)
+    ).size,
+    selectedDomainsCount: new Set(
+      filteredBookmarks.map(([url, _]) => new URL(url).hostname)
+    ).size,
+  }
 
   function getTagColor(tag) {
     const hue =
@@ -25,42 +32,6 @@
     return `hsl(${hue}, 70%, 50%)`
   }
 
-  $: filteredBookmarks = Object.entries($bookmarks.data)
-    .filter(([url, entry]) => {
-      const lowerKeyword = searchKeyword.trim().toLowerCase()
-      const hasKeyword =
-        lowerKeyword === '' ||
-        url.toLowerCase().includes(lowerKeyword) ||
-        entry.meta.title?.toLowerCase().includes(lowerKeyword) ||
-        entry.tags.some((tag) => tag.toLowerCase().includes(lowerKeyword))
-
-      const hasAllTags =
-        selectedTags.size === 0 ||
-        (selectedTags.size > 0 &&
-          entry.tags.some((tag) => selectedTags.has(tag)))
-
-      const hasDomain =
-        selectedDomains.size === 0 || selectedDomains.has(new URL(url).hostname)
-
-      return hasKeyword && hasAllTags && hasDomain
-    })
-    .sort((a, b) => {
-      const aTime = sortBy === 'updated' ? a[1].meta.updated : a[1].meta.created
-      const bTime = sortBy === 'updated' ? b[1].meta.updated : b[1].meta.created
-      return bTime - aTime
-    })
-
-  function toggleTag(tag) {
-    selectedTags = selectedTags.has(tag)
-      ? new Set([...selectedTags].filter((t) => t !== tag))
-      : new Set([...selectedTags, tag])
-  }
-
-  function toggleDomain(domain) {
-    selectedDomains = selectedDomains.has(domain)
-      ? new Set([...selectedDomains].filter((d) => d !== domain))
-      : new Set([...selectedDomains, domain])
-  }
   let scrollTop = 0
 
   function clearAll() {
@@ -171,48 +142,12 @@
 </script>
 
 <main class="container">
-  <aside class="sidebar">
-    <div class="search-box">
-      <input
-        type="text"
-        placeholder="搜索 URL/标题/标签..."
-        bind:value={searchKeyword} />
-    </div>
-
-    <div class="filter-controls">
-      <div class="filter-group">
-        <h4>标签筛选：</h4>
-        {#each Array.from(allTags) as tag}
-          <label class="filter-tag">
-            <input
-              type="checkbox"
-              checked={selectedTags.has(tag)}
-              on:change={() => {
-                toggleTag(tag)
-                selectedTags = selectedTags // 触发响应式更新
-              }} />
-            {tag}
-          </label>
-        {/each}
-      </div>
-
-      <div class="filter-group">
-        <h4>域名筛选：</h4>
-        {#each Array.from(allDomains) as domain}
-          <label class="filter-domain">
-            <input
-              type="checkbox"
-              checked={selectedDomains.has(domain)}
-              on:change={() => {
-                toggleDomain(domain)
-                selectedDomains = selectedDomains // 触发响应式更新
-              }} />
-            {domain}
-          </label>
-        {/each}
-      </div>
-    </div>
-  </aside>
+  <Sidebar
+    bind:searchKeyword
+    originalBookmarks={$bookmarks.data}
+    bind:filteredBookmarks
+    bind:allTags
+    bind:allDomains />
 
   <div class="content-area">
     <div class="toolbar">
@@ -242,6 +177,11 @@
     {/if}
 
     <div class="sort-controls">
+      <div class="stats-display">
+        <span class="stat-item">🔖 {stats.totalBookmarks}</span>
+        <span class="stat-item">🏷️ {stats.selectedTagsCount}</span>
+        <span class="stat-item">🌐 {stats.selectedDomainsCount}</span>
+      </div>
       <label class="radio-option {sortBy === 'updated' ? 'active' : ''}">
         <input
           type="radio"
@@ -360,15 +300,7 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    height: calc(100vh - 60px);
-  }
-
-  .sidebar {
-    width: 280px;
-    min-width: 280px;
-    border-right: 1px solid #eee;
-    padding-right: 20px;
-    overflow-y: auto;
+    height: calc(100vh - 0px);
   }
 
   .content-area {
@@ -415,5 +347,22 @@
     background: #0066cc;
     color: white;
     border-color: #0066cc;
+  }
+
+  .stats-display {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: #f5f5f5;
+    border-radius: 16px;
   }
 </style>
