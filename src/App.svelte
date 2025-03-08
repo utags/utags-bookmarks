@@ -19,6 +19,12 @@
     Object.keys($bookmarks.data).map((url) => new URL(url).hostname)
   )
 
+  function getTagColor(tag) {
+    const hue =
+      Array.from(tag).reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360
+    return `hsl(${hue}, 70%, 50%)`
+  }
+
   $: filteredBookmarks = Object.entries($bookmarks.data)
     .filter(([url, entry]) => {
       const lowerKeyword = searchKeyword.trim().toLowerCase()
@@ -261,22 +267,89 @@
 
     <div class="bookmark-list">
       <VirtualList items={filteredBookmarks} bind:scrollTop let:item>
-        <div class="bookmark-item">
-          <img
-            src={`https://www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}`}
-            alt="favicon"
-            class="favicon" />
-          <span class="title">{item[1].meta.title || '无标题'}</span>
-          <a href={item[0]} target="_blank" class="url"
-            >{new URL(item[0]).hostname}</a>
-          <div class="tags">
-            {#each item[1].tags as tag}
-              <span class="tag">{tag}</span>
-            {/each}
+        <div
+          class="group relative bg-white/80 backdrop-blur-sm rounded-md p-2 shadow-sm hover:shadow transition-all duration-200 border border-gray-100 hover:-translate-y-0">
+          <div class="flex items-start gap-2">
+            <img
+              src={import.meta.env.MODE === 'development'
+                ? '/favicon.ico'
+                : `https://www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}`}
+              class="w-4 h-4 mt-1 flex-none"
+              alt="favicon" />
+            <div class="flex-1 min-w-0 space-y-0.5">
+              <div class="flex items-baseline gap-2 truncate">
+                <h3 class="text-sm font-medium text-gray-900 truncate">
+                  <a
+                    href={item[0]}
+                    title={item[1].meta.title || '无标题'}
+                    target="_blank"
+                    class="hover:text-blue-600">
+                    {item[1].meta.title || '无标题'}
+                  </a>
+                </h3>
+                <span class="text-gray-400 text-xs">|</span>
+                <a
+                  href={item[0]}
+                  title={item[0]}
+                  target="_blank"
+                  class="text-xs text-blue-600 hover:text-blue-800 truncate">
+                  {new URL(item[0]).hostname}
+                </a>
+              </div>
+              <div class="mt-1 flex flex-wrap gap-1">
+                {#each item[1].tags as tag}
+                  <span
+                    class="flex items-center px-1 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700 leading-none">
+                    <span
+                      class="w-1.5 h-1.5 rounded-full mr-1"
+                      class:bg-{tag}-500={tag}
+                      style="background-color: {getTagColor(tag)}"></span>
+                    {tag}
+                  </span>
+                {/each}
+              </div>
+            </div>
+            <span
+              class="text-[11px] text-gray-500 absolute top-1 right-0 pr-1 text-right">
+              {#if item[1].meta.created === item[1].meta.updated}
+                <div class="flex flex-col gap-0.5 items-end justify-end">
+                  <span title="创建时间/更新时间"
+                    >{new Date(item[1].meta.updated).toLocaleString('zh-CN', {
+                      hour12: false,
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}</span>
+                </div>
+              {:else}
+                <div class="flex flex-col gap-0.5 items-end justify-end">
+                  <span title="更新时间"
+                    >{new Date(item[1].meta.updated).toLocaleString('zh-CN', {
+                      hour12: false,
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}</span>
+                  <span title="创建时间"
+                    >{new Date(item[1].meta.created).toLocaleString('zh-CN', {
+                      hour12: false,
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}</span>
+                </div>
+              {/if}
+            </span>
           </div>
-          <span class="updated">
-            {new Date(item[1].meta.updated).toLocaleDateString()}
-          </span>
         </div>
       </VirtualList>
     </div>
@@ -351,20 +424,8 @@
   }
 
   .bookmark-list {
-    height: calc(100vh - 200px);
+    height: calc(100vh - 120px);
     overflow-y: auto;
-  }
-
-  .bookmark-item {
-    display: grid;
-    grid-template-columns: 1fr 2fr 3fr 2fr 1fr;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-  }
-
-  .favicon {
-    width: 16px;
-    height: 16px;
   }
 
   button.primary {

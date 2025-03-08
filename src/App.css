@@ -1,0 +1,33 @@
+/* 添加全局容器样式 */
+@layer components {
+  .app-container {
+    @apply min-h-screen bg-neutral-50/95 backdrop-blur-sm;
+  }
+
+  /* 导航栏样式 - 模仿Firefox View */
+  .nav-bar {
+    @apply sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200/70;
+    @apply px-4 py-3 flex items-center justify-between;
+  }
+
+  /* 内容区域网格布局 - 类似Finder的列视图 */
+  .grid-view {
+    @apply grid gap-4 p-4;
+    @apply md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5;
+  }
+
+  /* 卡片元素样式 */
+  .card-item {
+    @apply bg-white rounded-xl p-4 transition-all;
+    @apply border border-gray-200/70 hover:border-blue-500/30;
+    @apply shadow-sm hover:shadow-md;
+    @apply hover:-translate-y-0.5;
+  }
+
+  /* 按钮交互状态 */
+  .action-btn {
+    @apply px-3 py-1.5 rounded-lg text-sm font-medium;
+    @apply bg-blue-600/5 text-blue-600 hover:bg-blue-600/10;
+    @apply transition-colors active:scale-95;
+  }
+}
