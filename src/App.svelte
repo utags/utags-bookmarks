@@ -212,39 +212,6 @@
         {/each}
       </div>
     </div>
-    <div class="filter-controls">
-      <div class="filter-group">
-        <h4>标签筛选：</h4>
-        {#each Array.from(allTags) as tag}
-          <label class="filter-tag">
-            <input
-              type="checkbox"
-              checked={selectedTags.has(tag)}
-              on:change={() => {
-                toggleTag(tag)
-                selectedTags = selectedTags
-              }} />
-            {tag}
-          </label>
-        {/each}
-      </div>
-
-      <div class="filter-group">
-        <h4>域名筛选：</h4>
-        {#each Array.from(allDomains) as domain}
-          <label class="filter-domain">
-            <input
-              type="checkbox"
-              checked={selectedDomains.has(domain)}
-              on:change={() => {
-                toggleDomain(domain)
-                selectedDomains = selectedDomains
-              }} />
-            {domain}
-          </label>
-        {/each}
-      </div>
-    </div>
   </aside>
 
   <div class="content-area">
@@ -257,12 +224,42 @@
       <AddBookmark bind:show={showAddModal} />
     </div>
 
-    <div class="list-header">
-      <span>图标</span>
-      <span>标题</span>
-      <span>URL</span>
-      <span>标签</span>
-      <span>更新时间</span>
+    {#if importProgress.total > 0}
+      <div class="import-progress">
+        导入进度: {importProgress.current}/{importProgress.total}
+        {#if importProgress.stats}
+          <div class="stats">
+            新增: {importProgress.stats.newBookmarks}书签・
+            {importProgress.stats.newDomains.size}域名・
+            {importProgress.stats.newTags.size}标签
+            <div class="total-stats">
+              总数: {Object.keys($bookmarks.data).length}书签・
+              {allTags.size}标签・{allDomains.size}域名
+            </div>
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    <div class="sort-controls">
+      <label class="radio-option {sortBy === 'updated' ? 'active' : ''}">
+        <input
+          type="radio"
+          name="sort-by"
+          value="updated"
+          checked={sortBy === 'updated'}
+          on:change={() => (sortBy = 'updated')} />
+        按更新时间排序
+      </label>
+      <label class="radio-option {sortBy === 'created' ? 'active' : ''}">
+        <input
+          type="radio"
+          name="sort-by"
+          value="created"
+          checked={sortBy === 'created'}
+          on:change={() => (sortBy = 'created')} />
+        按创建时间排序
+      </label>
     </div>
 
     <div class="bookmark-list">
@@ -278,7 +275,7 @@
               alt="favicon" />
             <div class="flex-1 min-w-0 space-y-0.5">
               <div class="flex items-baseline gap-2 truncate">
-                <h3 class="text-sm font-medium text-gray-900 truncate">
+                <h3 class="text-sm text-gray-900 truncate">
                   <a
                     href={item[0]}
                     title={item[1].meta.title || '无标题'}
@@ -299,7 +296,7 @@
               <div class="mt-1 flex flex-wrap gap-1">
                 {#each item[1].tags as tag}
                   <span
-                    class="flex items-center px-1 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700 leading-none">
+                    class="flex items-center px-1 py-0.5 rounded-full text-[11px] bg-gray-100 text-gray-700 leading-none">
                     <span
                       class="w-1.5 h-1.5 rounded-full mr-1"
                       class:bg-{tag}-500={tag}
@@ -353,36 +350,6 @@
         </div>
       </VirtualList>
     </div>
-
-    {#if importProgress.total > 0}
-      <div class="import-progress">
-        导入进度: {importProgress.current}/{importProgress.total}
-        {#if importProgress.stats}
-          <div class="stats">
-            新增: {importProgress.stats.newBookmarks}书签・
-            {importProgress.stats.newDomains.size}域名・
-            {importProgress.stats.newTags.size}标签
-            <div class="total-stats">
-              总数: {Object.keys($bookmarks.data).length}书签・
-              {allTags.size}标签・{allDomains.size}域名
-            </div>
-          </div>
-        {/if}
-      </div>
-    {/if}
-
-    <div class="sort-controls">
-      <button
-        class="sort-btn {sortBy === 'updated' ? 'active' : ''}"
-        on:click={() => (sortBy = 'updated')}>
-        按更新时间排序
-      </button>
-      <button
-        class="sort-btn {sortBy === 'created' ? 'active' : ''}"
-        on:click={() => (sortBy = 'created')}>
-        按创建时间排序
-      </button>
-    </div>
   </div>
 </main>
 
@@ -415,16 +382,8 @@
     margin-bottom: 20px;
   }
 
-  .list-header {
-    display: grid;
-    grid-template-columns: 1fr 2fr 3fr 2fr 1fr;
-    font-weight: bold;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-  }
-
   .bookmark-list {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 150px);
     overflow-y: auto;
   }
 
@@ -435,5 +394,26 @@
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+  }
+
+  .radio-option {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: all 0.2s;
+  }
+
+  .radio-option input {
+    margin-right: 6px;
+  }
+
+  .radio-option.active {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
   }
 </style>
