@@ -33,16 +33,24 @@
     <div class="modal-content">
       <h3>添加新书签</h3>
       <div class="form-group">
-        <label>URL：</label>
-        <input type="text" bind:value={url} placeholder="https://example.com" />
+        <label for="url-input">URL：</label>
+        <input
+          id="url-input"
+          type="text"
+          bind:value={url}
+          placeholder="https://example.com" />
       </div>
       <div class="form-group">
-        <label>标题：</label>
-        <input type="text" bind:value={title} />
+        <label for="title-input">标题：</label>
+        <input id="title-input" type="text" bind:value={title} />
       </div>
       <div class="form-group">
-        <label>标签（逗号分隔）：</label>
-        <input type="text" bind:value={tags} placeholder="工作,技术,重要" />
+        <label for="tags-input">标签（逗号分隔）：</label>
+        <input
+          id="tags-input"
+          type="text"
+          bind:value={tags}
+          placeholder="工作,技术,重要" />
       </div>
       <div class="form-actions">
         <button class="primary" on:click={addBookmark}>保存</button>
