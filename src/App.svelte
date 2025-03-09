@@ -6,17 +6,94 @@
 
   // 初始化书签存储
   const bookmarks = persisted('utags', { data: {} })
-  let sortBy = 'updated'
-  let searchKeyword = ''
-  let showAddModal = false
-  let selectedTags = new Set()
-  let selectedDomains = new Set()
-  let filteredBookmarks = []
-  let filteredBookmarks1 = []
-  let allTags
-  let allDomains
+  const originalBookmarks = $derived(Object.entries($bookmarks.data))
+  let sortBy = $state('updated')
+  let scrollTop = $state(0)
+  let showAddModal = $state(false)
+  let allTags = $state(new Set())
+  let allDomains = $state(new Set())
+  let filteredBookmarks1 = $state([])
+  let filteredBookmarks2 = $state([])
+  let filteredBookmarks3 = $state([])
+  let useLevel2 = $derived(
+    filteredBookmarks1.length &&
+      filteredBookmarks1.length !== originalBookmarks.length
+  )
+  let useLevel3 = $derived(
+    filteredBookmarks2.length &&
+      filteredBookmarks2.length !== filteredBookmarks1.length
+  )
+  let timeoutId
+  let filteredBookmarks = $state([])
 
-  $: stats = {
+  function updateFilteredBookmarks() {
+    console.log('!!! updateFilteredBookmarks')
+
+    const temp = useLevel3
+      ? filteredBookmarks3
+      : useLevel2
+        ? filteredBookmarks2
+        : filteredBookmarks1
+
+    if (sortBy) {
+      console.log(`sort by:`, sortBy)
+      temp.sort((a, b) => {
+        const aTime =
+          sortBy === 'updated' ? a[1].meta.updated : a[1].meta.created
+        const bTime =
+          sortBy === 'updated' ? b[1].meta.updated : b[1].meta.created
+        return bTime - aTime
+      })
+    }
+
+    filteredBookmarks = temp
+
+    setTimeout(() => {
+      document.querySelector('.bookmark-list > *').scrollTo(0, 0)
+    }, 100)
+  }
+
+  window.addEventListener('filterUpdated', () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+    timeoutId = setTimeout(() => {
+      updateFilteredBookmarks()
+    }, 100)
+
+    const originalBookmarksLength = originalBookmarks.length
+    const filteredBookmarks1Length = filteredBookmarks1.length
+    const filteredBookmarks2Length = filteredBookmarks2.length
+    const filteredBookmarks3Length = filteredBookmarks3.length
+
+    console.log(
+      'filterUpdated',
+      originalBookmarksLength,
+      filteredBookmarks1Length,
+      filteredBookmarks2Length,
+      filteredBookmarks3Length
+    )
+
+    if (
+      filteredBookmarks1Length === 0 ||
+      filteredBookmarks1Length === originalBookmarksLength
+    ) {
+      console.log('clear level 2, level 3')
+      filteredBookmarks2 = []
+      filteredBookmarks3 = []
+    } else if (filteredBookmarks1Length > 0) {
+      if (
+        filteredBookmarks2Length === 0 ||
+        filteredBookmarks2Length === filteredBookmarks1Length
+      ) {
+        console.log('clear level 3')
+        filteredBookmarks3 = []
+      }
+    }
+  })
+
+  const stats = $derived({
     totalBookmarks: filteredBookmarks.length,
     selectedTagsCount: new Set(
       filteredBookmarks.flatMap(([_, entry]) => entry.tags)
@@ -24,7 +101,7 @@
     selectedDomainsCount: new Set(
       filteredBookmarks.map(([url, _]) => new URL(url).hostname)
     ).size,
-  }
+  })
 
   function getTagColor(tag) {
     const hue =
@@ -32,14 +109,12 @@
     return `hsl(${hue}, 70%, 50%)`
   }
 
-  let scrollTop = 0
-
   function clearAll() {
     if (confirm('请确认是否清空所有书签？此操作不可逆，建议先导出备份数据。')) {
       $bookmarks.data = {}
       bookmarks.set($bookmarks)
-      selectedTags = new Set()
-      selectedDomains = new Set()
+      // selectedTags = new Set()
+      // selectedDomains = new Set()
     }
   }
 
@@ -56,7 +131,7 @@
   }
 
   // 新增导入状态
-  let importProgress = {
+  let importProgress = $state({
     current: 0,
     total: 0,
     stats: {
@@ -64,7 +139,7 @@
       newDomains: new Set(),
       newTags: new Set(),
     },
-  }
+  })
 
   async function importData() {
     const input = document.createElement('input')
@@ -143,18 +218,35 @@
 
 <main class="container">
   <Sidebar
-    bind:searchKeyword
-    originalBookmarks={$bookmarks.data}
-    bind:filteredBookmarks
+    name="level1"
+    paused={importProgress.total > 0}
+    input={originalBookmarks}
+    bind:output={filteredBookmarks1}
     bind:allTags
     bind:allDomains />
 
+  {#if useLevel2 && importProgress.total === 0}
+    <Sidebar
+      name="level2"
+      paused={importProgress.total > 0}
+      input={filteredBookmarks1}
+      bind:output={filteredBookmarks2} />
+
+    {#if useLevel3}
+      <Sidebar
+        name="level3"
+        paused={importProgress.total > 0}
+        input={filteredBookmarks2}
+        bind:output={filteredBookmarks3} />
+    {/if}
+  {/if}
+
   <div class="content-area">
     <div class="toolbar">
-      <button class="primary" on:click={importData}>导入</button>
-      <button class="primary" on:click={exportData}>导出</button>
-      <button class="primary" on:click={clearAll}>清空</button>
-      <button class="primary" on:click={() => (showAddModal = true)}
+      <button class="primary" onclick={importData}>导入</button>
+      <button class="primary" onclick={exportData}>导出</button>
+      <button class="primary" onclick={clearAll}>清空</button>
+      <button class="primary" onclick={() => (showAddModal = true)}
         >+ 添加</button>
       <AddBookmark bind:show={showAddModal} />
     </div>
@@ -188,7 +280,10 @@
           name="sort-by"
           value="updated"
           checked={sortBy === 'updated'}
-          on:change={() => (sortBy = 'updated')} />
+          onchange={() => {
+            sortBy = 'updated'
+            updateFilteredBookmarks()
+          }} />
         按更新时间排序
       </label>
       <label class="radio-option {sortBy === 'created' ? 'active' : ''}">
@@ -197,7 +292,10 @@
           name="sort-by"
           value="created"
           checked={sortBy === 'created'}
-          on:change={() => (sortBy = 'created')} />
+          onchange={() => {
+            sortBy = 'created'
+            updateFilteredBookmarks()
+          }} />
         按创建时间排序
       </label>
     </div>

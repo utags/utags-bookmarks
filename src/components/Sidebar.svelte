@@ -1,65 +1,90 @@
 <script>
-  export let originalBookmarks
-  export let filteredBookmarks
-  export let allTags
-  export let allDomains
+  let {
+    name,
+    input,
+    output = $bindable(),
+    allTags = $bindable(),
+    allDomains = $bindable(),
+    paused,
+  } = $props()
 
   // 筛选相关状态
-  let searchKeyword = ''
-  let selectedTags = new Set()
-  let selectedDomains = new Set()
-  let sortBy = 'updated'
+  let searchKeyword = $state('')
+  let selectedTags = $state(new Set())
+  let selectedDomains = $state(new Set())
+  let tagCounts = $state()
+  let domainCounts = $state()
 
-  // 计算属性
-  $: allTags = new Set(
-    Object.values(originalBookmarks).flatMap((entry) => entry.tags)
-  )
+  // 监听 input 变化并更新 allTags 和 allDomains
+  $effect(() => {
+    console.log(`[${name}] init`)
+    allTags = new Set(input.flatMap((entry) => entry[1].tags))
+    allDomains = new Set(input.map((entry) => new URL(entry[0]).hostname))
 
-  $: allDomains = new Set(
-    Object.keys(originalBookmarks).map((url) => new URL(url).hostname)
-  )
+    searchKeyword = ''
+    selectedTags = new Set()
+    selectedDomains = new Set()
 
-  $: tagCounts = new Map(
-    Object.values(originalBookmarks)
-      .flatMap((entry) => entry.tags)
-      .reduce((acc, tag) => {
-        acc.set(tag, (acc.get(tag) || 0) + 1)
-        return acc
-      }, new Map())
-  )
+    tagCounts = new Map(
+      input
+        .flatMap((entry) => entry[1].tags)
+        .reduce((acc, tag) => {
+          acc.set(tag, (acc.get(tag) || 0) + 1)
+          return acc
+        }, new Map())
+    )
 
-  $: domainCounts = new Map(
-    Object.keys(originalBookmarks)
-      .map((url) => new URL(url).hostname)
-      .reduce((acc, domain) => {
-        acc.set(domain, (acc.get(domain) || 0) + 1)
-        return acc
-      }, new Map())
-  )
+    domainCounts = new Map(
+      input
+        .map((entry) => new URL(entry[0]).hostname)
+        .reduce((acc, domain) => {
+          acc.set(domain, (acc.get(domain) || 0) + 1)
+          return acc
+        }, new Map())
+    )
+  })
 
-  $: filteredBookmarks = Object.entries(originalBookmarks)
-    .filter(([url, entry]) => {
-      const lowerKeyword = searchKeyword.trim().toLowerCase()
-      const hasKeyword =
-        lowerKeyword === '' ||
-        url.toLowerCase().includes(lowerKeyword) ||
-        entry.meta.title?.toLowerCase().includes(lowerKeyword) ||
-        entry.tags.some((tag) => tag.toLowerCase().includes(lowerKeyword))
+  // 监听筛选条件变化并更新 output
+  $effect(() => {
+    if (paused) {
+      console.log(`[${name}] paused`)
+      return
+    }
+    console.log(
+      `[${name}] current filter:`,
+      `'${searchKeyword}'`,
+      selectedTags,
+      selectedDomains
+    )
 
-      const hasAllTags =
-        selectedTags.size === 0 ||
-        entry.tags.some((tag) => selectedTags.has(tag))
+    if (searchKeyword || selectedTags.size || selectedDomains.size) {
+      console.log(`=> [${name}] apply filter`)
+      output = input.filter(([url, entry]) => {
+        const lowerKeyword = searchKeyword.trim().toLowerCase()
+        const hasKeyword =
+          lowerKeyword === '' ||
+          url.toLowerCase().includes(lowerKeyword) ||
+          entry.meta.title?.toLowerCase().includes(lowerKeyword) ||
+          entry.tags.some((tag) => tag.toLowerCase().includes(lowerKeyword))
 
-      const hasDomain =
-        selectedDomains.size === 0 || selectedDomains.has(new URL(url).hostname)
+        const hasAllTags =
+          selectedTags.size === 0 ||
+          entry.tags.some((tag) => selectedTags.has(tag))
 
-      return hasKeyword && hasAllTags && hasDomain
-    })
-    .sort((a, b) => {
-      const aTime = sortBy === 'updated' ? a[1].meta.updated : a[1].meta.created
-      const bTime = sortBy === 'updated' ? b[1].meta.updated : b[1].meta.created
-      return bTime - aTime
-    })
+        const hasDomain =
+          selectedDomains.size === 0 ||
+          selectedDomains.has(new URL(url).hostname)
+
+        return hasKeyword && hasAllTags && hasDomain
+      })
+    } else {
+      output = [...input]
+    }
+
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('filterUpdated'))
+    }, 5)
+  })
 
   function toggleTag(tag) {
     selectedTags = selectedTags.has(tag)
@@ -78,42 +103,46 @@
   <div class="search-box">
     <input
       type="text"
-      placeholder="搜索 URL/标题/标签..."
+      placeholder="{name} 搜索 URL/标题/标签..."
       bind:value={searchKeyword} />
   </div>
 
   <div class="filter-controls">
-    <div class="filter-group">
-      <h4>标签筛选：</h4>
-      {#each Array.from(allTags).sort((a, b) => tagCounts.get(b) - tagCounts.get(a)) as tag}
-        <label class="filter-tag text-sm">
-          <input
-            type="checkbox"
-            checked={selectedTags.has(tag)}
-            on:change={() => {
-              toggleTag(tag)
-              selectedTags = selectedTags
-            }} />
-          {tag}（{tagCounts.get(tag) || 0}）
-        </label>
-      {/each}
-    </div>
+    {#if allTags && allTags.size}
+      <div class="filter-group">
+        <h4>标签筛选：</h4>
+        {#each Array.from(allTags).sort((a, b) => tagCounts.get(b) - tagCounts.get(a)) as tag}
+          <label class="filter-tag text-sm">
+            <input
+              type="checkbox"
+              checked={selectedTags.has(tag)}
+              onchange={() => {
+                toggleTag(tag)
+                selectedTags = selectedTags
+              }} />
+            {tag}（{tagCounts.get(tag) || 0}）
+          </label>
+        {/each}
+      </div>
+    {/if}
 
-    <div class="filter-group">
-      <h4>域名筛选：</h4>
-      {#each Array.from(allDomains).sort((a, b) => domainCounts.get(b) - domainCounts.get(a)) as domain}
-        <label class="filter-domain text-sm">
-          <input
-            type="checkbox"
-            checked={selectedDomains.has(domain)}
-            on:change={() => {
-              toggleDomain(domain)
-              selectedDomains = selectedDomains
-            }} />
-          {domain}（{domainCounts.get(domain) || 0}）
-        </label>
-      {/each}
-    </div>
+    {#if allDomains && allDomains.size}
+      <div class="filter-group">
+        <h4>域名筛选：</h4>
+        {#each Array.from(allDomains).sort((a, b) => domainCounts.get(b) - domainCounts.get(a)) as domain}
+          <label class="filter-domain text-sm">
+            <input
+              type="checkbox"
+              checked={selectedDomains.has(domain)}
+              onchange={() => {
+                toggleDomain(domain)
+                selectedDomains = selectedDomains
+              }} />
+            {domain}（{domainCounts.get(domain) || 0}）
+          </label>
+        {/each}
+      </div>
+    {/if}
   </div>
 </aside>
 
