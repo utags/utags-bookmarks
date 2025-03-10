@@ -7,6 +7,12 @@
 
   // 初始化书签存储
   const bookmarks = persisted('utags', { data: {} })
+  const settings = persisted('ustags-settings', {
+    sortBy: 'updated',
+    showTags: true,
+    showDomains: true,
+    sidebarPosition: 'right',
+  })
   const originalBookmarks = $derived(Object.entries($bookmarks.data))
   let sortBy = $state('updated')
   let scrollTop = $state(0)
@@ -51,6 +57,9 @@
 
     setTimeout(() => {
       document.querySelector('.bookmark-list > *').scrollTo(0, 0)
+      document
+        .querySelector('.aside-area aside:last-of-type')
+        .scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start' })
     }, 100)
   }
 
@@ -209,9 +218,14 @@
 
     input.click()
   }
+
+  function toggleView() {
+    $settings.sidebarPosition =
+      $settings.sidebarPosition === 'right' ? 'left' : 'right'
+  }
 </script>
 
-<main class="container">
+<main class="container {$settings.sidebarPosition}-sidebar">
   <div class="aside-area">
     <Sidebar
       name="level1"
@@ -237,42 +251,69 @@
       {/if}
     {/if}
   </div>
+  <div class="vertical-seperator-line"></div>
   <div class="content-area">
-    <div class="toolbar">
-      <div class="left-group">
-        <button class="primary" onclick={importData}>导入</button>
-        <button class="primary" onclick={exportData}>导出</button>
-        <button class="primary" onclick={clearAll}>清空</button>
-        <button class="primary" onclick={() => (showAddModal = true)}
-          >+ 添加</button>
+    <div
+      class="toolbar flex items-center justify-between mb-6 px-4 py-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200">
+      <div class="flex items-center gap-3">
+        <button
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          onclick={importData}>
+          导入
+        </button>
+        <button
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          onclick={exportData}>导出</button>
+        <button
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          onclick={clearAll}>清空</button>
+        <button
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          onclick={() => (showAddModal = true)}>+ 添加</button>
         <AddBookmark bind:show={showAddModal} />
+        <button
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          onclick={toggleView}>切换侧边栏位置</button>
       </div>
 
-      <div class="sort-controls">
-        <label class="radio-option {sortBy === 'updated' ? 'active' : ''}">
-          <input
-            type="radio"
-            name="sort-by"
-            value="updated"
-            checked={sortBy === 'updated'}
-            onchange={() => {
-              sortBy = 'updated'
-              updateFilteredBookmarks()
-            }} />
-          按更新时间排序
-        </label>
-        <label class="radio-option {sortBy === 'created' ? 'active' : ''}">
-          <input
-            type="radio"
-            name="sort-by"
-            value="created"
-            checked={sortBy === 'created'}
-            onchange={() => {
-              sortBy = 'created'
-              updateFilteredBookmarks()
-            }} />
-          按创建时间排序
-        </label>
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-700">排序方式：</span>
+        <div class="flex bg-gray-100 p-1 rounded-md gap-1">
+          <label
+            class="px-3 py-1.5 rounded-md transition-colors cursor-pointer {sortBy ===
+            'updated'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'}">
+            <input
+              type="radio"
+              name="sort-by"
+              value="updated"
+              checked={sortBy === 'updated'}
+              class="hidden"
+              onchange={() => {
+                sortBy = 'updated'
+                updateFilteredBookmarks()
+              }} />
+            <span class="text-sm">更新时间</span>
+          </label>
+          <label
+            class="px-3 py-1.5 rounded-md transition-colors cursor-pointer {sortBy ===
+            'created'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'}">
+            <input
+              type="radio"
+              name="sort-by"
+              value="created"
+              checked={sortBy === 'created'}
+              class="hidden"
+              onchange={() => {
+                sortBy = 'created'
+                updateFilteredBookmarks()
+              }} />
+            <span class="text-sm">创建时间</span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -293,16 +334,39 @@
       </div>
     {/if}
 
-    <div class="stats-display">
-      <span class="stat-item">🔖 {stats.totalBookmarks}</span>
-      <span class="stat-item">🏷️ {stats.selectedTagsCount}</span>
-      <span class="stat-item">🌐 {stats.selectedDomainsCount}</span>
+    <div class="flex gap-4 mb-3 px-4 py-3 bg-white">
+      <div class="flex items-center gap-2">
+        <span class="text-blue-500 text-lg flex items-center">🔖</span>
+        <div class="flex flex-col justify-center">
+          <span class="text-xs font-medium text-gray-500">书签总数</span>
+          <span class="text-xl font-semibold text-gray-900">
+            {stats.totalBookmarks}</span>
+        </div>
+      </div>
+      <div class="h-full w-px bg-gray-200 my-auto self-stretch"></div>
+      <div class="flex items-center gap-2">
+        <span class="text-green-500 text-lg flex items-center">🏷️</span>
+        <div class="flex flex-col justify-center">
+          <span class="text-xs font-medium text-gray-500">使用标签</span>
+          <span class="text-xl font-semibold text-gray-900">
+            {stats.selectedTagsCount}</span>
+        </div>
+      </div>
+      <div class="h-full w-px bg-gray-200 my-auto self-stretch"></div>
+      <div class="flex items-center gap-2">
+        <span class="text-purple-500 text-lg flex items-center">🌐</span>
+        <div class="flex flex-col justify-center">
+          <span class="text-xs font-medium text-gray-500">来源域名</span>
+          <span class="text-xl font-semibold text-gray-900">
+            {stats.selectedDomainsCount}</span>
+        </div>
+      </div>
     </div>
 
-    <div class="bookmark-list">
+    <div class="bookmark-list shadow-lg">
       <VirtualList items={filteredBookmarks} bind:scrollTop let:item>
         <div
-          class="group relative bg-white p-3 rounded-md transition-colors duration-50 hover:bg-gray-100 mr-[10px]">
+          class="group relative bg-white p-3 rounded-md transition-colors duration-50 hover:bg-gray-100 ml-[10px] mr-[10px]">
           <div class="flex items-center gap-3">
             <div class="flex-1 min-w-0 space-y-0.5">
               <div class="flex items-center gap-2 truncate">
@@ -391,22 +455,62 @@
 </main>
 
 <style>
+  :root {
+    --container-justify-content: flex-end;
+    --vertical-seperator-line-order: 0;
+    --aside-area-order: 0;
+    --aside-area-flex-direction: row-reverse;
+    --aside-area-margin-left: 0px;
+    --aside-area-margin-right: -20px;
+    --sidebar-border-right: 1px solid #eee;
+    --sidebar-border-left: none;
+    --sidebar-padding-left: 0px;
+    --sidebar-padding-right: 20px;
+  }
+
+  .right-sidebar {
+    --container-justify-content: flex-start;
+    --vertical-seperator-line-order: 1;
+    --aside-area-order: 2;
+    --aside-area-flex-direction: row;
+    --aside-area-margin-left: -20px;
+    --aside-area-margin-right: 0px;
+    --sidebar-border-right: none;
+    --sidebar-border-left: 1px solid #eee;
+    --sidebar-padding-left: 20px;
+    --sidebar-padding-right: 0px;
+  }
+
   .container {
     display: flex;
-    justify-content: flex-start;
+    justify-content: var(--container-justify-content);
     gap: 20px;
-    max-width: min(calc(100vw - 100px), 1840px);
+    max-width: min(calc(100vw - 100px), 1842px);
     height: 100vh;
     margin: 0 auto;
     padding: 20px 20px 0;
+    overflow: hidden;
   }
 
   .aside-area {
     overflow-x: auto;
     display: flex;
-    flex-direction: row;
+    flex-direction: var(--aside-area-flex-direction);
     gap: 20px;
-    order: 1;
+    order: var(--aside-area-order);
+    margin-left: var(--aside-area-margin-left);
+    margin-right: var(--aside-area-margin-right);
+  }
+
+  .vertical-seperator-line {
+    width: 0px;
+    height: calc(100% - 20px);
+    border-right: none;
+    border-left: 1px solid #eee;
+    box-shadow: 0px -15px 15px 15px white;
+    display: block;
+    z-index: 2;
+    order: var(--vertical-seperator-line-order);
   }
 
   .content-area {
@@ -438,23 +542,8 @@
   }
 
   .bookmark-list {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 195px);
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f1f5f9;
-  }
-
-  .bookmark-list::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .bookmark-list::-webkit-scrollbar-track {
-    background: #f1f5f9;
-  }
-
-  .bookmark-list::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 4px;
   }
 
   button.primary {
@@ -464,45 +553,5 @@
     padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
-  }
-
-  .radio-option {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 8px;
-    transition: all 0.2s;
-  }
-
-  .radio-option input {
-    margin-right: 6px;
-  }
-
-  .radio-option.active {
-    background: #0066cc;
-    color: white;
-    border-color: #0066cc;
-  }
-
-  .stats-display {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 16px;
-    font-size: 13px;
-    color: #4b5563;
-  }
-
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 </style>

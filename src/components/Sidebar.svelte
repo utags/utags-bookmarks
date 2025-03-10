@@ -190,10 +190,17 @@
   .sidebar {
     width: 280px;
     min-width: 280px;
-    border-left: 1px solid #eee;
-    padding-left: 20px;
+    border-right: var(--sidebar-border-right);
+    border-left: var(--sidebar-border-left);
+    padding-left: var(--sidebar-padding-left);
+    padding-right: var(--sidebar-padding-right);
     margin-bottom: 20px;
     overflow: hidden;
+  }
+
+  .sidebar:first-of-type {
+    border-right: none;
+    border-left: none;
   }
 
   .filter-group {
