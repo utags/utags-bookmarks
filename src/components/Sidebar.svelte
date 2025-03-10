@@ -103,7 +103,7 @@
   <div class="search-box">
     <input
       type="text"
-      placeholder="{name} 搜索 URL/标题/标签..."
+      placeholder="搜索 URL/标题/标签..."
       bind:value={searchKeyword} />
   </div>
 
@@ -150,8 +150,9 @@
   .sidebar {
     width: 280px;
     min-width: 280px;
-    border-right: 1px solid #eee;
-    padding-right: 20px;
+    border-left: 1px solid #eee;
+    padding-left: 20px;
+    margin-bottom: 20px;
     overflow: hidden;
   }
 

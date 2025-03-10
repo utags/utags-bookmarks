@@ -1,7 +1,8 @@
 <script>
   import { persisted } from 'svelte-persisted-store'
+  import { fade } from 'svelte/transition'
   import VirtualList from 'svelte-virtual-list'
-  import AddBookmark from './AddBookmark.svelte'
+  import AddBookmark from './components/AddBookmark.svelte'
   import Sidebar from './components/Sidebar.svelte'
 
   // 初始化书签存储
@@ -201,8 +202,8 @@
         alert(`
           导入完成！
           新增书签: ${importProgress.stats.newBookmarks}
-          新增域名: ${importProgress.stats.newDomains.size}
           新增标签: ${importProgress.stats.newTags.size}
+          新增域名: ${importProgress.stats.newDomains.size}
         `)
 
         // 重置进度
@@ -217,48 +218,78 @@
 </script>
 
 <main class="container">
-  <Sidebar
-    name="level1"
-    paused={importProgress.total > 0}
-    input={originalBookmarks}
-    bind:output={filteredBookmarks1}
-    bind:allTags
-    bind:allDomains />
-
-  {#if useLevel2 && importProgress.total === 0}
+  <div class="aside-area">
     <Sidebar
-      name="level2"
+      name="level1"
       paused={importProgress.total > 0}
-      input={filteredBookmarks1}
-      bind:output={filteredBookmarks2} />
+      input={originalBookmarks}
+      bind:output={filteredBookmarks1}
+      bind:allTags
+      bind:allDomains />
 
-    {#if useLevel3}
+    {#if useLevel2 && importProgress.total === 0}
       <Sidebar
-        name="level3"
+        name="level2"
         paused={importProgress.total > 0}
-        input={filteredBookmarks2}
-        bind:output={filteredBookmarks3} />
-    {/if}
-  {/if}
+        input={filteredBookmarks1}
+        bind:output={filteredBookmarks2} />
 
+      {#if useLevel3}
+        <Sidebar
+          name="level3"
+          paused={importProgress.total > 0}
+          input={filteredBookmarks2}
+          bind:output={filteredBookmarks3} />
+      {/if}
+    {/if}
+  </div>
   <div class="content-area">
     <div class="toolbar">
-      <button class="primary" onclick={importData}>导入</button>
-      <button class="primary" onclick={exportData}>导出</button>
-      <button class="primary" onclick={clearAll}>清空</button>
-      <button class="primary" onclick={() => (showAddModal = true)}
-        >+ 添加</button>
-      <AddBookmark bind:show={showAddModal} />
+      <div class="left-group">
+        <button class="primary" onclick={importData}>导入</button>
+        <button class="primary" onclick={exportData}>导出</button>
+        <button class="primary" onclick={clearAll}>清空</button>
+        <button class="primary" onclick={() => (showAddModal = true)}
+          >+ 添加</button>
+        <AddBookmark bind:show={showAddModal} />
+      </div>
+
+      <div class="sort-controls">
+        <label class="radio-option {sortBy === 'updated' ? 'active' : ''}">
+          <input
+            type="radio"
+            name="sort-by"
+            value="updated"
+            checked={sortBy === 'updated'}
+            onchange={() => {
+              sortBy = 'updated'
+              updateFilteredBookmarks()
+            }} />
+          按更新时间排序
+        </label>
+        <label class="radio-option {sortBy === 'created' ? 'active' : ''}">
+          <input
+            type="radio"
+            name="sort-by"
+            value="created"
+            checked={sortBy === 'created'}
+            onchange={() => {
+              sortBy = 'created'
+              updateFilteredBookmarks()
+            }} />
+          按创建时间排序
+        </label>
+      </div>
     </div>
 
     {#if importProgress.total > 0}
-      <div class="import-progress">
+      <div class="import-progress" out:fade={{ duration: 1000 }}>
         导入进度: {importProgress.current}/{importProgress.total}
         {#if importProgress.stats}
           <div class="stats">
             新增: {importProgress.stats.newBookmarks}书签・
-            {importProgress.stats.newDomains.size}域名・
-            {importProgress.stats.newTags.size}标签
+            {importProgress.stats.newTags.size}标签・
+            {importProgress.stats.newDomains.size}域名
             <div class="total-stats">
               总数: {Object.keys($bookmarks.data).length}书签・
               {allTags.size}标签・{allDomains.size}域名
@@ -268,36 +299,10 @@
       </div>
     {/if}
 
-    <div class="sort-controls">
-      <div class="stats-display">
-        <span class="stat-item">🔖 {stats.totalBookmarks}</span>
-        <span class="stat-item">🏷️ {stats.selectedTagsCount}</span>
-        <span class="stat-item">🌐 {stats.selectedDomainsCount}</span>
-      </div>
-      <label class="radio-option {sortBy === 'updated' ? 'active' : ''}">
-        <input
-          type="radio"
-          name="sort-by"
-          value="updated"
-          checked={sortBy === 'updated'}
-          onchange={() => {
-            sortBy = 'updated'
-            updateFilteredBookmarks()
-          }} />
-        按更新时间排序
-      </label>
-      <label class="radio-option {sortBy === 'created' ? 'active' : ''}">
-        <input
-          type="radio"
-          name="sort-by"
-          value="created"
-          checked={sortBy === 'created'}
-          onchange={() => {
-            sortBy = 'created'
-            updateFilteredBookmarks()
-          }} />
-        按创建时间排序
-      </label>
+    <div class="stats-display">
+      <span class="stat-item">🔖 {stats.totalBookmarks}</span>
+      <span class="stat-item">🏷️ {stats.selectedTagsCount}</span>
+      <span class="stat-item">🌐 {stats.selectedDomainsCount}</span>
     </div>
 
     <div class="bookmark-list">
@@ -394,26 +399,50 @@
 <style>
   .container {
     display: flex;
+    justify-content: flex-start;
     gap: 20px;
-    max-width: 1200px;
+    max-width: min(calc(100vw - 100px), 1840px);
+    height: 100vh;
     margin: 0 auto;
-    padding: 20px;
-    height: calc(100vh - 0px);
+    padding: 20px 20px 0;
+  }
+
+  .aside-area {
+    overflow-x: auto;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    order: 1;
   }
 
   .content-area {
     flex: 1;
-    min-width: 0;
+    max-width: 900px;
+    min-width: 900px;
   }
 
   .toolbar {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
     margin-bottom: 20px;
   }
 
+  .toolbar .left-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar .sort-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
   .bookmark-list {
-    height: calc(100vh - 150px);
+    height: calc(100vh - 122px);
     overflow-y: auto;
   }
 

@@ -101,6 +101,7 @@ const generateBookmarks = () => {
         '数据',
         '分析',
         '学习',
+        '收藏',
       ]
       const englishParts = [
         'AI',
@@ -113,6 +114,8 @@ const generateBookmarks = () => {
         'Web',
         'App',
         'Mobile',
+        'block',
+        'test',
       ]
 
       for (let i = 0; i < length; i++) {
@@ -127,7 +130,11 @@ const generateBookmarks = () => {
 
     // 修改tags生成逻辑
     const tagCount = Math.floor(Math.random() * 5) + 1
-    const tags = Array.from({ length: tagCount }, () => generateRandomTag())
+    const uniqueTags = new Set()
+    while (uniqueTags.size < tagCount) {
+      uniqueTags.add(generateRandomTag())
+    }
+    const tags = Array.from(uniqueTags)
 
     data[url] = {
       tags,
