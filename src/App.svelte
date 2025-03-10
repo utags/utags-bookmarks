@@ -4,6 +4,7 @@
   import VirtualList from 'svelte-virtual-list'
   import AddBookmark from './components/AddBookmark.svelte'
   import Sidebar from './components/Sidebar.svelte'
+  import NavSidebar from './components/NavSidebar.svelte'
 
   // 初始化书签存储
   const bookmarks = persisted('utags', { data: {} })
@@ -227,6 +228,7 @@
 
 <main class="container {$settings.sidebarPosition}-sidebar">
   <div class="aside-area">
+    <NavSidebar />
     <Sidebar
       name="level1"
       paused={importProgress.total > 0}
