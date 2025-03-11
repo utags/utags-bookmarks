@@ -1,5 +1,6 @@
-const fs = require('fs')
-let domainPool = []
+import fs from 'node:fs'
+
+const domainPool = []
 
 const generateDomain = () => {
   const suffixes = ['.com', '.net', '.org', '.io', '.co', '.dev', '.app']
@@ -8,7 +9,7 @@ const generateDomain = () => {
     const randomLength = Math.floor(Math.random() * (15 - 3)) + 3
     const prefix = Math.random()
       .toString(36)
-      .substring(2, 2 + randomLength)
+      .slice(2, 2 + randomLength)
     const suffix = suffixes[Math.floor(Math.random() * suffixes.length)]
     domain = prefix + suffix
   } while (
@@ -16,10 +17,12 @@ const generateDomain = () => {
     domain.length > 30 ||
     domainPool.includes(domain)
   )
+
   return domain
 }
+
 const paths = ['article', 'post', 'blog', 'news', 'product']
-const genCount = 10000
+const generateCount = 10_000
 
 const generateTitle = () => {
   const subjects = [
@@ -43,17 +46,20 @@ const generateTitle = () => {
     const structure = Math.random()
     if (structure < 0.3) {
       return `${subjects[Math.floor(Math.random() * subjects.length)]}${verbs[Math.floor(Math.random() * verbs.length)]}${objects[Math.floor(Math.random() * objects.length)]}`
-    } else if (structure < 0.6) {
-      return `${modifiers[Math.floor(Math.random() * modifiers.length)]}，${subjects[Math.floor(Math.random() * subjects.length)]}迎来新发展`
-    } else {
-      return `${subjects[Math.floor(Math.random() * subjects.length)]}与${objects[Math.floor(Math.random() * objects.length)]}的${['融合', '碰撞', '协同', '博弈'][Math.floor(Math.random() * 4)]}`
     }
+
+    if (structure < 0.6) {
+      return `${modifiers[Math.floor(Math.random() * modifiers.length)]}，${subjects[Math.floor(Math.random() * subjects.length)]}迎来新发展`
+    }
+
+    return `${subjects[Math.floor(Math.random() * subjects.length)]}与${objects[Math.floor(Math.random() * objects.length)]}的${['融合', '碰撞', '协同', '博弈'][Math.floor(Math.random() * 4)]}`
   }
 
   let title = randomPart()
   while (title.length < 3 || title.length > 50) {
     title = randomPart()
   }
+
   return title
 }
 
@@ -61,7 +67,7 @@ const generateBookmarks = () => {
   const data = {}
   const now = Date.now()
 
-  for (let i = 0; i < genCount; i++) {
+  for (let i = 0; i < generateCount; i++) {
     let domain
 
     if (domainPool.length < 20) {
@@ -72,11 +78,14 @@ const generateBookmarks = () => {
     }
 
     const path = paths[Math.floor(Math.random() * paths.length)]
-    const url = `https://${domain}/${path}-${Math.random().toString(36).substring(2, 7)}`
+    const url = `https://${domain}/${path}-${Math.random().toString(36).slice(2, 7)}`
 
-    const created = Math.max(now - Math.floor(Math.random() * 31536000000), 0) // 确保不早于1970年
+    const created = Math.max(
+      now - Math.floor(Math.random() * 31_536_000_000),
+      0
+    ) // 确保不早于1970年
     const maxUpdate = Math.min(
-      created + Math.floor(Math.random() * 2592000000),
+      created + Math.floor(Math.random() * 2_592_000_000),
       now
     ) // 取当前时间和30天后的较小值
     const updated = Math.random() > 0.2 ? maxUpdate : created // 保持20%几率不更新
@@ -119,13 +128,13 @@ const generateBookmarks = () => {
       ]
 
       for (let i = 0; i < length; i++) {
-        if (Math.random() > 0.3) {
-          tag += chineseChars[Math.floor(Math.random() * chineseChars.length)]
-        } else {
-          tag += englishParts[Math.floor(Math.random() * englishParts.length)]
-        }
+        tag +=
+          Math.random() > 0.3
+            ? chineseChars[Math.floor(Math.random() * chineseChars.length)]
+            : englishParts[Math.floor(Math.random() * englishParts.length)]
       }
-      return tag.substring(0, length)
+
+      return tag.slice(0, Math.max(0, length))
     }
 
     // 修改tags生成逻辑
@@ -134,6 +143,7 @@ const generateBookmarks = () => {
     while (uniqueTags.size < tagCount) {
       uniqueTags.add(generateRandomTag())
     }
+
     const tags = Array.from(uniqueTags)
 
     data[url] = {
@@ -141,12 +151,13 @@ const generateBookmarks = () => {
       meta: {
         title: generateTitle(),
         created,
-        updated: updated,
+        updated,
       },
     }
   }
+
   return { data }
 }
 
 fs.writeFileSync('mock-data.json', JSON.stringify(generateBookmarks(), null, 2))
-console.log(`成功生成${genCount}条测试数据到 mock-data.json`)
+console.log(`成功生成${generateCount}条测试数据到 mock-data.json`)

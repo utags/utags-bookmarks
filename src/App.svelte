@@ -6,9 +6,61 @@
   import Sidebar from './components/Sidebar.svelte'
   import NavSidebar from './components/NavSidebar.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
+  import { humanizeUrl } from './utils'
 
   // 初始化书签存储
   const bookmarks = persisted('utags', { data: {} })
+
+  // 首次访问检测并添加示例数据
+  if (Object.keys($bookmarks.data).length === 0) {
+    $bookmarks.data = {
+      'https://greasyfork.org/scripts/460718': {
+        meta: {
+          title: 'Userscript - 🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
+          created: Date.now(),
+          updated: Date.now(),
+        },
+        tags: ['开源项目', 'Tools', '油猴脚本', 'userscript'],
+      },
+      'https://chromewebstore.google.com/detail/utags-add-usertags-to-lin/kofjcnaphffjoookgahgjidofbdplgig':
+        {
+          meta: {
+            title: 'Chrome extension - UTags - Add usertags to links',
+            created: Date.now() - 1000 - Math.floor(Math.random() * 3600000),
+            updated: Date.now() - 1000,
+          },
+          tags: ['chrome', '浏览器扩展', 'Tools', '开源项目'],
+        },
+      'https://microsoftedge.microsoft.com/addons/detail/utags-add-usertags-to-l/bhlbflbehfoccjjenpekilgabbjjnphe':
+        {
+          meta: {
+            title: 'Edge extension - UTags - Add usertags to links',
+            created: Date.now() - 2000 - Math.floor(Math.random() * 3600000),
+            updated: Date.now() - 2000,
+          },
+          tags: ['edge', '浏览器扩展', 'Productivity', 'Tools', '开源项目'],
+        },
+      'https://addons.mozilla.org/firefox/addon/utags/': {
+        meta: {
+          title: 'Firefox extension - UTags - Add usertags to links',
+          created: Date.now() - 3000 - Math.floor(Math.random() * 3600000),
+          updated: Date.now() - 3000,
+        },
+        tags: ['firefox', '浏览器扩展', '开源项目', 'Tools', 'Bookmarks'],
+      },
+      'https://github.com/utags/utags': {
+        meta: {
+          title:
+            'GitHub - utags/utags: 🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
+          created: Date.now() - 4000 - Math.floor(Math.random() * 3600000),
+          updated: Date.now() - 4000,
+        },
+        tags: ['开源项目', '浏览器扩展', '油猴脚本', 'userscript'],
+      },
+    }
+    bookmarks.set($bookmarks)
+  }
+
   const settings = persisted('ustags-settings', {
     sortBy: 'updated',
     showTags: true,
@@ -262,33 +314,33 @@
   <div class="vertical-seperator-line"></div>
   <div class="content-area">
     <div
-      class="toolbar flex items-center justify-between mb-6 px-4 py-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200">
+      class="toolbar mb-6 flex items-center justify-between rounded-lg border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm">
       <div class="flex items-center gap-3">
         <button
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={importData}>
           导入
         </button>
         <button
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={exportData}>导出</button>
         <button
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={clearAll}>清空</button>
         <button
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={() => (showAddModal = true)}>+ 添加</button>
         <AddBookmark bind:show={showAddModal} />
         <button
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 flex items-center gap-2"
+          class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={toggleView}>切换侧边栏位置</button>
       </div>
 
       <div class="flex items-center gap-2">
         <span class="text-sm text-gray-700">排序方式：</span>
-        <div class="flex bg-gray-100 p-1 rounded-md gap-1">
+        <div class="flex gap-1 rounded-md bg-gray-100 p-1">
           <label
-            class="px-3 py-1.5 rounded-md transition-colors cursor-pointer {sortBy ===
+            class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
             'updated'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50'}">
@@ -305,7 +357,7 @@
             <span class="text-sm">更新时间</span>
           </label>
           <label
-            class="px-3 py-1.5 rounded-md transition-colors cursor-pointer {sortBy ===
+            class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
             'created'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50'}">
@@ -342,27 +394,27 @@
       </div>
     {/if}
 
-    <div class="flex gap-4 mb-3 px-4 py-3 bg-white">
+    <div class="mb-3 flex gap-4 bg-white px-4 py-3">
       <div class="flex items-center gap-2">
-        <span class="text-blue-500 text-lg flex items-center">🔖</span>
+        <span class="flex items-center text-lg text-blue-500">🔖</span>
         <div class="flex flex-col justify-center">
           <span class="text-xs font-medium text-gray-500">书签总数</span>
           <span class="text-xl font-semibold text-gray-900">
             {stats.totalBookmarks}</span>
         </div>
       </div>
-      <div class="h-full w-px bg-gray-200 my-auto self-stretch"></div>
+      <div class="my-auto h-full w-px self-stretch bg-gray-200"></div>
       <div class="flex items-center gap-2">
-        <span class="text-green-500 text-lg flex items-center">🏷️</span>
+        <span class="flex items-center text-lg text-green-500">🏷️</span>
         <div class="flex flex-col justify-center">
           <span class="text-xs font-medium text-gray-500">使用标签</span>
           <span class="text-xl font-semibold text-gray-900">
             {stats.selectedTagsCount}</span>
         </div>
       </div>
-      <div class="h-full w-px bg-gray-200 my-auto self-stretch"></div>
+      <div class="my-auto h-full w-px self-stretch bg-gray-200"></div>
       <div class="flex items-center gap-2">
-        <span class="text-purple-500 text-lg flex items-center">🌐</span>
+        <span class="flex items-center text-lg text-purple-500">🌐</span>
         <div class="flex flex-col justify-center">
           <span class="text-xs font-medium text-gray-500">来源域名</span>
           <span class="text-xl font-semibold text-gray-900">
@@ -374,24 +426,24 @@
     <div class="bookmark-list shadow-lg">
       <VirtualList items={filteredBookmarks} bind:scrollTop let:item>
         <div
-          class="group relative bg-white p-3 rounded-md transition-colors duration-50 hover:bg-gray-100 ml-[10px] mr-[10px]">
+          class="group relative mr-[10px] ml-[10px] rounded-md bg-white p-3 transition-colors duration-50 hover:bg-gray-100">
           <div class="flex items-center gap-3">
-            <div class="flex-1 min-w-0 space-y-0.5">
+            <div class="min-w-0 flex-1 space-y-0.5">
               <div class="flex items-center gap-2 truncate">
                 <h3
-                  class="text-sm text-gray-900 truncate"
+                  class="truncate text-sm text-gray-900"
                   style="flex: 0 0 50%; min-width: 0;">
                   <a
                     href={item[0]}
                     title={item[1].meta.title || '无标题'}
                     target="_blank"
-                    class="flex items-center gap-1 flex-nowrap"
+                    class="flex flex-nowrap items-center gap-1"
                     style="flex-shrink:0; min-width:0">
                     <img
                       src={import.meta.env.MODE === 'development'
                         ? '/favicon.ico'
                         : `https://www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}`}
-                      class="w-4 h-4 flex-none"
+                      class="h-4 w-4 flex-none"
                       alt="favicon" />
                     <span class="truncate" style="min-width:0"
                       >{item[1].meta.title || '无标题'}</span>
@@ -402,24 +454,26 @@
                   href={item[0]}
                   title={item[0]}
                   target="_blank"
-                  class="text-xs text-gray-800 hover:text-gray-800 truncate pt-0.5">
-                  {item[0].replace(/^https:\/\//, '')}
+                  class="truncate pt-0.5 text-xs text-gray-800 hover:text-gray-800">
+                  {humanizeUrl(item[0])}
                 </a>
               </div>
               <div class="mt-2 flex flex-wrap gap-2">
                 {#each item[1].tags as tag}
                   <span
-                    class="inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded-sm border border-gray-200 bg-gray-50 text-gray-700 gap-1">
+                    class="inline-flex items-center gap-1 rounded-sm border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
                     <span class="font-normal tracking-tight">{tag}</span>
                   </span>
                 {/each}
               </div>
             </div>
             <div class="top-3 right-3 text-right">
-              <span class="text-xs text-gray-500 font-mono tracking-tight">
+              <span class="font-mono text-xs tracking-tight text-gray-500">
                 {#if item[1].meta.created === item[1].meta.updated}
-                  <div class="flex flex-col gap-0.5 items-end">
-                    <span title="创建时间/更新时间"
+                  <div
+                    title="创建时间 (未更新过)"
+                    class="flex flex-col items-end gap-0.5">
+                    <span
                       >{new Date(item[1].meta.updated).toLocaleString('zh-CN', {
                         hour12: false,
                         year: 'numeric',
@@ -431,8 +485,10 @@
                       })}</span>
                   </div>
                 {:else}
-                  <div class="flex flex-col gap-0.5 items-end justify-end">
-                    <span title="更新时间"
+                  <div
+                    title="更新时间/创建时间"
+                    class="flex flex-col items-end justify-end gap-0.5">
+                    <span
                       >{new Date(item[1].meta.updated).toLocaleString('zh-CN', {
                         hour12: false,
                         year: 'numeric',
@@ -442,7 +498,7 @@
                         minute: '2-digit',
                         second: '2-digit',
                       })}</span>
-                    <span title="创建时间"
+                    <span
                       >{new Date(item[1].meta.created).toLocaleString('zh-CN', {
                         hour12: false,
                         year: 'numeric',
@@ -538,29 +594,8 @@
     border-bottom: 1px solid #f1f5f9;
   }
 
-  .toolbar .left-group {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .toolbar .sort-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
   .bookmark-list {
-    height: calc(100vh - 195px);
+    height: calc(100vh - 198px);
     overflow-y: auto;
-  }
-
-  button.primary {
-    background: #0066cc;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
   }
 </style>

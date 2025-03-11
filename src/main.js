@@ -3,11 +3,13 @@ import App from './App.svelte'
 import './tailwind.css'
 
 // 初始化Google Analytics
-window.gtag('config', 'G-7FV6Z2SXHE', {
-  page_path: window.location.pathname,
+globalThis.gtag('config', 'G-7FV6Z2SXHE', {
+  // eslint-disable-next-line camelcase
+  page_path: globalThis.location.pathname,
+  // eslint-disable-next-line camelcase
   send_page_view: true,
 })
 
-const app = mount(App, { target: document.getElementById('app') })
+const app = mount(App, { target: document.querySelector('#app') })
 
 export default app
