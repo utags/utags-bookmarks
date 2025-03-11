@@ -60,7 +60,11 @@
       document.querySelector('.bookmark-list > *').scrollTo(0, 0)
       document
         .querySelector('.aside-area aside:last-of-type')
-        .scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'start' })
+        .scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
+        })
     }, 100)
   }
 
