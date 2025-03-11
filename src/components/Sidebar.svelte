@@ -198,11 +198,6 @@
     overflow: hidden;
   }
 
-  .sidebar:first-of-type {
-    border-right: none;
-    border-left: none;
-  }
-
   .filter-group {
     max-height: calc(50vh - 32px);
     overflow-y: auto;

@@ -3,15 +3,18 @@
   let collapsed = $state(initialCollapsed)
 
   const links = [
+    { name: '这里不知道如何设计好了', icon: '💡', url: '/' },
+    { name: '暂时先这么放着', icon: '⏳', url: '/' },
+    { name: '欢迎给出您的建议', icon: '🙏', url: 'https://github.com/utags/utags/issues' },
     { name: '书签管理', icon: '📚', url: '/' },
-    { name: '标签统计', icon: '🏷️', url: '/tags' },
-    { name: '域名分析', icon: '🌐', url: '/domains' },
-    { name: '设置', icon: '⚙️', url: '/settings' },
+    { name: '标签统计', icon: '🏷️', url: '/' },
+    { name: '域名分析', icon: '🌐', url: '/' },
+    { name: '设置', icon: '⚙️', url: '/' },
   ]
 </script>
 
 <div
-  style="order: 1;"
+  style="order: 2;"
   class="nav-sidebar bg-gradient-to-r from-gray-50 to-gray-100 backdrop-blur-md bg-opacity-30 border-r border-gray-100 shadow-lg shadow-gray-300/10 transition-all duration-300 {collapsed
     ? 'w-16 min-w-[64px]'
     : 'w-60 min-w-[240px]'} p-4 flex flex-col gap-5">
@@ -43,3 +46,9 @@
     {/each}
   </nav>
 </div>
+
+<style>
+  .nav-sidebar {
+    width: 100%;
+  }
+</style>

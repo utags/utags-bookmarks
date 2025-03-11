@@ -5,6 +5,7 @@
   import AddBookmark from './components/AddBookmark.svelte'
   import Sidebar from './components/Sidebar.svelte'
   import NavSidebar from './components/NavSidebar.svelte'
+  import SavedFilters from './components/SavedFilters.svelte'
 
   // 初始化书签存储
   const bookmarks = persisted('utags', { data: {} })
@@ -58,13 +59,11 @@
 
     setTimeout(() => {
       document.querySelector('.bookmark-list > *').scrollTo(0, 0)
-      document
-        .querySelector('.aside-area aside:last-of-type')
-        .scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-          inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
-        })
+      document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
+      })
     }, 100)
   }
 
@@ -122,8 +121,8 @@
     if (confirm('请确认是否清空所有书签？此操作不可逆，建议先导出备份数据。')) {
       $bookmarks.data = {}
       bookmarks.set($bookmarks)
-      // selectedTags = new Set()
-      // selectedDomains = new Set()
+      const event = new CustomEvent('clearAll')
+      window.dispatchEvent(event)
     }
   }
 
@@ -233,6 +232,9 @@
 <main class="container {$settings.sidebarPosition}-sidebar">
   <div class="aside-area">
     <NavSidebar />
+
+    <SavedFilters />
+
     <Sidebar
       name="level1"
       paused={importProgress.total > 0}
@@ -462,13 +464,14 @@
 
 <style>
   :root {
+    --seperator-line: 1px solid #eee;
     --container-justify-content: flex-end;
     --vertical-seperator-line-order: 0;
     --aside-area-order: 0;
     --aside-area-flex-direction: row-reverse;
     --aside-area-margin-left: 0px;
     --aside-area-margin-right: -20px;
-    --sidebar-border-right: 1px solid #eee;
+    --sidebar-border-right: var(--seperator-line);
     --sidebar-border-left: none;
     --sidebar-padding-left: 0px;
     --sidebar-padding-right: 20px;
@@ -482,7 +485,7 @@
     --aside-area-margin-left: -20px;
     --aside-area-margin-right: 0px;
     --sidebar-border-right: none;
-    --sidebar-border-left: 1px solid #eee;
+    --sidebar-border-left: var(--seperator-line);
     --sidebar-padding-left: 20px;
     --sidebar-padding-right: 0px;
   }
@@ -512,7 +515,7 @@
     width: 0px;
     height: calc(100% - 20px);
     border-right: none;
-    border-left: 1px solid #eee;
+    border-left: var(--seperator-line);
     box-shadow: 0px -15px 15px 15px white;
     display: block;
     z-index: 2;
