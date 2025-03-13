@@ -3,21 +3,31 @@
   let collapsed = $state(initialCollapsed)
 
   const links = [
-    { name: '这里不知道如何设计好了', icon: '💡', url: '/' },
-    { name: '暂时先这么放着', icon: '⏳', url: '/' },
+    { name: '这里不知道如何设计好了', icon: '💡', url: 'javascript:;' },
+    { name: '暂时先这么放着', icon: '⏳', url: 'javascript:;' },
     {
       name: '欢迎给出您的建议',
       icon: '🙏',
       url: 'https://github.com/utags/utags/issues',
     },
-    { name: '书签管理', icon: '📚', url: '/' },
-    { name: '标签统计', icon: '🏷️', url: '/' },
-    { name: '域名分析', icon: '🌐', url: '/' },
-    { name: '设置', icon: '⚙️', url: '/' },
     {
       name: '问题反馈',
       icon: '🙏',
       url: 'https://github.com/utags/utags/issues',
+    },
+    { name: 'TODO', icon: '⏳', url: 'javascript:;' },
+    { name: ' - 编辑/删除书签', icon: '🌐', url: 'javascript:;' },
+    { name: ' - 使用小鱼标签添加书签', icon: '🏷️', url: 'javascript:;' },
+    { name: ' - 使用 bookmarklet 添加书签', icon: '📚', url: 'javascript:;' },
+    { name: ' - 同步功能', icon: '🌐', url: 'javascript:;' },
+    { name: ' - 批量修改/删除标签', icon: '🏷️', url: 'javascript:;' },
+    { name: ' - 批量删除书签', icon: '🌐', url: 'javascript:;' },
+    { name: ' - 批量添加标签', icon: '🏷️', url: 'javascript:;' },
+    { name: ' - 根据 URL 显示相应标签的书签', icon: '🏷️', url: 'javascript:;' },
+    {
+      name: ' - 支持导入 Chrome, Firefox 浏览器的标签',
+      icon: '🏷️',
+      url: 'javascript:;',
     },
   ]
 

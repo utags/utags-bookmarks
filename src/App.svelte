@@ -9,10 +9,23 @@
   import { humanizeUrl } from './utils'
 
   // 初始化书签存储
-  const bookmarks = persisted('utags', { data: {} })
+  const bookmarks = persisted('utags-bookmarks', {
+    data: {},
+    meta: {
+      databaseVersion: 3,
+    },
+  })
+  const settings = persisted('utags-settings', {
+    sortBy: 'updated',
+    showTags: true,
+    showDomains: true,
+    sidebarPosition: 'right',
+    isFirstRun: true,
+  })
 
   // 首次访问检测并添加示例数据
-  if (Object.keys($bookmarks.data).length === 0) {
+  if (Object.keys($bookmarks.data).length === 0 && $settings.isFirstRun) {
+    $settings.isFirstRun = false
     $bookmarks.data = {
       'https://greasyfork.org/scripts/460718': {
         meta: {
@@ -61,12 +74,6 @@
     bookmarks.set($bookmarks)
   }
 
-  const settings = persisted('ustags-settings', {
-    sortBy: 'updated',
-    showTags: true,
-    showDomains: true,
-    sidebarPosition: 'right',
-  })
   const originalBookmarks = $derived(Object.entries($bookmarks.data))
   let sortBy = $state('updated')
   let scrollTop = $state(0)
@@ -330,14 +337,13 @@
         <button
           class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={() => (showAddModal = true)}>+ 添加</button>
-        <AddBookmark bind:show={showAddModal} />
         <button
           class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors duration-200 hover:bg-blue-700"
           onclick={toggleView}>切换侧边栏位置</button>
       </div>
 
       <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-700">排序方式：</span>
+        <span class="text-sm text-gray-700">排序方式: </span>
         <div class="flex gap-1 rounded-md bg-gray-100 p-1">
           <label
             class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
@@ -516,6 +522,7 @@
         </div></VirtualList>
     </div>
   </div>
+  <AddBookmark bind:show={showAddModal} />
 </main>
 
 <style>

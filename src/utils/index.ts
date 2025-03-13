@@ -1,5 +1,5 @@
 /**
- * 美化URL：
+ * 美化URL:
  * 1. 移除跟踪参数（utm_*, fbclid等）
  * 2. 简化路径（保留前2段或最后1段）
  * 3. 移除末尾斜杠
@@ -17,7 +17,7 @@ export function humanizeUrl(url: string) {
       ([key]) => !/^(utm_|fbclid|gclid|mc_|yclid|_ga|zanpid)/.test(key)
     )
 
-    // 路径简化逻辑：超过2段时保留首段和末段，否则保持原样
+    // 路径简化逻辑: 超过2段时保留首段和末段，否则保持原样
     const pathSegments = parsed.pathname.split('/').filter(Boolean)
     const simplifiedPath =
       pathSegments.length > 2

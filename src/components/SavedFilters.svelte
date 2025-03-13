@@ -37,9 +37,9 @@
 
   if ($filters.length === 0) {
     ;[
-      '示例：AI 学习资源',
-      '示例：搞笑视频',
-      '友情提示：此功能即将到来',
+      '示例: AI 学习资源',
+      '示例: 搞笑视频',
+      '友情提示: 此功能即将到来',
     ].forEach((name) => {
       filterName = name
       saveFilter()
