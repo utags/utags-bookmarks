@@ -19,7 +19,15 @@
     showTags: true,
     showDomains: true,
     sidebarPosition: 'right',
+    viewMode: 'compact',
     isFirstRun: true,
+  })
+
+  $effect(() => {
+    if ($settings.viewMode === 'card') {
+      alert('card 模式即将上线，敬请期待！')
+      $settings.viewMode = 'list'
+    }
   })
 
   // 首次访问检测并添加示例数据
@@ -380,6 +388,17 @@
           </label>
         </div>
       </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-700">视图模式: </span>
+        <select
+          class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+          bind:value={$settings.viewMode}>
+          <option value="list">列表视图</option>
+          <option value="compact">紧凑视图</option>
+          <option value="card">卡片视图</option>
+        </select>
+      </div>
     </div>
 
     {#if importProgress.total > 0}
@@ -429,7 +448,10 @@
     </div>
 
     <div class="bookmark-list shadow-lg">
-      <BookmarkList {filteredBookmarks} bind:scrollTop />
+      <BookmarkList
+        {filteredBookmarks}
+        viewMode={$settings.viewMode}
+        bind:scrollTop />
     </div>
 
     <AddBookmark bind:show={showAddModal} />
