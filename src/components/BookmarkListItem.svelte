@@ -2,20 +2,26 @@
   import { humanizeUrl } from '../utils'
 
   let { item, viewMode } = $props()
+  let defaultFavicon = encodeURIComponent(
+    'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
+  )
 </script>
 
 {#if viewMode === 'compact'}
   <div
     class="group relative mx-[6px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
     <div class="flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 truncate">
+      <a
+        class="flex items-center gap-2 truncate"
+        href={item[0]}
+        title={item[1].meta.title || '无标题'}
+        target="_blank">
         <img
-          src={import.meta.env.MODE === 'development'
-            ? '/favicon.ico'
-            : `https://www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}`}
+          src={`https://wsrv.nl/?w=16&h=16&url=www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}&default=${defaultFavicon}`}
           class="h-3 w-3 flex-none"
+          loading="lazy"
           alt="favicon" />
-        <h3 class="truncate text-xs font-medium text-gray-900">
+        <h3 class="truncate text-xs font-normal text-gray-900">
           {item[1].meta.title || '无标题'}
         </h3>
         <div class="flex flex-nowrap gap-1 overflow-x-auto">
@@ -26,7 +32,7 @@
             </span>
           {/each}
         </div>
-      </div>
+      </a>
       <span class="shrink-0 text-xs text-gray-500">
         {new Date(item[1].meta.updated).toLocaleString('zh-CN', {
           hour12: false,
@@ -39,7 +45,7 @@
   </div>
 {:else}
   <div
-    class="group relative mr-[10px] ml-[10px] rounded-md bg-white p-3 transition-colors duration-50 hover:bg-gray-100">
+    class="group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
     <div class="flex items-center gap-3">
       <div class="min-w-0 flex-1 space-y-0.5">
         <div class="flex items-center gap-2 truncate">
@@ -53,10 +59,9 @@
               class="flex flex-nowrap items-center gap-1"
               style="flex-shrink:0; min-width:0">
               <img
-                src={import.meta.env.MODE === 'development'
-                  ? '/favicon.ico'
-                  : `https://www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}`}
+                src={`https://wsrv.nl/?w=16&h=16&url=www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}&default=${defaultFavicon}`}
                 class="h-4 w-4 flex-none"
+                loading="lazy"
                 alt="favicon" />
               <span class="truncate" style="min-width:0">
                 {item[1].meta.title || '无标题'}
@@ -75,7 +80,7 @@
         <div class="mt-2 flex flex-wrap gap-2">
           {#each item[1].tags as tag}
             <span
-              class="inline-flex items-center gap-1 rounded-sm border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs font-medium text-gray-700">
+              class="inline-flex items-center gap-1 rounded-sm border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs text-gray-700">
               <span class="font-normal tracking-tight">{tag}</span>
             </span>
           {/each}

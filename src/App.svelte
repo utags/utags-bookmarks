@@ -12,6 +12,7 @@
     data: {},
     meta: {
       databaseVersion: 3,
+      created: Date.now(),
     },
   })
   const settings = persisted('utags-settings', {

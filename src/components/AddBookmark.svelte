@@ -12,11 +12,19 @@
   const bookmarks = persisted('utags-bookmarks', { data: {} })
   let error = $state('')
   let tagError = $state('')
+  let lastUrl = undefined
 
   function validateUrl() {
     try {
-      new URL(url)
+      url = new URL(url).href
       error = ''
+
+      const entry = $bookmarks.data[url]
+      if (entry && url !== lastUrl) {
+        title = entry.meta.title || ''
+        tags = entry.tags.join(', ')
+      }
+      lastUrl = url
       return true
     } catch {
       error = '请输入有效的URL格式（例如: https://example.com）'
@@ -43,6 +51,20 @@
   function addBookmark() {
     title = trimTitle(title)
     if (!validateUrl() || !validateTags()) {
+      return
+    }
+
+    const entry = $bookmarks.data[url]
+    if (entry) {
+      entry.tags = tagsArray
+      if (title) {
+        entry.meta.title = title
+      } else {
+        delete entry.meta.title
+      }
+      entry.meta.updated = Date.now()
+      bookmarks.set($bookmarks)
+      close()
       return
     }
 
@@ -86,6 +108,7 @@
     if (show) {
       document.addEventListener('keydown', handleKeydown)
     } else {
+      lastUrl = undefined
       document.removeEventListener('keydown', handleKeydown)
     }
   })
@@ -122,7 +145,10 @@
           id="title-input"
           type="text"
           bind:value={title}
-          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none" />
+          disabled={!url}
+          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none {!url
+            ? 'cursor-not-allowed bg-gray-100'
+            : ''}" />
       </div>
       <div class="flex flex-col gap-2">
         <label for="tags-input">标签（逗号分隔）: </label>
@@ -130,11 +156,12 @@
           id="tags-input"
           type="text"
           bind:value={tags}
+          disabled={!url}
           onblur={validateTags}
           placeholder="工作,技术,重要"
-          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none {tagError
-            ? 'border-red-500 ring-red-500'
-            : ''}" />
+          class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none {!url
+            ? 'cursor-not-allowed bg-gray-100'
+            : ''} {tagError ? 'border-red-500 ring-red-500' : ''}" />
         {#if tagError}
           <div out:fade={{ duration: 200 }} class="mt-1 text-sm text-red-500">
             {tagError}
