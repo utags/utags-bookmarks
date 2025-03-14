@@ -129,14 +129,26 @@
     scrollTop = 0
 
     setTimeout(() => {
+      console.log(
+        'scrollIntoView',
+        useLevel2,
+        useLevel3,
+        document.querySelectorAll('.sidebar').length
+      )
       document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
       document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
-      document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
+      const selector = useLevel3
+        ? '.aside-area aside:nth-child(5)'
+        : useLevel2
+          ? '.aside-area aside:nth-child(4)'
+          : '.aside-area aside:nth-child(3)'
+      console.log(document.querySelector(selector))
+      document.querySelector(selector).scrollIntoView({
         behavior: 'smooth',
         block: 'start',
-        inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
+        inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
       })
-    }, 310)
+    }, 10)
   }
 
   window.addEventListener('filterUpdated', () => {
@@ -303,7 +315,7 @@
       document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
         behavior: 'smooth',
         block: 'start',
-        inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
+        inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
       })
     }, 10)
   }
@@ -500,7 +512,7 @@
     --container-justify-content: flex-end;
     --vertical-seperator-line-order: 0;
     --aside-area-order: 0;
-    --aside-area-flex-direction: row-reverse;
+    --aside-area-flex-direction: row;
     --aside-area-margin-left: 0px;
     --aside-area-margin-right: -20px;
     --sidebar-width: 280px;
@@ -508,21 +520,23 @@
     --sidebar-border-right: none;
     --sidebar-padding-left: 20px;
     --sidebar-padding-right: 20px;
-    --sidebar-reset-filter-align-self: flex-start;
+    --sidebar-reset-filter-align-self: flex-end;
+    --sidebar-scroll-snap-align: end;
   }
 
   .right-sidebar {
     --container-justify-content: flex-start;
     --vertical-seperator-line-order: 1;
     --aside-area-order: 2;
-    --aside-area-flex-direction: row;
+    --aside-area-flex-direction: row-reverse;
     --aside-area-margin-left: -20px;
     --aside-area-margin-right: 0px;
     --sidebar-border-left: none;
     --sidebar-border-right: var(--seperator-line);
     --sidebar-padding-left: 20px;
     --sidebar-padding-right: 20px;
-    --sidebar-reset-filter-align-self: flex-end;
+    --sidebar-reset-filter-align-self: flex-start;
+    --sidebar-scroll-snap-align: start;
   }
 
   .container {
@@ -541,7 +555,8 @@
     overflow-x: auto;
     display: flex;
     flex-direction: var(--aside-area-flex-direction);
-    width: 560px;
+    width: calc(var(--sidebar-width) * 2);
+    min-width: calc(var(--sidebar-width) * 2);
     /* gap: 20px; */
     order: var(--aside-area-order);
     margin-left: var(--aside-area-margin-left);
@@ -563,6 +578,7 @@
 
   .content-area {
     flex: 1;
+    width: calc(100% - var(--sidebar-width) * 2 - 20px);
     /* max-width: 900px;
     min-width: 900px; */
   }

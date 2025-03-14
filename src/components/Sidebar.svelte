@@ -100,7 +100,7 @@
   }
 </script>
 
-<aside class="sidebar" out:fade={{ duration: 300 }}>
+<aside class="sidebar" out:fade={{ duration: 1000 }}>
   <div class="mb-4 flex flex-col gap-2">
     <button
       class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
@@ -197,7 +197,7 @@
     padding-left: var(--sidebar-padding-left);
     padding-right: var(--sidebar-padding-right);
     overflow: hidden;
-    scroll-snap-align: end;
+    scroll-snap-align: var(--sidebar-scroll-snap-align);
   }
 
   .filter-group {

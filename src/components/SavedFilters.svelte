@@ -47,7 +47,7 @@
   }
 </script>
 
-<div style="order: 1;" class="saved-filters">
+<div class="saved-filters">
   <div class="mb-4 space-y-3">
     <button
       class="flex w-full items-center justify-center rounded-lg bg-indigo-600
@@ -105,6 +105,6 @@
     padding-left: var(--sidebar-padding-left);
     padding-right: var(--sidebar-padding-right);
     overflow: hidden;
-    scroll-snap-align: end;
+    scroll-snap-align: var(--sidebar-scroll-snap-align);
   }
 </style>
