@@ -1,4 +1,5 @@
 <script>
+  import { fade } from 'svelte/transition'
   let {
     name,
     input,
@@ -99,10 +100,10 @@
   }
 </script>
 
-<aside class="sidebar">
+<aside class="sidebar" out:fade={{ duration: 300 }}>
   <div class="mb-4 flex flex-col gap-2">
     <button
-      class="self-start rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
+      class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
       onclick={() => {
         searchKeyword = ''
         selectedTags = new Set()
@@ -188,14 +189,15 @@
 
 <style>
   .sidebar {
-    width: 280px;
-    min-width: 280px;
+    /* background-color: wheat; */
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
     border-right: var(--sidebar-border-right);
     border-left: var(--sidebar-border-left);
     padding-left: var(--sidebar-padding-left);
     padding-right: var(--sidebar-padding-right);
-    margin-bottom: 20px;
     overflow: hidden;
+    scroll-snap-align: end;
   }
 
   .filter-group {
@@ -212,5 +214,9 @@
     padding: 8px 0;
     z-index: 1;
     margin: 0;
+  }
+
+  .reset-filter {
+    align-self: var(--sidebar-reset-filter-align-self);
   }
 </style>

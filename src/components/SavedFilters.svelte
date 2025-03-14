@@ -98,13 +98,13 @@
 
 <style>
   .saved-filters {
-    width: 280px;
-    min-width: 280px;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
     border-right: var(--sidebar-border-right);
     border-left: var(--sidebar-border-left);
     padding-left: var(--sidebar-padding-left);
     padding-right: var(--sidebar-padding-right);
-    margin-bottom: 20px;
     overflow: hidden;
+    scroll-snap-align: end;
   }
 </style>

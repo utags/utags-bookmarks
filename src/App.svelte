@@ -136,7 +136,7 @@
         block: 'start',
         inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
       })
-    }, 10)
+    }, 310)
   }
 
   window.addEventListener('filterUpdated', () => {
@@ -298,6 +298,14 @@
   function toggleView() {
     $settings.sidebarPosition =
       $settings.sidebarPosition === 'right' ? 'left' : 'right'
+
+    setTimeout(() => {
+      document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
+      })
+    }, 10)
   }
 </script>
 
@@ -395,7 +403,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex hidden items-center gap-2">
         <span class="text-sm text-gray-700">视图模式: </span>
         <select
           class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
@@ -495,10 +503,12 @@
     --aside-area-flex-direction: row-reverse;
     --aside-area-margin-left: 0px;
     --aside-area-margin-right: -20px;
-    --sidebar-border-right: var(--seperator-line);
-    --sidebar-border-left: none;
-    --sidebar-padding-left: 0px;
+    --sidebar-width: 280px;
+    --sidebar-border-left: var(--seperator-line);
+    --sidebar-border-right: none;
+    --sidebar-padding-left: 20px;
     --sidebar-padding-right: 20px;
+    --sidebar-reset-filter-align-self: flex-start;
   }
 
   .right-sidebar {
@@ -508,10 +518,11 @@
     --aside-area-flex-direction: row;
     --aside-area-margin-left: -20px;
     --aside-area-margin-right: 0px;
-    --sidebar-border-right: none;
-    --sidebar-border-left: var(--seperator-line);
+    --sidebar-border-left: none;
+    --sidebar-border-right: var(--seperator-line);
     --sidebar-padding-left: 20px;
-    --sidebar-padding-right: 0px;
+    --sidebar-padding-right: 20px;
+    --sidebar-reset-filter-align-self: flex-end;
   }
 
   .container {
@@ -526,13 +537,17 @@
   }
 
   .aside-area {
+    /* background-color: #f1f5f9; */
     overflow-x: auto;
     display: flex;
     flex-direction: var(--aside-area-flex-direction);
-    gap: 20px;
+    width: 560px;
+    /* gap: 20px; */
     order: var(--aside-area-order);
     margin-left: var(--aside-area-margin-left);
     margin-right: var(--aside-area-margin-right);
+    padding-bottom: 20px;
+    scroll-snap-type: x mandatory;
   }
 
   .vertical-seperator-line {
@@ -548,8 +563,8 @@
 
   .content-area {
     flex: 1;
-    max-width: 900px;
-    min-width: 900px;
+    /* max-width: 900px;
+    min-width: 900px; */
   }
 
   .toolbar {

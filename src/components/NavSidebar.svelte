@@ -66,7 +66,7 @@
 </script>
 
 <div
-  style="order: 2;"
+  style="order: 2; display: none;"
   class="nav-sidebar bg-opacity-95 border-r border-gray-200/50 bg-gradient-to-r from-white/70 to-gray-50/50 shadow-sm transition-all duration-300 {collapsed
     ? 'w-16 min-w-[64px]'
     : 'w-60 min-w-[240px]'} flex flex-col gap-4 p-3">
