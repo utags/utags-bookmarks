@@ -100,6 +100,8 @@
   )
   let timeoutId
   let filteredBookmarks = $state([])
+  const maxBookmarksPerPage = 100
+  let fullList = $state(false)
 
   function updateFilteredBookmarks() {
     console.log('!!! updateFilteredBookmarks')
@@ -122,15 +124,18 @@
     }
 
     filteredBookmarks = temp
+    fullList = false
+    scrollTop = 0
 
     setTimeout(() => {
-      document.querySelector('.bookmark-list > *').scrollTo(0, 0)
+      document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
+      document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
       document.querySelector('.aside-area aside:last-of-type').scrollIntoView({
         behavior: 'smooth',
         block: 'start',
         inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
       })
-    }, 100)
+    }, 10)
   }
 
   window.addEventListener('filterUpdated', () => {
@@ -449,9 +454,31 @@
 
     <div class="bookmark-list shadow-lg">
       <BookmarkList
-        {filteredBookmarks}
+        filteredBookmarks={fullList
+          ? filteredBookmarks
+          : filteredBookmarks.slice(0, maxBookmarksPerPage)}
         viewMode={$settings.viewMode}
         bind:scrollTop />
+      {#if filteredBookmarks.length > maxBookmarksPerPage && !fullList}
+        <div
+          class="mt-4 flex items-center justify-center border-t-1 border-gray-200 bg-white/90 p-4 shadow-sm">
+          <div class="text-center">
+            <span class="text-sm leading-relaxed text-gray-600">
+              当前已加载前 100 个书签🔖 <br />
+              <span class="text-xs text-gray-500"
+                >若您想查看全部书签，请点击‘展开所有’按钮</span>
+            </span>
+          </div>
+          <button
+            class="ml-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white shadow-sm transition-colors duration-200 hover:bg-blue-700"
+            onclick={() => {
+              fullList = true
+              scrollTop = document.querySelector('.bookmark-list').scrollTop
+            }}>
+            展开所有
+          </button>
+        </div>
+      {/if}
     </div>
 
     <AddBookmark bind:show={showAddModal} />
