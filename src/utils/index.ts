@@ -39,3 +39,22 @@ export function humanizeUrl(url: string) {
     return url.replace(/^(https?:\/\/)?(www\.)?/, '').split(/[?#]/)[0]
   }
 }
+
+export function formatDatetime(date: number, full = false) {
+  return full
+    ? new Date(date).toLocaleString('zh-CN', {
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })
+    : new Date(date).toLocaleString('zh-CN', {
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+}

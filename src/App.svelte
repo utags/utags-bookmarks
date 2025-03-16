@@ -354,6 +354,7 @@
   <div class="vertical-seperator-line"></div>
   <div class="content-area">
     <div
+      style="flex-wrap: wrap"
       class="toolbar mb-6 flex items-center justify-between rounded-lg border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm">
       <div class="flex items-center gap-3">
         <button
@@ -415,14 +416,15 @@
         </div>
       </div>
 
-      <div class="flex hidden items-center gap-2">
+      <div class="flex items-center gap-2">
         <span class="text-sm text-gray-700">视图模式: </span>
         <select
           class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
           bind:value={$settings.viewMode}>
-          <option value="list">列表视图</option>
-          <option value="compact">紧凑视图</option>
-          <option value="card">卡片视图</option>
+          <option value="list">列表</option>
+          <option value="compact">紧凑</option>
+          <option value="simple">极简</option>
+          <option value="simple2">极简 2</option>
         </select>
       </div>
     </div>

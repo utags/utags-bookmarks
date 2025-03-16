@@ -1,139 +1,54 @@
 <script>
-  import { humanizeUrl } from '../utils'
+  import { formatDatetime } from '../utils'
+  import BookmarkListItemList from './BookmarkListItemList.svelte'
+  import BookmarkListItemCompact from './BookmarkListItemCompact.svelte'
+  import BookmarkListItemSimple from './BookmarkListItemSimple.svelte'
+  import BookmarkListItemLobsters from './BookmarkListItemLobsters.svelte'
 
   let { item, viewMode } = $props()
-  let defaultFavicon = encodeURIComponent(
-    'https://wsrv.nl/?w=16&h=16&url=th.bing.com/th?id=ODLS.A2450BEC-5595-40BA-9F13-D9EC6AB74B9F'
+
+  const href = $derived(item[0])
+  const tags = $derived(item[1].tags)
+  const meta = $derived(item[1].meta)
+  const title = $derived(meta.title || '无标题')
+  const created = $derived(meta.created)
+  const updated = $derived(meta.updated)
+  const formatedCreated = $derived(formatDatetime(created))
+  const formatedUpdated = $derived(formatDatetime(updated))
+  const dateTitleText = $derived(
+    `更新时间: ${formatDatetime(updated, true)} \u000d创建时间: ${formatDatetime(created, true)}`
   )
 </script>
 
 {#if viewMode === 'compact'}
-  <div
-    class="group relative mx-[6px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
-    <div class="flex items-center justify-between gap-2">
-      <a
-        class="flex items-center gap-2 truncate"
-        href={item[0]}
-        title={item[1].meta.title || '无标题'}
-        target="_blank">
-        <img
-          src={`https://wsrv.nl/?w=16&h=16&url=www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}&default=${defaultFavicon}`}
-          class="h-3 w-3 flex-none"
-          loading="lazy"
-          alt="favicon" />
-        <h3 class="truncate text-xs font-normal text-gray-900">
-          {item[1].meta.title || '无标题'}
-        </h3>
-        <div class="flex flex-nowrap gap-1 overflow-x-auto">
-          {#each item[1].tags as tag}
-            <span
-              class="inline-flex items-center rounded-sm bg-gray-100 px-1 py-0.5 text-[11px] text-gray-600">
-              {tag}
-            </span>
-          {/each}
-        </div>
-      </a>
-      <span class="shrink-0 text-xs text-gray-500">
-        {new Date(item[1].meta.updated).toLocaleString('zh-CN', {
-          hour12: false,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        })}
-      </span>
-    </div>
-  </div>
+  <BookmarkListItemCompact
+    {href}
+    {tags}
+    {title}
+    {formatedUpdated}
+    {dateTitleText} />
+{:else if viewMode === 'simple'}
+  <BookmarkListItemSimple
+    {href}
+    {tags}
+    {title}
+    {formatedUpdated}
+    {dateTitleText} />
+{:else if viewMode === 'simple2'}
+  <BookmarkListItemLobsters
+    {href}
+    {tags}
+    {title}
+    {formatedUpdated}
+    {dateTitleText} />
 {:else}
-  <div
-    class="group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
-    <div class="flex items-center gap-3">
-      <div class="min-w-0 flex-1 space-y-0.5">
-        <div class="flex items-center gap-2 truncate">
-          <h3
-            class="truncate text-sm text-gray-900"
-            style="flex: 0 0 50%; min-width: 0;">
-            <a
-              href={item[0]}
-              title={item[1].meta.title || '无标题'}
-              target="_blank"
-              class="flex flex-nowrap items-center gap-1"
-              style="flex-shrink:0; min-width:0">
-              <img
-                src={`https://wsrv.nl/?w=16&h=16&url=www.google.com/s2/favicons?domain=${new URL(item[0]).hostname}&default=${defaultFavicon}`}
-                class="h-4 w-4 flex-none"
-                loading="lazy"
-                alt="favicon" />
-              <span class="truncate" style="min-width:0">
-                {item[1].meta.title || '无标题'}
-              </span>
-            </a>
-          </h3>
-
-          <a
-            href={item[0]}
-            title={item[0]}
-            target="_blank"
-            class="truncate pt-0.5 text-xs text-gray-800 hover:text-gray-800">
-            {humanizeUrl(item[0])}
-          </a>
-        </div>
-        <div class="mt-2 flex flex-wrap gap-2">
-          {#each item[1].tags as tag}
-            <span
-              class="inline-flex items-center gap-1 rounded-sm border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs text-gray-700">
-              <span class="font-normal tracking-tight">{tag}</span>
-            </span>
-          {/each}
-        </div>
-      </div>
-      <div class="top-3 right-3 text-right">
-        <span class="font-mono text-xs tracking-tight text-gray-500">
-          {#if item[1].meta.created === item[1].meta.updated}
-            <div
-              title="创建时间 (未更新过)"
-              class="flex flex-col items-end gap-0.5">
-              <span
-                >{new Date(item[1].meta.updated).toLocaleString('zh-CN', {
-                  hour12: false,
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}</span>
-            </div>
-          {:else}
-            <div
-              title="更新时间/创建时间"
-              class="flex flex-col items-end justify-end gap-0.5">
-              <span
-                >{new Date(item[1].meta.updated).toLocaleString('zh-CN', {
-                  hour12: false,
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}</span>
-              <span
-                >{new Date(item[1].meta.created).toLocaleString('zh-CN', {
-                  hour12: false,
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}</span>
-            </div>
-          {/if}
-        </span>
-      </div>
-    </div>
-  </div>
+  <BookmarkListItemList
+    {href}
+    {tags}
+    {title}
+    {created}
+    {updated}
+    {formatedCreated}
+    {formatedUpdated}
+    {dateTitleText} />
 {/if}
-
-<style>
-</style>
