@@ -2,8 +2,10 @@
   import { formatDatetime } from '../utils'
   import BookmarkListItemList from './BookmarkListItemList.svelte'
   import BookmarkListItemCompact from './BookmarkListItemCompact.svelte'
+  import BookmarkListItemCompact2 from './BookmarkListItemCompact2.svelte'
   import BookmarkListItemSimple from './BookmarkListItemSimple.svelte'
-  import BookmarkListItemLobsters from './BookmarkListItemLobsters.svelte'
+  import BookmarkListItemSimple2 from './BookmarkListItemSimple2.svelte'
+  import BookmarkListItemSimple3 from './BookmarkListItemSimple3.svelte'
 
   let { item, viewMode } = $props()
 
@@ -27,6 +29,13 @@
     {title}
     {formatedUpdated}
     {dateTitleText} />
+{:else if viewMode === 'compact2'}
+  <BookmarkListItemCompact2
+    {href}
+    {tags}
+    {title}
+    {formatedUpdated}
+    {dateTitleText} />
 {:else if viewMode === 'simple'}
   <BookmarkListItemSimple
     {href}
@@ -35,7 +44,14 @@
     {formatedUpdated}
     {dateTitleText} />
 {:else if viewMode === 'simple2'}
-  <BookmarkListItemLobsters
+  <BookmarkListItemSimple2
+    {href}
+    {tags}
+    {title}
+    {formatedUpdated}
+    {dateTitleText} />
+{:else if viewMode === 'simple3'}
+  <BookmarkListItemSimple3
     {href}
     {tags}
     {title}

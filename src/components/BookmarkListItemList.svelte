@@ -15,7 +15,7 @@
 </script>
 
 <div
-  class="group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
+  class="list-default group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100">
   <div class="flex items-center gap-3">
     <div class="min-w-0 flex-1 space-y-0.5">
       <div class="flex items-center gap-2 truncate">
@@ -45,12 +45,13 @@
           {humanizeUrl(href)}
         </a>
       </div>
-      <div class="mt-2 flex flex-wrap gap-2">
+      <div class="tags mt-2 flex flex-wrap gap-2">
         {#each tags as tag}
-          <span
-            class="inline-flex items-center gap-1 rounded-sm border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-xs text-gray-700">
+          <a
+            href="#{tag}"
+            class="tag inline-flex items-center gap-1 rounded-sm bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700">
             <span class="font-normal tracking-tight">{tag}</span>
-          </span>
+          </a>
         {/each}
       </div>
     </div>
@@ -72,3 +73,9 @@
     </div>
   </div>
 </div>
+
+<style>
+  .list-default:hover .tag {
+    background-color: #ebe6e7;
+  }
+</style>

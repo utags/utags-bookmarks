@@ -4,7 +4,7 @@
   let { href, tags, title, formatedUpdated, dateTitleText } = $props()
 </script>
 
-<div class="simple group relative mx-[6px] p-2">
+<div class="list-simple2 group relative mx-[6px] p-2">
   <div class="flex flex-wrap items-center gap-2 truncate">
     <Favicon {href} classNames="h-4 w-4 flex-none" />
     <a class="title flex-none" {href} {title} target="_blank" rel="noopener">
@@ -12,7 +12,7 @@
     </a>
     <span class="tags flex flex-wrap gap-1">
       {#each tags as tag}
-        <span>{tag}</span>
+        <a href="#{tag}" class="tag">{tag}</a>
       {/each}
     </span>
     <a class="domain" {href} target="_blank" rel="noopener"
@@ -27,7 +27,7 @@
 </div>
 
 <style>
-  .simple {
+  .list-simple2 {
     flex: 1 1 0;
     --color-tag-bg: #fffcd7;
     --color-tag-border: #d5d458;
@@ -39,7 +39,7 @@
       var(--base-fg) / var(--opacity-fg-contrast-4-5)
     );
   }
-  .simple .title {
+  .list-simple2 .title {
     color: #1c59d1;
     display: block;
     font-weight: 500;
@@ -48,14 +48,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .simple .domain {
+  .list-simple2 .domain {
     color: var(--color-fg-contrast-4-5);
     font-style: italic;
     font-size: 9pt;
     text-decoration: none;
     vertical-align: middle;
   }
-  .simple .tags span {
+  .list-simple2 .tags .tag {
     background-color: var(--color-tag-bg);
     border: 1px solid var(--color-tag-border);
     border-radius: 5px;
@@ -65,11 +65,11 @@
     text-decoration: none;
     white-space: nowrap;
   }
-  .simple .byline span {
+  .list-simple2 .byline span {
     color: var(--color-fg-contrast-4-5);
     font-size: 12px;
   }
-  .simple .byline span:not(:first-of-type)::before {
+  .list-simple2 .byline span:not(:first-of-type)::before {
     content: '|';
     margin-right: calc(var(--spacing) * 1);
   }
