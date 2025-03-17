@@ -1,6 +1,10 @@
 <script>
   import { fade } from 'svelte/transition'
-  import { addEventListener, extendHistoryApi } from 'browser-extension-utils'
+  import {
+    $ as _$,
+    addEventListener,
+    extendHistoryApi,
+  } from 'browser-extension-utils'
   let {
     name,
     input,
@@ -17,11 +21,27 @@
   let tagCounts = $state()
   let domainCounts = $state()
 
+  function scrollTagIntoView(tag) {
+    const element = _$(`label[data-tag="${tag}"]`)
+    if (element) {
+      console.log(element)
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      })
+    }
+  }
+
   // 重置筛选条件
-  function resetFilterWith(searchKeyword, tags, domains) {
-    searchKeyword = searchKeyword || ''
+  function resetFilterWith(keyword, tags, domains) {
+    searchKeyword = keyword || ''
     selectedTags = new Set(tags)
     selectedDomains = new Set(domains)
+    if (tags && tags.length > 0) {
+      setTimeout(() => {
+        scrollTagIntoView(tags[0])
+      }, 5)
+    }
   }
 
   // 监听 hashchange 事件并更新 selectedTags
@@ -138,9 +158,7 @@
     <button
       class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200"
       onclick={() => {
-        searchKeyword = ''
-        selectedTags = new Set()
-        selectedDomains = new Set()
+        resetFilterWith()
       }}>
       重置筛选
     </button>
@@ -175,6 +193,7 @@
         </h4>
         {#each Array.from(allTags).sort((a, b) => tagCounts.get(b) - tagCounts.get(a)) as tag}
           <label
+            data-tag={tag}
             class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
             <input
               type="checkbox"
@@ -238,6 +257,7 @@
     overflow-y: auto;
     position: relative;
     margin-bottom: 20px;
+    scroll-padding-bottom: 60%;
   }
 
   .filter-group h4 {
