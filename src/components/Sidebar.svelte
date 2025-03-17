@@ -1,5 +1,6 @@
 <script>
   import { fade } from 'svelte/transition'
+  import { addEventListener, extendHistoryApi } from 'browser-extension-utils'
   let {
     name,
     input,
@@ -15,6 +16,38 @@
   let selectedDomains = $state(new Set())
   let tagCounts = $state()
   let domainCounts = $state()
+
+  // 重置筛选条件
+  function resetFilterWith(searchKeyword, tags, domains) {
+    searchKeyword = searchKeyword || ''
+    selectedTags = new Set(tags)
+    selectedDomains = new Set(domains)
+  }
+
+  // 监听 hashchange 事件并更新 selectedTags
+  function handleHashChange() {
+    console.log('locationchanged', location.href, location.hash)
+    if (location.hash && location.hash.length > 1) {
+      try {
+        const tag = decodeURIComponent(location.hash.slice(1))
+        console.log(tag)
+        setTimeout(() => {
+          resetFilterWith('', [tag])
+        }, 5)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }
+  if (!globalThis.locationchange) {
+    globalThis.locationchange = true
+    extendHistoryApi()
+
+    addEventListener(globalThis, 'locationchange', handleHashChange)
+    if (location.hash) {
+      handleHashChange()
+    }
+  }
 
   // 监听 input 变化并更新 allTags 和 allDomains
   $effect(() => {
