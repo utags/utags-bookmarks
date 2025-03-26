@@ -58,6 +58,15 @@
     "overrides": [
       {
         "files": [
+          "src/data/*"
+        ],
+        "rules": {
+          "@typescript-eslint/naming-convention": 0,
+          "unicorn/filename-case": 0
+        }
+      },
+      {
+        "files": [
           "vite.config.mjs"
         ],
         "rules": {

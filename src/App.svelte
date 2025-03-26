@@ -17,6 +17,8 @@
   import SavedFilters from './components/SavedFilters.svelte'
   import Statistics from './components/Statistics.svelte'
   import { settings } from './stores.ts'
+  import { initialBookmarks } from './data/initial-bookmarks'
+  import { initialBookmarks as initialBookmarksCN } from './data/initial-bookmarks-zh-CN'
 
   const console = new Console({
     prefix: 'app',
@@ -42,51 +44,8 @@
   // 首次访问检测并添加示例数据
   if (Object.keys($bookmarks.data).length === 0 && $settings.isFirstRun) {
     $settings.isFirstRun = false
-    $bookmarks.data = {
-      'https://greasyfork.org/scripts/460718': {
-        meta: {
-          title: 'Userscript - 🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
-          created: Date.now(),
-          updated: Date.now(),
-        },
-        tags: ['开源项目', 'Tools', '油猴脚本', 'userscript'],
-      },
-      'https://chromewebstore.google.com/detail/utags-add-usertags-to-lin/kofjcnaphffjoookgahgjidofbdplgig':
-        {
-          meta: {
-            title: 'Chrome extension - UTags - Add usertags to links',
-            created: Date.now() - 1000 - Math.floor(Math.random() * 3600000),
-            updated: Date.now() - 1000,
-          },
-          tags: ['chrome', '浏览器扩展', 'Tools', '开源项目'],
-        },
-      'https://microsoftedge.microsoft.com/addons/detail/utags-add-usertags-to-l/bhlbflbehfoccjjenpekilgabbjjnphe':
-        {
-          meta: {
-            title: 'Edge extension - UTags - Add usertags to links',
-            created: Date.now() - 2000 - Math.floor(Math.random() * 3600000),
-            updated: Date.now() - 2000,
-          },
-          tags: ['edge', '浏览器扩展', 'Productivity', 'Tools', '开源项目'],
-        },
-      'https://addons.mozilla.org/firefox/addon/utags/': {
-        meta: {
-          title: 'Firefox extension - UTags - Add usertags to links',
-          created: Date.now() - 3000 - Math.floor(Math.random() * 3600000),
-          updated: Date.now() - 3000,
-        },
-        tags: ['firefox', '浏览器扩展', '开源项目', 'Tools', 'Bookmarks'],
-      },
-      'https://github.com/utags/utags': {
-        meta: {
-          title:
-            'GitHub - utags/utags: 🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
-          created: Date.now() - 4000 - Math.floor(Math.random() * 3600000),
-          updated: Date.now() - 4000,
-        },
-        tags: ['开源项目', '浏览器扩展', '油猴脚本', 'userscript'],
-      },
-    }
+    $bookmarks.data =
+      $settings.lang === 'zh-CN' ? initialBookmarksCN : initialBookmarks
     bookmarks.set($bookmarks)
   }
 
@@ -167,11 +126,13 @@
   function updateFilteredBookmarks() {
     console.log('!!! updateFilteredBookmarks')
 
-    const temp = useLevel3
-      ? filteredBookmarks3
-      : useLevel2
-        ? filteredBookmarks2
-        : filteredBookmarks1
+    const temp = [
+      ...(useLevel3
+        ? filteredBookmarks3
+        : useLevel2
+          ? filteredBookmarks2
+          : filteredBookmarks1),
+    ]
 
     if (sortBy) {
       console.log(`sort by:`, sortBy)
