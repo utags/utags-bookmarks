@@ -5,9 +5,6 @@
   let {
     collapsed = false,
     showAddModal = $bindable(),
-    importData,
-    exportData,
-    clearAll,
     skin = $bindable(),
   } = $props()
 

@@ -225,27 +225,6 @@
     ).size,
   })
 
-  function clearAll() {
-    if (confirm('请确认是否清空所有书签？此操作不可逆，建议先导出备份数据。')) {
-      $bookmarks.data = {}
-      bookmarks.set($bookmarks)
-      const event = new CustomEvent('clearAll')
-      window.dispatchEvent(event)
-    }
-  }
-
-  function exportData() {
-    const dataStr = JSON.stringify($bookmarks)
-    const blob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    const now = new Date()
-    const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
-    a.href = url
-    a.download = `utags-backup-${timestamp}.json`
-    a.click()
-  }
-
   // 新增导入状态
   let importProgress = $state({
     current: 0,
@@ -257,79 +236,30 @@
     },
   })
 
-  async function importData() {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'application/json'
-
-    input.onchange = async (e) => {
-      const file = e.target.files[0]
-      if (!file) return
-
-      try {
-        const content = await file.text()
-        const data = JSON.parse(content)
-
-        // 初始化进度
-        importProgress = {
-          current: 0,
-          total: Object.keys(data.data).length,
-          stats: {
-            newBookmarks: 0,
-            newDomains: new Set(),
-            newTags: new Set(),
-          },
-        }
-
-        // 分批处理避免阻塞
-        const batchSize = 50
-        const entries = Object.entries(data.data)
-
-        for (let i = 0; i < entries.length; i += batchSize) {
-          const batch = entries.slice(i, i + batchSize)
-          batch.forEach(([url, entry]) => {
-            if (!$bookmarks.data[url]) {
-              importProgress.stats.newBookmarks++
-
-              // 统计新域名
-              const domain = new URL(url).hostname
-              if (!allDomains.has(domain)) {
-                importProgress.stats.newDomains.add(domain)
-              }
-
-              // 统计新标签
-              entry.tags.forEach((tag) => {
-                if (!allTags.has(tag)) {
-                  importProgress.stats.newTags.add(tag)
-                }
-              })
-            }
-            $bookmarks.data[url] = entry
-            importProgress.current++
-          })
-
-          // 触发响应式更新
-          bookmarks.set($bookmarks)
-          await new Promise((resolve) => setTimeout(resolve, 0))
-        }
-
-        // 显示统计结果
-        alert(`
+  // 监听导入状态变化
+  window.addEventListener('importProgressUpdated', (e) => {
+    importProgress = e.detail
+  })
+  window.addEventListener('importFinished', () => {
+    console.log('importFinished')
+    // 显示统计结果
+    alert(`
           导入完成！
           新增书签: ${importProgress.stats.newBookmarks}
           新增标签: ${importProgress.stats.newTags.size}
           新增域名: ${importProgress.stats.newDomains.size}
         `)
 
-        // 重置进度
-        importProgress = { current: 0, total: 0, stats: null }
-      } catch (error) {
-        alert('文件导入失败，请检查文件格式')
-      }
+    importProgress = {
+      current: 0,
+      total: 0,
+      stats: {
+        newBookmarks: 0,
+        newDomains: new Set(),
+        newTags: new Set(),
+      },
     }
-
-    input.click()
-  }
+  })
 
   $effect(() => {
     document.documentElement.dataset.theme = $settings.skin || 'skin1'
@@ -337,12 +267,7 @@
 </script>
 
 <main class="{$settings.sidebarPosition}-sidebar">
-  <Header
-    {importData}
-    {exportData}
-    {clearAll}
-    bind:showAddModal
-    bind:skin={$settings.skin} />
+  <Header bind:showAddModal bind:skin={$settings.skin} />
   <div class="container bg-white dark:bg-black">
     <div class="aside-area">
       <SavedFilters />

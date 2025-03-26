@@ -3,7 +3,7 @@
   import ThemeSwitcher from './ThemeSwitcher.svelte'
   import { $ as _$ } from 'browser-extension-utils'
   import { initFocusTrap } from 'focus-trap-lite'
-  import { settings } from '../stores.ts'
+  import { settings, importData, exportData, clearAll } from '../stores.ts'
 
   let { showSettings = $bindable() } = $props()
 
