@@ -1,0 +1,7 @@
+node_modules/**
+LICENSE
+*.min.js
+pnpm-lock.yaml
+tsconfig.json
+tsconfig.tsbuildinfo
+._*

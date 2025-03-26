@@ -1,0 +1,69 @@
+{
+  "name": "utags-app",
+  "version": "0.0.1",
+  "author": "Pipecraft",
+  "namespace": "https://utags.pipecraft.net/",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/utags/utags/issues"
+  },
+  "homepage": "https://github.com/utags/utags#readme",
+  "type": "module",
+  "scripts": {
+    "p": "prettier --write . && npx prettier@2.8.8 --config .prettierrc-markdown.cjs --write *.md",
+    "lint": "run-s lint:*",
+    "lint:code": "npm run p && xo --fix",
+    "lint:type": "tsc --noemit",
+    "lint:check": "svelte-check --tsconfig ./tsconfig.json",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tailwindcss/postcss": "^4.0.16",
+    "@testing-library/svelte": "^5.2.7",
+    "@vitest/ui": "^3.0.9",
+    "autoprefixer": "^10.4.21",
+    "browser-extension-utils": "^0.1.19",
+    "console-tagger": "^0.0.6",
+    "focus-trap-lite": "^0.0.5",
+    "npm-run-all": "^4.1.5",
+    "postcss": "^8.5.3",
+    "postcss-load-config": "^6.0.1",
+    "prettier": "^3.5.3",
+    "prettier-plugin-svelte": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "svelte": "^5.25.3",
+    "svelte-check": "^4.1.5",
+    "svelte-persisted-store": "^0.12.0",
+    "svelte-virtual-list": "^3.0.1",
+    "tailwindcss": "^4.0.16",
+    "typescript": "^5.2.2",
+    "utags-utils": "^0.0.3",
+    "vite": "^6.2.3",
+    "vitest": "^3.0.9",
+    "xo": "^0.60.0"
+  },
+  "xo": {
+    "space": 2,
+    "prettier": true,
+    "envs": [
+      "browser"
+    ],
+    "rules": {
+      "capitalized-comments": 0
+    },
+    "overrides": [
+      {
+        "files": [
+          "vite.config.mjs"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": 0
+        }
+      }
+    ]
+  }
+}

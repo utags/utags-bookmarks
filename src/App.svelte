@@ -1,0 +1,662 @@
+<script>
+  import { persisted } from 'svelte-persisted-store'
+  import { fade } from 'svelte/transition'
+  import {
+    $ as _$,
+    addEventListener,
+    extendHistoryApi,
+  } from 'browser-extension-utils'
+  import Console from 'console-tagger'
+  import { cleanFilterString } from './utils/index.js'
+  import { HASH_DELIMITER } from './constants.js'
+  import Header from './components/Header.svelte'
+  import AddBookmark from './components/AddBookmark.svelte'
+  import BookmarkList from './components/BookmarkList.svelte'
+  import CompositeFilters from './components/CompositeFilters.svelte'
+  import NavSidebar from './components/NavSidebar.svelte'
+  import SavedFilters from './components/SavedFilters.svelte'
+  import Statistics from './components/Statistics.svelte'
+  import { settings } from './stores.ts'
+
+  const console = new Console({
+    prefix: 'app',
+    color: { line: 'white', background: 'red' },
+  })
+
+  // 初始化书签存储
+  const bookmarks = persisted('utags-bookmarks', {
+    data: {},
+    meta: {
+      databaseVersion: 3,
+      created: Date.now(),
+    },
+  })
+
+  $effect(() => {
+    if ($settings.viewMode === 'card') {
+      alert('card 模式即将上线，敬请期待！')
+      $settings.viewMode = 'list'
+    }
+  })
+
+  // 首次访问检测并添加示例数据
+  if (Object.keys($bookmarks.data).length === 0 && $settings.isFirstRun) {
+    $settings.isFirstRun = false
+    $bookmarks.data = {
+      'https://greasyfork.org/scripts/460718': {
+        meta: {
+          title: 'Userscript - 🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
+          created: Date.now(),
+          updated: Date.now(),
+        },
+        tags: ['开源项目', 'Tools', '油猴脚本', 'userscript'],
+      },
+      'https://chromewebstore.google.com/detail/utags-add-usertags-to-lin/kofjcnaphffjoookgahgjidofbdplgig':
+        {
+          meta: {
+            title: 'Chrome extension - UTags - Add usertags to links',
+            created: Date.now() - 1000 - Math.floor(Math.random() * 3600000),
+            updated: Date.now() - 1000,
+          },
+          tags: ['chrome', '浏览器扩展', 'Tools', '开源项目'],
+        },
+      'https://microsoftedge.microsoft.com/addons/detail/utags-add-usertags-to-l/bhlbflbehfoccjjenpekilgabbjjnphe':
+        {
+          meta: {
+            title: 'Edge extension - UTags - Add usertags to links',
+            created: Date.now() - 2000 - Math.floor(Math.random() * 3600000),
+            updated: Date.now() - 2000,
+          },
+          tags: ['edge', '浏览器扩展', 'Productivity', 'Tools', '开源项目'],
+        },
+      'https://addons.mozilla.org/firefox/addon/utags/': {
+        meta: {
+          title: 'Firefox extension - UTags - Add usertags to links',
+          created: Date.now() - 3000 - Math.floor(Math.random() * 3600000),
+          updated: Date.now() - 3000,
+        },
+        tags: ['firefox', '浏览器扩展', '开源项目', 'Tools', 'Bookmarks'],
+      },
+      'https://github.com/utags/utags': {
+        meta: {
+          title:
+            'GitHub - utags/utags: 🏷️ 小鱼标签 (UTags) - 为链接添加用户标签',
+          created: Date.now() - 4000 - Math.floor(Math.random() * 3600000),
+          updated: Date.now() - 4000,
+        },
+        tags: ['开源项目', '浏览器扩展', '油猴脚本', 'userscript'],
+      },
+    }
+    bookmarks.set($bookmarks)
+  }
+
+  const originalBookmarks = $derived(Object.entries($bookmarks.data))
+  let sortBy = $state('updated')
+  let scrollTop = $state(0)
+  let showAddModal = $state(false)
+  let allTags = $state(new Set())
+  let allDomains = $state(new Set())
+  // allTags = new Set(input.flatMap((entry) => entry[1].tags))
+  //   allDomains = new Set(input.map((entry) => new URL(entry[0]).hostname))
+  let filteredBookmarks1 = $state([])
+  let filteredBookmarks2 = $state([])
+  let filteredBookmarks3 = $state([])
+  let useLevel2 = $derived(
+    filteredBookmarks1.length &&
+      filteredBookmarks1.length !== originalBookmarks.length
+  )
+  let useLevel3 = $derived(
+    filteredBookmarks2.length &&
+      filteredBookmarks2.length !== filteredBookmarks1.length
+  )
+  let timeoutId
+  let filteredBookmarks = $state([])
+  const maxBookmarksPerPage = 100
+  let fullList = $state(false)
+  let filterStringLevel1 = $state('')
+  let filterStringLevel2 = $state('')
+  let filterStringLevel3 = $state('')
+
+  function handleHashChange() {
+    console.log(
+      '>>>>>> location changed',
+      globalThis.currentUrlHash === location.hash,
+      globalThis.lastHash === location.hash,
+      location.href,
+      location.hash
+    )
+    if (globalThis.lastHash !== location.hash) {
+      console.log(
+        'last hash:',
+        `[${decodeURIComponent(globalThis.lastHash)}]`,
+        '\n       new hash:',
+        `[${decodeURIComponent(location.hash)}]`
+      )
+
+      const filterStringArr = location.hash.split(HASH_DELIMITER)
+      const _filterStringLevel1 = cleanFilterString(filterStringArr[1])
+      // Invalid hash, clear it
+      if (location.hash && !_filterStringLevel1) {
+        history.replaceState({}, '', '#')
+        return
+      }
+
+      globalThis.lastHash = location.hash
+
+      filterStringLevel1 = _filterStringLevel1
+      filterStringLevel2 = cleanFilterString(filterStringArr[2])
+      filterStringLevel3 = cleanFilterString(filterStringArr[3])
+      console.log(`multi-level filter strings:`, [
+        filterStringLevel1,
+        filterStringLevel2,
+        filterStringLevel3,
+      ])
+    }
+  }
+
+  if (!globalThis.locationchange) {
+    globalThis.locationchange = true
+    // 使浏览器支持 locationchange 自定义事件
+    extendHistoryApi()
+
+    addEventListener(globalThis, 'locationchange', handleHashChange)
+    // 初始化时触发一次
+    handleHashChange()
+  }
+
+  function updateFilteredBookmarks() {
+    console.log('!!! updateFilteredBookmarks')
+
+    const temp = useLevel3
+      ? filteredBookmarks3
+      : useLevel2
+        ? filteredBookmarks2
+        : filteredBookmarks1
+
+    if (sortBy) {
+      console.log(`sort by:`, sortBy)
+      temp.sort((a, b) => {
+        const aTime =
+          sortBy === 'updated' ? a[1].meta.updated : a[1].meta.created
+        const bTime =
+          sortBy === 'updated' ? b[1].meta.updated : b[1].meta.created
+        return bTime - aTime
+      })
+    }
+
+    filteredBookmarks = temp
+    fullList = false
+    scrollTop = 0
+
+    setTimeout(() => {
+      console.log(
+        'scrollIntoView',
+        useLevel2,
+        useLevel3,
+        document.querySelectorAll('.composite-filters').length
+      )
+      document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
+      document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
+      const selector = useLevel3
+        ? '.aside-area aside:nth-of-type(3)'
+        : useLevel2
+          ? '.aside-area aside:nth-of-type(2)'
+          : '.aside-area aside:nth-of-type(1)'
+      const lastSidebar = _$(selector)
+      console.log(lastSidebar)
+      if (lastSidebar) {
+        lastSidebar.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: $settings.sidebarPosition === 'right' ? 'start' : 'end',
+        })
+      }
+    }, 10)
+  }
+
+  window.addEventListener('filterUpdated', () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+    timeoutId = setTimeout(() => {
+      updateFilteredBookmarks()
+    }, 100)
+
+    const originalBookmarksLength = originalBookmarks.length
+    const filteredBookmarks1Length = filteredBookmarks1.length
+    const filteredBookmarks2Length = filteredBookmarks2.length
+    const filteredBookmarks3Length = filteredBookmarks3.length
+
+    console.log(
+      'filterUpdated',
+      originalBookmarksLength,
+      filteredBookmarks1Length,
+      filteredBookmarks2Length,
+      filteredBookmarks3Length
+    )
+
+    if (
+      filteredBookmarks1Length === 0 ||
+      filteredBookmarks1Length === originalBookmarksLength
+    ) {
+      console.log('clear level 2, level 3')
+      filteredBookmarks2 = []
+      filteredBookmarks3 = []
+    } else if (filteredBookmarks1Length > 0) {
+      if (
+        filteredBookmarks2Length === 0 ||
+        filteredBookmarks2Length === filteredBookmarks1Length
+      ) {
+        console.log('clear level 3')
+        filteredBookmarks3 = []
+      }
+    }
+  })
+
+  const stats = $derived({
+    totalBookmarks: filteredBookmarks.length,
+    selectedTagsCount: new Set(
+      filteredBookmarks.flatMap(([_, entry]) => entry.tags)
+    ).size,
+    selectedDomainsCount: new Set(
+      filteredBookmarks.map(([url, _]) => new URL(url).hostname)
+    ).size,
+  })
+
+  function clearAll() {
+    if (confirm('请确认是否清空所有书签？此操作不可逆，建议先导出备份数据。')) {
+      $bookmarks.data = {}
+      bookmarks.set($bookmarks)
+      const event = new CustomEvent('clearAll')
+      window.dispatchEvent(event)
+    }
+  }
+
+  function exportData() {
+    const dataStr = JSON.stringify($bookmarks)
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const now = new Date()
+    const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
+    a.href = url
+    a.download = `utags-backup-${timestamp}.json`
+    a.click()
+  }
+
+  // 新增导入状态
+  let importProgress = $state({
+    current: 0,
+    total: 0,
+    stats: {
+      newBookmarks: 0,
+      newDomains: new Set(),
+      newTags: new Set(),
+    },
+  })
+
+  async function importData() {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'application/json'
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0]
+      if (!file) return
+
+      try {
+        const content = await file.text()
+        const data = JSON.parse(content)
+
+        // 初始化进度
+        importProgress = {
+          current: 0,
+          total: Object.keys(data.data).length,
+          stats: {
+            newBookmarks: 0,
+            newDomains: new Set(),
+            newTags: new Set(),
+          },
+        }
+
+        // 分批处理避免阻塞
+        const batchSize = 50
+        const entries = Object.entries(data.data)
+
+        for (let i = 0; i < entries.length; i += batchSize) {
+          const batch = entries.slice(i, i + batchSize)
+          batch.forEach(([url, entry]) => {
+            if (!$bookmarks.data[url]) {
+              importProgress.stats.newBookmarks++
+
+              // 统计新域名
+              const domain = new URL(url).hostname
+              if (!allDomains.has(domain)) {
+                importProgress.stats.newDomains.add(domain)
+              }
+
+              // 统计新标签
+              entry.tags.forEach((tag) => {
+                if (!allTags.has(tag)) {
+                  importProgress.stats.newTags.add(tag)
+                }
+              })
+            }
+            $bookmarks.data[url] = entry
+            importProgress.current++
+          })
+
+          // 触发响应式更新
+          bookmarks.set($bookmarks)
+          await new Promise((resolve) => setTimeout(resolve, 0))
+        }
+
+        // 显示统计结果
+        alert(`
+          导入完成！
+          新增书签: ${importProgress.stats.newBookmarks}
+          新增标签: ${importProgress.stats.newTags.size}
+          新增域名: ${importProgress.stats.newDomains.size}
+        `)
+
+        // 重置进度
+        importProgress = { current: 0, total: 0, stats: null }
+      } catch (error) {
+        alert('文件导入失败，请检查文件格式')
+      }
+    }
+
+    input.click()
+  }
+
+  $effect(() => {
+    document.documentElement.dataset.theme = $settings.skin || 'skin1'
+  })
+</script>
+
+<main class="{$settings.sidebarPosition}-sidebar">
+  <Header
+    {importData}
+    {exportData}
+    {clearAll}
+    bind:showAddModal
+    bind:skin={$settings.skin} />
+  <div class="container bg-white dark:bg-black">
+    <div class="aside-area">
+      <SavedFilters />
+
+      <CompositeFilters
+        level="1"
+        paused={importProgress.total > 0}
+        filterString={filterStringLevel1}
+        input={originalBookmarks}
+        bind:output={filteredBookmarks1} />
+
+      {#if useLevel2 && importProgress.total === 0}
+        <CompositeFilters
+          level="2"
+          paused={importProgress.total > 0}
+          filterString={filterStringLevel2}
+          input={filteredBookmarks1}
+          bind:output={filteredBookmarks2} />
+
+        {#if useLevel3}
+          <CompositeFilters
+            level="3"
+            paused={importProgress.total > 0}
+            filterString={filterStringLevel3}
+            input={filteredBookmarks2}
+            bind:output={filteredBookmarks3} />
+        {/if}
+      {/if}
+    </div>
+    <div class="vertical-seperator-line"></div>
+    <div class="content-area flex flex-col">
+      <div
+        style="flex-wrap: wrap"
+        class="toolbar mb-6 flex items-center justify-between rounded-lg border border-(color:--seperator-line-color) bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm dark:bg-black/90">
+        <Statistics
+          totalBookmarks={stats.totalBookmarks}
+          selectedTagsCount={stats.selectedTagsCount}
+          selectedDomainsCount={stats.selectedDomainsCount} />
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-700 dark:text-gray-200"
+            >排序方式:
+          </span>
+          <div class="flex gap-1 rounded-md bg-gray-100 p-1 dark:bg-gray-800">
+            <label
+              class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
+              'updated'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
+              <input
+                type="radio"
+                name="sort-by"
+                value="updated"
+                checked={sortBy === 'updated'}
+                class="hidden"
+                onchange={() => {
+                  sortBy = 'updated'
+                  updateFilteredBookmarks()
+                }} />
+              <span class="text-sm">更新时间</span>
+            </label>
+            <label
+              class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
+              'created'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
+              <input
+                type="radio"
+                name="sort-by"
+                value="created"
+                checked={sortBy === 'created'}
+                class="hidden"
+                onchange={() => {
+                  sortBy = 'created'
+                  updateFilteredBookmarks()
+                }} />
+              <span class="text-sm">创建时间</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-700 dark:text-gray-200"
+            >视图模式:
+          </span>
+          <select
+            class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+            bind:value={$settings.viewMode}>
+            <option value="list">列表</option>
+            <option value="compact">紧凑 1</option>
+            <option value="compact2">紧凑 2</option>
+            <option value="simple">极简 1</option>
+            <option value="simple2">极简 2</option>
+            <option value="simple3">极简 3</option>
+          </select>
+        </div>
+      </div>
+
+      {#if importProgress.total > 0}
+        <div class="import-progress" out:fade={{ duration: 1000 }}>
+          导入进度: {importProgress.current}/{importProgress.total}
+          {#if importProgress.stats}
+            <div class="stats">
+              新增: {importProgress.stats.newBookmarks}书签・
+              {importProgress.stats.newTags.size}标签・
+              {importProgress.stats.newDomains.size}域名
+              <div class="total-stats">
+                总数: {Object.keys($bookmarks.data).length}书签・
+                {allTags.size}标签・{allDomains.size}域名
+              </div>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
+      <div class="bookmark-list shadow-lg dark:border dark:border-gray-700">
+        <BookmarkList
+          filteredBookmarks={fullList
+            ? filteredBookmarks
+            : filteredBookmarks.slice(0, maxBookmarksPerPage)}
+          viewMode={$settings.viewMode}
+          bind:scrollTop />
+        {#if filteredBookmarks.length > maxBookmarksPerPage && !fullList}
+          <div
+            class="mt-4 flex items-center justify-center border-t-1 border-(color:--seperator-line-color) bg-white/90 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div class="text-center">
+              <span
+                class="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                当前已加载前 100 个书签🔖 <br />
+                <span class="text-xs text-gray-500 dark:text-gray-400"
+                  >若您想查看全部书签，请点击‘展开所有’按钮</span>
+              </span>
+            </div>
+            <button
+              class="ml-4 flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm text-white shadow-sm transition-colors duration-200 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+              onclick={() => {
+                fullList = true
+                scrollTop = document.querySelector('.bookmark-list').scrollTop
+              }}>
+              展开所有
+            </button>
+          </div>
+        {/if}
+      </div>
+
+      <AddBookmark bind:show={showAddModal} />
+    </div>
+  </div>
+</main>
+
+<style>
+  :root {
+    --seperator-line-color: #f6f3f4;
+    --seperator-line: 1px solid var(--seperator-line-color);
+    --container-justify-content: flex-start;
+    --vertical-seperator-line-order: 0;
+    --aside-area-order: 0;
+    --aside-area-flex-direction: row;
+    --aside-area-margin-left: 0px;
+    --aside-area-margin-right: -20px;
+    --sidebar-width: 280px;
+    --sidebar-border-left: var(--seperator-line);
+    --sidebar-border-right: none;
+    --sidebar-padding-left: 20px;
+    --sidebar-padding-right: 20px;
+    --sidebar-reset-filter-align-self: flex-end;
+    --sidebar-scroll-snap-align: end;
+    --main-background-color: #f6f8fc;
+    --shadow-color: white;
+  }
+
+  .right-sidebar {
+    --container-justify-content: flex-end;
+    --vertical-seperator-line-order: 1;
+    --aside-area-order: 2;
+    --aside-area-flex-direction: row-reverse;
+    --aside-area-margin-left: -20px;
+    --aside-area-margin-right: 0px;
+    --sidebar-border-left: none;
+    --sidebar-border-right: var(--seperator-line);
+    --sidebar-padding-left: 20px;
+    --sidebar-padding-right: 20px;
+    --sidebar-reset-filter-align-self: flex-start;
+    --sidebar-scroll-snap-align: start;
+  }
+
+  :root.dark {
+    --main-background-color: #292a2d;
+    --shadow-color: #000;
+    --seperator-line-color: #364153;
+  }
+
+  main {
+    /* background-color: var(--main-background-color); */
+  }
+
+  .container {
+    display: flex;
+    justify-content: var(--container-justify-content);
+    gap: 20px;
+    max-width: min(calc(100vw - 100px), 1842px);
+    height: 100vh;
+    margin: 0 auto;
+    padding: 57px 20px 0;
+    position: relative;
+    overflow: hidden;
+    /* background-color: white; */
+  }
+
+  .aside-area {
+    /* background-color: #f1f5f9; */
+    overflow-x: auto;
+    display: flex;
+    flex-direction: var(--aside-area-flex-direction);
+    width: calc(var(--sidebar-width) * 2);
+    min-width: calc(var(--sidebar-width) * 2);
+    /* gap: 20px; */
+    order: var(--aside-area-order);
+    margin-left: var(--aside-area-margin-left);
+    margin-right: var(--aside-area-margin-right);
+    padding-bottom: var(--vertical-seperator-line-padding-bottom, 0px);
+    padding-top: var(--vertical-seperator-line-padding-top, 0px);
+    scroll-snap-type: x mandatory;
+  }
+
+  .vertical-seperator-line {
+    width: 0px;
+    height: calc(
+      100% - var(--vertical-seperator-line-padding-bottom, 0px) -
+        var(--vertical-seperator-line-padding-top, 0px)
+    );
+    border-right: none;
+    border-left: var(--seperator-line);
+    box-shadow: 0px -15px 15px 15px var(--shadow-color);
+    display: block;
+    z-index: 2;
+    order: var(--vertical-seperator-line-order);
+    align-self: var(--vertical-seperator-line-align-self);
+  }
+
+  .content-area {
+    flex: 1;
+    width: calc(100% - var(--sidebar-width) * 2 - 20px);
+    padding-top: 20px;
+    /* max-width: 900px;
+    min-width: 900px; */
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    /* border-bottom: 1px solid #f1f5f9; */
+  }
+
+  .bookmark-list {
+    /* height: calc(100% - 198px); */
+    overflow-y: auto;
+    margin-left: 2px;
+  }
+
+  :root[data-theme='skin1'] {
+    --sidebar-padding-top: 20px;
+  }
+  :root[data-theme='skin2'] {
+    --vertical-seperator-line-padding-bottom: 20px;
+    --vertical-seperator-line-align-self: flex-start;
+    --sidebar-padding-top: 20px;
+  }
+  :root[data-theme='skin3'] {
+    --vertical-seperator-line-padding-bottom: 20px;
+    --vertical-seperator-line-padding-top: 20px;
+    --vertical-seperator-line-align-self: center;
+    --sidebar-padding-top: 0px;
+  }
+</style>
