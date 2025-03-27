@@ -1,9 +1,7 @@
 <script>
-  import { persisted } from 'svelte-persisted-store'
   import Modal from './Modal.svelte'
   import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
-
-  const { filters = persisted('utags-filters', []) } = $props()
+  import { filters } from '../stores.js'
 
   let showModal = $state(false)
   let isEditing = $state(false)

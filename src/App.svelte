@@ -1,5 +1,4 @@
 <script>
-  import { persisted } from 'svelte-persisted-store'
   import { fade } from 'svelte/transition'
   import {
     $ as _$,
@@ -13,43 +12,21 @@
   import AddBookmark from './components/AddBookmark.svelte'
   import BookmarkList from './components/BookmarkList.svelte'
   import CompositeFilters from './components/CompositeFilters.svelte'
-  import NavSidebar from './components/NavSidebar.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
   import Statistics from './components/Statistics.svelte'
-  import { settings } from './stores.ts'
-  import { initialBookmarks } from './data/initial-bookmarks'
-  import { initialBookmarks as initialBookmarksCN } from './data/initial-bookmarks-zh-CN'
+  import { settings, bookmarks } from './stores.ts'
 
   const console = new Console({
     prefix: 'app',
     color: { line: 'white', background: 'red' },
   })
 
-  // 初始化书签存储
-  const bookmarks = persisted('utags-bookmarks', {
-    data: {},
-    meta: {
-      databaseVersion: 3,
-      created: Date.now(),
-    },
+  let originalBookmarks = $derived(Object.entries($bookmarks.data))
+  globalThis.addEventListener('bookmarksInitialized', (event) => {
+    console.log('bookmarksInitialized')
+    originalBookmarks = Object.entries($bookmarks.data)
   })
 
-  $effect(() => {
-    if ($settings.viewMode === 'card') {
-      alert('card 模式即将上线，敬请期待！')
-      $settings.viewMode = 'list'
-    }
-  })
-
-  // 首次访问检测并添加示例数据
-  if (Object.keys($bookmarks.data).length === 0 && $settings.isFirstRun) {
-    $settings.isFirstRun = false
-    $bookmarks.data =
-      $settings.lang === 'zh-CN' ? initialBookmarksCN : initialBookmarks
-    bookmarks.set($bookmarks)
-  }
-
-  const originalBookmarks = $derived(Object.entries($bookmarks.data))
   let sortBy = $state('updated')
   let scrollTop = $state(0)
   let showAddModal = $state(false)

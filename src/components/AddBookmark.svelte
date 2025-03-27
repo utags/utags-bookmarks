@@ -1,8 +1,19 @@
 <script>
   import { fade } from 'svelte/transition'
-  import { persisted } from 'svelte-persisted-store'
   import { splitTags, trimTitle } from 'utags-utils'
   import { initFocusTrap } from 'focus-trap-lite'
+  import Console from 'console-tagger'
+  import { bookmarks, checkBookmarksDataReady } from '../stores.ts'
+  const console = new Console({
+    prefix: 'AddBookmark',
+    color: {
+      line: 'white',
+      background: 'pink',
+    },
+  })
+
+  console.log(`component loaded`)
+
   let { show = $bindable(false) } = $props()
   let modalElement = $state()
 
@@ -11,7 +22,6 @@
   let tags = $state('')
   let tagsArray = $state([])
 
-  const bookmarks = persisted('utags-bookmarks', { data: {} })
   let error = $state('')
   let tagError = $state('')
   let lastUrl = undefined
@@ -51,6 +61,7 @@
   }
 
   function addBookmark() {
+    checkBookmarksDataReady()
     title = trimTitle(title)
     if (!validateUrl() || !validateTags()) {
       return
