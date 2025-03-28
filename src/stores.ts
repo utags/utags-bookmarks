@@ -7,23 +7,7 @@ import {
   STORAGE_KEY_SETTINGS,
   STORAGE_KEY_FILTERS,
 } from './constants.js'
-
-export type BookmarkTagsAndMetadata = {
-  tags: string[]
-  meta: {
-    title: string
-    created: number
-    updated: number
-  }
-}
-
-type Bookmarks = {
-  data: Record<string, BookmarkTagsAndMetadata>
-  meta: {
-    databaseVersion: number
-    created: number
-  }
-}
+import { type BookmarksStore } from './types/bookmarks.js'
 
 export const settings = persisted(STORAGE_KEY_SETTINGS, {
   sortBy: 'updated',
@@ -47,7 +31,7 @@ export function checkBookmarksDataReady() {
 
 // 初始化书签存储
 // eslint-disable-next-line import/no-mutable-exports
-export let bookmarks: Persisted<Bookmarks> = persisted(
+export let bookmarks: Persisted<BookmarksStore> = persisted(
   'temporary_bookmarks',
   {
     data: {},
@@ -86,7 +70,7 @@ setTimeout(() => {
   const event = new CustomEvent('bookmarksInitialized')
   globalThis.dispatchEvent(event)
   isBookmarksDataReady = true
-}, 20)
+}, 2000)
 
 export function exportData() {
   checkBookmarksDataReady()
@@ -151,7 +135,7 @@ export async function importData() {
 
     try {
       const content = await file.text()
-      const data: Bookmarks = JSON.parse(content) as Bookmarks
+      const data: BookmarksStore = JSON.parse(content) as BookmarksStore
 
       // 初始化进度
       importProgress = {
