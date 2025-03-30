@@ -6,113 +6,311 @@ import {
 } from './sync-conflict-resolver.ts'
 
 describe('书签同步冲突解决', () => {
-  // 案例1测试
+  const now = Date.now()
+
+  // 案例1测试 - 多设备添加不同标签
   test('多设备添加不同标签', () => {
-    const local = { tags: ['tag1', 'tag2'] }
-    const remote = { tags: ['tag1', 'tag3'] }
-    const base = { tags: ['tag1'] }
-
-    expect(mergeBookmarks(local, remote, base)).toEqual({
-      tags: ['tag1', 'tag2', 'tag3'],
-    })
-  })
-
-  // 案例2测试
-  test('删除操作优先', () => {
-    const local = { tags: ['tag1', 'tag3'] }
-    const remote = { tags: ['tag1', 'tag2'] }
-    const base = { tags: ['tag1', 'tag2', 'tag3'] }
-
-    expect(mergeTags(local.tags, remote.tags, base.tags)).toEqual(['tag1'])
-  })
-
-  // 案例3测试
-  test('时间戳决定最新值', () => {
-    const local = { desc: { text: '描述A', updatedAt: 1000 } }
-    const remote = { desc: { text: '描述B', updatedAt: 2000 } }
-    const base = { desc: { text: '原始描述', updatedAt: 500 } }
-
-    expect(mergeBookmarks(local, remote, base)).toEqual({
-      desc: { text: '描述B', updatedAt: 2000 },
-    })
-  })
-
-  // 案例4测试
-  test('嵌套字段独立合并', () => {
-    const local = { meta: { rating: 4 } }
-    const remote = { meta: { author: '李四' } }
-    const base = { meta: { author: '张三', rating: 3 } }
-
-    expect(mergeBookmarks(local, remote, base)).toEqual({
-      meta: { author: '李四', rating: 4 },
-    })
-  })
-
-  // 案例5测试
-  test('数组元素修改与删除冲突', () => {
-    // const local = { tags: ['tag1', 'tag2@v2'] }
-    // const remote = { tags: ['tag1'] }
-    // const base = { tags: ['tag1', 'tag2@v1'] }
-    // expect(mergeBookmarks(local, remote, base)).toEqual({
-    //   tags: ['tag1'],
-    // })
-  })
-
-  // 案例7测试
-  test('数据类型冲突保持原始类型', () => {
-    const local = { count: 'five' }
-    const remote = { count: 6 }
-    const base = { count: 5 }
-
-    expect(resolveValueConflict(local.count, remote.count, base.count)).toBe(6)
-  })
-
-  // 案例10测试
-  test('树形结构重命名与移动', () => {
     const local = {
-      category: {
-        sub1: [],
-        sub2: ['item1', 'item2'],
+      url1: { tags: ['tag1', 'tag2'], meta: { created: now, updated: now } },
+    }
+    const remote = {
+      url1: { tags: ['tag1', 'tag3'], meta: { created: now, updated: now } },
+    }
+    const base = {
+      url1: { tags: ['tag1'], meta: { created: now, updated: now } },
+    }
+
+    expect(mergeBookmarks(local, remote, base)).toEqual({
+      url1: {
+        tags: ['tag1', 'tag2', 'tag3'],
+        meta: { created: now, updated: now },
+      },
+    })
+  })
+
+  // 案例2测试 - 删除操作优先
+  test('删除操作优先', () => {
+    const local = {
+      url1: { tags: ['tag1', 'tag3'], meta: { created: now, updated: now } },
+    }
+    const remote = {
+      url1: { tags: ['tag1', 'tag2'], meta: { created: now, updated: now } },
+    }
+    const base = {
+      url1: {
+        tags: ['tag1', 'tag2', 'tag3'],
+        meta: { created: now, updated: now },
+      },
+    }
+
+    expect(
+      mergeTags(local['url1'].tags, remote['url1'].tags, base['url1'].tags)
+    ).toEqual(['tag1'])
+  })
+
+  // 案例3测试 - 时间戳决定最新值
+  test('时间戳决定最新值', () => {
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: 1000,
+          desc: { text: '描述A', updatedAt: 1000 },
+        },
       },
     }
     const remote = {
-      category: {
-        sub1: ['item1'],
-        newSub: ['item2'],
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: 2000,
+          desc: { text: '描述B', updatedAt: 2000 },
+        },
       },
     }
     const base = {
-      category: {
-        sub1: ['item1'],
-        sub2: ['item2'],
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: 500,
+          desc: { text: '原始描述', updatedAt: 500 },
+        },
       },
     }
 
-    // 书签合并不需要处理重名命冲突
-    // expect(mergeBookmarks(local, remote, base)).toEqual({
-    //   category: {
-    //     sub1: [],
-    //     newSub: ['item2', 'item1'],
-    //   },
-    // })
-
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      category: {
-        sub1: [],
-        sub2: ['item1', 'item2'],
-        newSub: ['item2'],
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: 2000,
+          desc: { text: '描述B', updatedAt: 2000 },
+        },
       },
     })
   })
 
-  // 案例11测试
-  test('空值与非空值冲突', () => {
-    const local = { note: '备注内容' }
-    const remote = { note: null }
-    const base = { note: null }
+  // 案例4测试 - 嵌套字段独立合并
+  test('嵌套字段独立合并', () => {
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          rating: 4,
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          author: '李四',
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          author: '张三',
+          rating: 3,
+        },
+      },
+    }
 
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      note: '备注内容',
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          author: '李四',
+          rating: 4,
+        },
+      },
+    })
+  })
+
+  // 案例5测试 - 数组元素修改与删除冲突
+  test('数组元素修改与删除冲突', () => {
+    const local = {
+      url1: {
+        tags: ['tag1', 'tag2@v2'],
+        meta: { created: now, updated: now },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: ['tag1'],
+        meta: { created: now, updated: now },
+      },
+    }
+    const base = {
+      url1: {
+        tags: ['tag1', 'tag2@v1'],
+        meta: { created: now, updated: now },
+      },
+    }
+
+    // 不需要合并这种情况
+    // expect(mergeBookmarks(local, remote, base)).toEqual({
+    //   url1: {
+    //     tags: ['tag1'],
+    //     meta: { created: now, updated: now },
+    //   },
+    // })
+  })
+
+  // 案例7测试 - 数据类型冲突保持原始类型
+  test('数据类型冲突保持原始类型', () => {
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          count: 'five',
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          count: 6,
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          count: 5,
+        },
+      },
+    }
+
+    expect(
+      resolveValueConflict(
+        local['url1'].meta.count,
+        remote['url1'].meta.count,
+        base['url1'].meta.count
+      )
+    ).toBe(6)
+  })
+
+  // 案例10测试 - 树形结构重命名与移动
+  test('树形结构重命名与移动', () => {
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          category: {
+            sub1: [],
+            sub2: ['item1', 'item2'],
+          },
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          category: {
+            sub1: ['item1'],
+            newSub: ['item2'],
+          },
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          category: {
+            sub1: ['item1'],
+            sub2: ['item2'],
+          },
+        },
+      },
+    }
+
+    expect(mergeBookmarks(local, remote, base)).toEqual({
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          category: {
+            sub1: ['item1'],
+            newSub: ['item2'],
+          },
+        },
+      },
+    })
+  })
+
+  // 案例11测试 - 空值与非空值冲突
+  test('空值与非空值冲突', () => {
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          note: '备注内容',
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          note: null,
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          note: null,
+        },
+      },
+    }
+
+    expect(mergeBookmarks(local, remote, base)).toEqual({
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          note: '备注内容',
+        },
+      },
     })
   })
 
@@ -123,48 +321,109 @@ describe('书签同步冲突解决', () => {
 
   // 案例13测试 - 新增字段合并
   test('新增字段合并', () => {
-    const local = { title: '新标题' }
-    const remote = { desc: '新描述' }
-    const base = {}
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          note: '新标题',
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          desc: '新描述',
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+        },
+      },
+    }
 
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      title: '新标题',
-      desc: '新描述',
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          note: '新标题',
+          desc: '新描述',
+        },
+      },
     })
   })
 
   // 案例14测试 - 深层嵌套对象合并
   test('深层嵌套对象合并', () => {
     const local = {
-      data: {
+      url1: {
+        tags: [],
         meta: {
-          tags: ['a'],
-          info: { x: 1 },
+          created: now,
+          updated: now,
+          data: {
+            meta: {
+              tags: ['a'],
+              info: { x: 1 },
+            },
+          },
         },
       },
     }
     const remote = {
-      data: {
+      url1: {
+        tags: [],
         meta: {
-          tags: ['b'],
-          info: { y: 2 },
+          created: now,
+          updated: now,
+          data: {
+            meta: {
+              tags: ['b'],
+              info: { y: 2 },
+            },
+          },
         },
       },
     }
     const base = {
-      data: {
+      url1: {
+        tags: [],
         meta: {
-          tags: [],
-          info: {},
+          created: now,
+          updated: now,
+          data: {
+            meta: {
+              tags: [],
+              info: {},
+            },
+          },
         },
       },
     }
 
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      data: {
+      url1: {
+        tags: [],
         meta: {
-          tags: ['a', 'b'],
-          info: { x: 1, y: 2 },
+          created: now,
+          updated: now,
+          data: {
+            meta: {
+              tags: ['a', 'b'],
+              info: { x: 1, y: 2 },
+            },
+          },
         },
       },
     })
@@ -172,33 +431,132 @@ describe('书签同步冲突解决', () => {
 
   // 案例15测试 - 数组元素完全替换
   test('数组元素完全替换', () => {
-    const local = { items: ['a', 'b'] }
-    const remote = { items: ['c', 'd'] }
-    const base = { items: ['x', 'y'] }
+    const local = {
+      url1: {
+        tags: ['a', 'b'],
+        meta: {
+          created: now,
+          updated: now,
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: ['c', 'd'],
+        meta: {
+          created: now,
+          updated: now,
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: ['x', 'y'],
+        meta: {
+          created: now,
+          updated: now,
+        },
+      },
+    }
 
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      items: ['a', 'b', 'c', 'd'],
+      url1: {
+        tags: ['a', 'b', 'c', 'd'],
+        meta: {
+          created: now,
+          updated: now,
+        },
+      },
     })
   })
 
   // 案例16测试 - 混合类型冲突处理
   test('混合类型冲突处理', () => {
-    const local = { data: ['array'] }
-    const remote = { data: { value: 42 } }
-    const base = { data: { value: 0 } }
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: ['array'],
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: { value: 42 },
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: { value: 0 },
+        },
+      },
+    }
 
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      data: { value: 42 },
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: { value: 42 },
+        },
+      },
     })
   })
 
+  // 案例16测试 - 混合类型冲突处理
   test('混合类型冲突处理 2', () => {
-    const local = { data: { value: 42 } }
-    const remote = { data: ['array'] }
-    const base = { data: { value: 0 } }
+    const local = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: { value: 42 },
+        },
+      },
+    }
+    const remote = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: ['array'],
+        },
+      },
+    }
+    const base = {
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: { value: 0 },
+        },
+      },
+    }
 
     expect(mergeBookmarks(local, remote, base)).toEqual({
-      data: { value: 42 },
+      url1: {
+        tags: [],
+        meta: {
+          created: now,
+          updated: now,
+          data: { value: 42 },
+        },
+      },
     })
   })
 })

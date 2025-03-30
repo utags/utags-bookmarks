@@ -1,3 +1,25 @@
+/**
+ * The tags and metadata of a bookmark.
+ */
+export type BookmarkTagsAndMetadata = {
+  tags: string[]
+  meta: {
+    title?: string
+    created: number
+    updated: number
+  }
+}
+
+/**
+ * The key is the URL of the bookmark.
+ */
+export type BookmarkKey = string
+
+/**
+ * The value is an object containing the tags and metadata of the bookmark.
+ */
+export type BookmarksData = Record<BookmarkKey, BookmarkTagsAndMetadata>
+
 type BookmarkData = Record<string, any>
 
 type TimestampValue = {
@@ -10,64 +32,79 @@ function getType(value: any) {
 
 class SyncConflictResolver {
   /**
-   * 基础合并策略
+   * 基础合并策略 - 针对书签数据结构优化
    * @param local 本地数据
    * @param remote 远程数据
    * @param base 基准数据
    * @returns 合并结果
    */
   static threeWayMerge(
-    local: BookmarkData,
-    remote: BookmarkData,
-    base: BookmarkData = {}
-  ): BookmarkData {
-    const result: BookmarkData = { ...base }
+    local: BookmarksData,
+    remote: BookmarksData,
+    base: BookmarksData = {}
+  ): BookmarksData {
+    const result: BookmarksData = { ...base }
 
-    // 字段级合并
-    for (const key of new Set([
+    // 合并所有书签URL
+    const allUrls = new Set([
       ...Object.keys(local),
       ...Object.keys(remote),
-    ])) {
-      if (!(key in remote)) {
-        result[key] = local[key] // 远程删除则保留本地
-        // eslint-disable-next-line unicorn/no-negated-condition
-      } else if (!(key in local)) {
-        result[key] = remote[key] // 本地删除则保留远程
-      } else {
-        // 处理带时间戳的对象（新增部分）
-        if (
-          this.isTimestampObject(local[key]) &&
-          this.isTimestampObject(remote[key])
-        ) {
-          result[key] = this.resolveValueConflict(
-            local[key],
-            remote[key],
-            base[key]
-          )
-        }
-        // 嵌套对象处理
-        else if (
-          this.isPlainObject(local[key]) &&
-          this.isPlainObject(remote[key])
-        ) {
-          result[key] = this.threeWayMerge(
-            local[key],
-            remote[key],
-            base[key] || {}
-          )
-        }
-        // 数组处理（标签等）
-        else if (Array.isArray(local[key]) && Array.isArray(remote[key])) {
-          result[key] = this.mergeArrays(local[key], remote[key], base[key])
-        }
-        // 基本类型处理
-        else {
-          result[key] = this.resolveValueConflict(
-            local[key],
-            remote[key],
-            base[key]
-          )
-        }
+      ...Object.keys(base),
+    ])
+
+    for (const url of allUrls) {
+      // 处理书签不存在于某方的情况
+      if (!(url in remote)) {
+        result[url] = local[url]
+        continue
+      }
+
+      if (!(url in local)) {
+        result[url] = remote[url]
+        continue
+      }
+
+      // 合并标签
+      const mergedTags = this.mergeArrays(
+        local[url].tags,
+        remote[url].tags,
+        base[url]?.tags || []
+      )
+
+      // 合并元数据
+      const mergedMeta = {
+        ...base[url]?.meta,
+        ...local[url].meta,
+        ...remote[url].meta,
+        // 特殊处理时间戳
+        updated: Math.max(
+          local[url].meta.updated,
+          remote[url].meta.updated,
+          base[url]?.meta.updated || 0
+        ),
+        // 保留创建时间（取最早的值）
+        created: Math.min(
+          local[url].meta.created,
+          remote[url].meta.created,
+          base[url]?.meta.created || Infinity
+        ),
+      }
+
+      // 处理标题冲突（取最新更新的）
+      const localTitle = local[url].meta.title
+      const remoteTitle = remote[url].meta.title
+      const baseTitle = base[url]?.meta.title
+
+      if (localTitle !== remoteTitle) {
+        mergedMeta.title =
+          local[url].meta.updated > remote[url].meta.updated
+            ? localTitle
+            : remoteTitle
+      }
+
+      result[url] = {
+        tags: mergedTags,
+        meta: mergedMeta,
       }
     }
 
