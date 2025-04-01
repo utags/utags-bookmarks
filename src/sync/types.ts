@@ -41,3 +41,17 @@ export type SyncInfo = {
   deviceName: string
   lastSyncTime: number
 }
+
+// 添加到现有类型定义中
+export type SyncMetadata = {
+  version: string // 同步协议版本
+  deviceId: string // 设备唯一标识
+  lastSyncTime: number // 最后成功同步时间戳
+  syncStatus: 'in_progress' | 'completed' | 'failed'
+  conflictCount: number // 冲突计数
+  syncedUrls: string[] // 已同步URL列表（可选）
+  error?: {
+    code: string
+    message: string
+  }
+}
