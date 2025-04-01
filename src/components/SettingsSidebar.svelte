@@ -4,6 +4,11 @@
   import { $ as _$ } from 'browser-extension-utils'
   import { initFocusTrap } from 'focus-trap-lite'
   import { settings, importData, exportData, clearAll } from '../stores.ts'
+  import CloseIcon from './svg/CloseIcon.svelte'
+  import InfoIcon from './svg/InfoIcon.svelte'
+  import GitHubIcon from './svg/GitHubIcon.svelte'
+  import IssueIcon from './svg/IssueIcon.svelte'
+  import RoadmapIcon from './svg/RoadmapIcon.svelte'
 
   let { showSettings = $bindable() } = $props()
 
@@ -66,18 +71,7 @@
           class="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
           onclick={() => (showSettings = false)}
           aria-label="关闭设置侧边栏">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="h-6 w-6">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <CloseIcon />
         </button>
       </div>
 
@@ -167,20 +161,7 @@
             <div class="flex items-center justify-between px-1 py-1.5">
               <div
                 class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 16v-4" />
-                  <path d="M12 8h.01" />
-                </svg>
+                <InfoIcon />
                 <span>版本号</span>
               </div>
               <span class="text-gray-500 dark:text-gray-400"
@@ -192,21 +173,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path d="M15 22v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 22v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
+                <GitHubIcon />
                 <span>GitHub 仓库</span>
               </a>
             </div>
@@ -216,20 +183,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                  <path d="M12 18h0" />
-                </svg>
+                <IssueIcon />
                 <span>报告问题</span>
               </a>
             </div>
@@ -239,19 +193,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <path d="m9 11 3 3L22 4" />
-                </svg>
+                <RoadmapIcon />
                 <span>开发路线图</span>
               </a>
             </div>
