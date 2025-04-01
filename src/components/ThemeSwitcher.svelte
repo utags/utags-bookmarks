@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { settings } from '../stores.ts'
-  let { type } = $props()
+  let { type = '' } = $props()
   let theme = $state($settings.theme || 'system')
 
   $effect(() => {

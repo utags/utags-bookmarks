@@ -27,7 +27,6 @@
     originalBookmarks = Object.entries($bookmarks.data)
   })
 
-  let sortBy = $state('updated')
   let scrollTop = $state(0)
   let showAddModal = $state(false)
   let allTags = $state(new Set())
@@ -111,6 +110,7 @@
           : filteredBookmarks1),
     ]
 
+    const sortBy = $settings.sortBy
     if (sortBy) {
       console.log(`sort by:`, sortBy)
       temp.sort((a, b) => {
@@ -192,6 +192,10 @@
     }
   })
 
+  window.addEventListener('sortByChanged', () => {
+    updateFilteredBookmarks()
+  })
+
   const stats = $derived({
     totalBookmarks: filteredBookmarks.length,
     selectedTagsCount: new Set(
@@ -246,6 +250,7 @@
 <main class="{$settings.sidebarPosition}-sidebar">
   <Header bind:showAddModal bind:skin={$settings.skin} />
   <div class="container bg-white dark:bg-black">
+    <div class="vertical-seperator-line"></div>
     <div class="aside-area">
       <SavedFilters />
 
@@ -283,63 +288,6 @@
           totalBookmarks={stats.totalBookmarks}
           selectedTagsCount={stats.selectedTagsCount}
           selectedDomainsCount={stats.selectedDomainsCount} />
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-700 dark:text-gray-200"
-            >排序方式:
-          </span>
-          <div class="flex gap-1 rounded-md bg-gray-100 p-1 dark:bg-gray-800">
-            <label
-              class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
-              'updated'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
-              <input
-                type="radio"
-                name="sort-by"
-                value="updated"
-                checked={sortBy === 'updated'}
-                class="hidden"
-                onchange={() => {
-                  sortBy = 'updated'
-                  updateFilteredBookmarks()
-                }} />
-              <span class="text-sm">更新时间</span>
-            </label>
-            <label
-              class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {sortBy ===
-              'created'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
-              <input
-                type="radio"
-                name="sort-by"
-                value="created"
-                checked={sortBy === 'created'}
-                class="hidden"
-                onchange={() => {
-                  sortBy = 'created'
-                  updateFilteredBookmarks()
-                }} />
-              <span class="text-sm">创建时间</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-700 dark:text-gray-200"
-            >视图模式:
-          </span>
-          <select
-            class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-            bind:value={$settings.viewMode}>
-            <option value="list">列表</option>
-            <option value="compact">紧凑 1</option>
-            <option value="compact2">紧凑 2</option>
-            <option value="simple">极简 1</option>
-            <option value="simple2">极简 2</option>
-            <option value="simple3">极简 3</option>
-          </select>
-        </div>
       </div>
 
       {#if importProgress.total > 0}
@@ -399,12 +347,14 @@
     --seperator-line-color: #f6f3f4;
     --seperator-line: 1px solid var(--seperator-line-color);
     --container-justify-content: flex-start;
+    --container-flex-direction: row;
     --vertical-seperator-line-order: 0;
     --aside-area-order: 0;
     --aside-area-flex-direction: row;
-    --aside-area-margin-left: 0px;
+    --aside-area-margin-left: -20px;
     --aside-area-margin-right: -20px;
-    --sidebar-width: 280px;
+    --aside-area-width: calc(var(--sidebar-width) * 2);
+    --sidebar-width: max(280px, 15vw);
     --sidebar-border-left: var(--seperator-line);
     --sidebar-border-right: none;
     --sidebar-padding-left: 20px;
@@ -417,11 +367,12 @@
 
   .right-sidebar {
     --container-justify-content: flex-end;
+    --container-flex-direction: row-reverse;
     --vertical-seperator-line-order: 1;
     --aside-area-order: 2;
     --aside-area-flex-direction: row-reverse;
-    --aside-area-margin-left: -20px;
-    --aside-area-margin-right: 0px;
+    /* --aside-area-margin-left: -20px;
+    --aside-area-margin-right: 0px; */
     --sidebar-border-left: none;
     --sidebar-border-right: var(--seperator-line);
     --sidebar-padding-left: 20px;
@@ -442,9 +393,11 @@
 
   .container {
     display: flex;
+    flex-direction: var(--container-flex-direction);
     justify-content: var(--container-justify-content);
     gap: 20px;
-    max-width: min(calc(100vw - 100px), 1842px);
+    /* max-width: min(calc(100vw - 100px), 1842px); */
+    max-width: 100%;
     height: 100vh;
     margin: 0 auto;
     padding: 57px 20px 0;
@@ -458,10 +411,10 @@
     overflow-x: auto;
     display: flex;
     flex-direction: var(--aside-area-flex-direction);
-    width: calc(var(--sidebar-width) * 2);
-    min-width: calc(var(--sidebar-width) * 2);
+    width: var(--aside-area-width);
+    min-width: var(--aside-area-width);
     /* gap: 20px; */
-    order: var(--aside-area-order);
+    /* order: var(--aside-area-order); */
     margin-left: var(--aside-area-margin-left);
     margin-right: var(--aside-area-margin-right);
     padding-bottom: var(--vertical-seperator-line-padding-bottom, 0px);
@@ -480,16 +433,15 @@
     box-shadow: 0px -15px 15px 15px var(--shadow-color);
     display: block;
     z-index: 2;
-    order: var(--vertical-seperator-line-order);
+    /* order: var(--vertical-seperator-line-order); */
     align-self: var(--vertical-seperator-line-align-self);
   }
 
   .content-area {
     flex: 1;
-    width: calc(100% - var(--sidebar-width) * 2 - 20px);
+    width: calc(100% - var(--aside-area-width) - 20px);
+    overflow: hidden;
     padding-top: 20px;
-    /* max-width: 900px;
-    min-width: 900px; */
   }
 
   .toolbar {
@@ -503,7 +455,7 @@
   }
 
   .bookmark-list {
-    /* height: calc(100% - 198px); */
+    height: calc(100% - 198px);
     overflow-y: auto;
     margin-left: 2px;
   }
@@ -521,5 +473,16 @@
     --vertical-seperator-line-padding-top: 20px;
     --vertical-seperator-line-align-self: center;
     --sidebar-padding-top: 0px;
+  }
+
+  @media (max-width: 1300px) {
+    :root {
+      --aside-area-width: var(--sidebar-width);
+    }
+  }
+  @media (min-width: 2100px) {
+    :root {
+      --aside-area-width: calc(var(--sidebar-width) * 3);
+    }
   }
 </style>
