@@ -84,6 +84,21 @@
     $filters = $filters.filter((f) => f.id !== id)
   }
 
+  function showAddModal() {
+    showModal = false
+    setTimeout(() => {
+      filterName = ''
+      description = ''
+      showModal = true
+      isEditing = false
+      currentFilterId = null
+    })
+  }
+
+  window.addEventListener('clickShowSaveFilterModal', () => {
+    showAddModal()
+  })
+
   if ($filters.length === 0) {
     ;[
       '智能推荐: AI 学习资源',
@@ -106,16 +121,7 @@
         class="flex items-center justify-center rounded-lg p-2 text-indigo-600
                transition-colors hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-gray-700"
         aria-label="新建筛选条件"
-        onclick={() => {
-          showModal = false
-          setTimeout(() => {
-            filterName = ''
-            description = ''
-            showModal = true
-            isEditing = false
-            currentFilterId = null
-          })
-        }}>
+        onclick={showAddModal}>
         <svg
           class="h-5 w-5"
           fill="none"

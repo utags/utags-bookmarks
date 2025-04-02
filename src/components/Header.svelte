@@ -76,51 +76,11 @@
           if (value === 'addBookmark') {
             showAddModal = true
           } else if (value === 'saveFilter') {
-            // 这里添加收藏筛选器的逻辑
+            window.dispatchEvent(new CustomEvent('clickShowSaveFilterModal'))
           }
           addMenuOpen = false
         }}
         width="w-40" />
-    </div>
-
-    <div class="hidden items-center gap-2">
-      <span class="text-sm text-gray-700 dark:text-gray-200">排序方式: </span>
-      <div class="flex gap-1 rounded-md bg-gray-100 p-1 dark:bg-gray-800">
-        <label
-          class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {$settings.sortBy ===
-          'updated'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
-          <input
-            type="radio"
-            name="sort-by"
-            value="updated"
-            checked={$settings.sortBy === 'updated'}
-            class="hidden"
-            onchange={() => {
-              $settings.sortBy = 'updated'
-              window.dispatchEvent(new CustomEvent('sortByChanged'))
-            }} />
-          <span class="text-sm">更新时间</span>
-        </label>
-        <label
-          class="cursor-pointer rounded-md px-3 py-1.5 transition-colors {$settings.sortBy ===
-          'created'
-            ? 'bg-blue-600 text-white'
-            : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}">
-          <input
-            type="radio"
-            name="sort-by"
-            value="created"
-            checked={$settings.sortBy === 'created'}
-            class="hidden"
-            onchange={() => {
-              $settings.sortBy = 'created'
-              window.dispatchEvent(new CustomEvent('sortByChanged'))
-            }} />
-          <span class="text-sm">创建时间</span>
-        </label>
-      </div>
     </div>
 
     <!-- 排序方式按钮 -->
