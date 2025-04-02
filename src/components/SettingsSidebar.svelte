@@ -16,6 +16,7 @@
   import SortIcon from './svg/SortIcon.svelte'
   import ViewModeIcon from './svg/ViewModeIcon.svelte'
   import ThemeIcon from './svg/ThemeIcon.svelte'
+  import FilterListIcon from './svg/FilterListIcon.svelte'
 
   let { showSettings = $bindable() } = $props()
 
@@ -94,7 +95,8 @@
             界面设置
           </h3>
           <div class="gap-y-4">
-            <div class="relative flex items-center justify-between px-1 py-1.25">
+            <div
+              class="relative flex items-center justify-between px-1 py-1.25">
               <div
                 class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                 <svg
@@ -175,8 +177,12 @@
           </div>
 
           <div class="gap-y-4">
-            <div class="flex items-center justify-between px-1 py-1.5">
-              <span class="text-gray-700 dark:text-gray-300">筛选栏位置</span>
+            <div class="flex items-center justify-between px-1 py-0.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <FilterListIcon />
+                <span>筛选栏位置</span>
+              </div>
               <div
                 class="flex gap-2 rounded-lg bg-gray-100 p-1 shadow-inner dark:bg-gray-700/90 dark:shadow-gray-900/30">
                 <label class="flex-1">
@@ -186,7 +192,7 @@
                     value="left"
                     bind:group={$settings.sidebarPosition} />
                   <span
-                    class="block cursor-pointer rounded-md px-4 py-2 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
+                    class="block cursor-pointer rounded-md px-4 py-1.5 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
                     左侧
                   </span>
                 </label>
@@ -197,7 +203,7 @@
                     value="right"
                     bind:group={$settings.sidebarPosition} />
                   <span
-                    class="block cursor-pointer rounded-md px-4 py-2 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
+                    class="block cursor-pointer rounded-md px-4 py-1.5 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
                     右侧
                   </span>
                 </label>
