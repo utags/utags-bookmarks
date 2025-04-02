@@ -12,6 +12,7 @@
   import ViewModeIcon from './svg/ViewModeIcon.svelte'
   import SettingsIcon from './svg/SettingsIcon.svelte'
   import ThemeIcon from './svg/ThemeIcon.svelte'
+  import FilterListIcon from './svg/FilterListIcon.svelte'
 
   let { collapsed = false, showAddModal = $bindable() } = $props()
 
@@ -54,108 +55,149 @@
 
   <!-- 右侧工具区 -->
   <div class="flex items-center gap-2">
-    <!-- 添加按钮 -->
-    <div class="relative">
-      <button
-        class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        aria-label="添加"
-        onclick={() => {
-          if (!addMenuOpen) {
-            setTimeout(() => {
-              addMenuOpen = true
-            })
-          }
-        }}>
-        <AddIcon />
-      </button>
+    {#if $settings.headerToolbarSettings.addButton}
+      <!-- 添加按钮 -->
+      <div class="relative">
+        <button
+          class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          aria-label="添加"
+          onclick={() => {
+            if (!addMenuOpen) {
+              setTimeout(() => {
+                addMenuOpen = true
+              })
+            }
+          }}>
+          <AddIcon />
+        </button>
 
-      <DropdownMenu
-        bind:open={addMenuOpen}
-        items={[
-          { value: 'addBookmark', label: '添加书签' },
-          { value: 'saveFilter', label: '收藏当前筛选器' },
-        ]}
-        selectedValue=""
-        onSelect={(value) => {
-          if (value === 'addBookmark') {
-            showAddModal = true
-          } else if (value === 'saveFilter') {
-            window.dispatchEvent(new CustomEvent('clickShowSaveFilterModal'))
-          }
-          addMenuOpen = false
-        }}
-        width="w-40" />
-    </div>
+        <DropdownMenu
+          bind:open={addMenuOpen}
+          items={[
+            { value: 'addBookmark', label: '添加书签' },
+            { value: 'saveFilter', label: '收藏当前筛选器' },
+          ]}
+          selectedValue=""
+          onSelect={(value) => {
+            if (value === 'addBookmark') {
+              showAddModal = true
+            } else if (value === 'saveFilter') {
+              window.dispatchEvent(new CustomEvent('clickShowSaveFilterModal'))
+            }
+            addMenuOpen = false
+          }}
+          width="w-40" />
+      </div>
+    {/if}
 
-    <!-- 排序方式按钮 -->
-    <div class="relative">
-      <button
-        class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        aria-label="排序方式"
-        onclick={() => {
-          if (!sortByOpen) {
-            setTimeout(() => {
-              sortByOpen = true
-            })
-          }
-        }}>
-        <SortIcon />
-      </button>
+    {#if $settings.headerToolbarSettings.sidebarPosition}
+      <div
+        class="flex gap-2 rounded-lg bg-gray-100 p-1 shadow-inner dark:bg-gray-700/90 dark:shadow-gray-900/30">
+        <label class="flex-1">
+          <input
+            type="radio"
+            class="peer absolute h-0 w-0 opacity-0"
+            value="left"
+            bind:group={$settings.sidebarPosition} />
 
-      <DropdownMenu
-        bind:open={sortByOpen}
-        items={sortOptions}
-        selectedValue={$settings.sortBy}
-        onSelect={(value) => {
-          $settings.sortBy = value
-          window.dispatchEvent(new CustomEvent('sortByChanged'))
-        }}
-        width="w-32" />
-    </div>
+          <span
+            class="block cursor-pointer rounded-md px-4 py-1.5 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
+            左
+          </span>
+        </label>
+        <label class="flex-1">
+          <input
+            type="radio"
+            class="peer absolute h-0 w-0 opacity-0"
+            value="right"
+            bind:group={$settings.sidebarPosition} />
+          <span
+            class="block cursor-pointer rounded-md px-4 py-1.5 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
+            右
+          </span>
+        </label>
+      </div>
+    {/if}
 
-    <!-- 视图模式按钮 -->
-    <div class="relative">
-      <button
-        class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        aria-label="视图模式"
-        onclick={() => {
-          if (!viewModeOpen) {
-            setTimeout(() => {
-              viewModeOpen = true
-            })
-          }
-        }}>
-        <ViewModeIcon />
-      </button>
+    {#if $settings.headerToolbarSettings.sortBy}
+      <!-- 排序方式按钮 -->
+      <div class="relative">
+        <button
+          class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          aria-label="排序方式"
+          onclick={() => {
+            if (!sortByOpen) {
+              setTimeout(() => {
+                sortByOpen = true
+              })
+            }
+          }}>
+          <SortIcon />
+        </button>
 
-      <DropdownMenu
-        bind:open={viewModeOpen}
-        items={viewModes}
-        selectedValue={$settings.viewMode}
-        onSelect={(value) => ($settings.viewMode = value)} />
-    </div>
+        <DropdownMenu
+          bind:open={sortByOpen}
+          items={sortOptions}
+          selectedValue={$settings.sortBy}
+          onSelect={(value) => {
+            $settings.sortBy = value
+            window.dispatchEvent(new CustomEvent('sortByChanged'))
+          }}
+          width="w-32" />
+      </div>
+    {/if}
 
-    <!-- 主题选择按钮 -->
-    <div class="relative">
-      <button
-        class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-        aria-label="主题选择"
-        onclick={() => {
-          if (!themeOpen) {
-            setTimeout(() => {
-              themeOpen = true
-            })
-          }
-        }}>
-        <ThemeIcon />
-      </button>
+    {#if $settings.headerToolbarSettings.viewMode}
+      <!-- 视图模式按钮 -->
+      <div class="relative">
+        <button
+          class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          aria-label="视图模式"
+          onclick={() => {
+            if (!viewModeOpen) {
+              setTimeout(() => {
+                viewModeOpen = true
+              })
+            }
+          }}>
+          <ViewModeIcon />
+        </button>
 
-      <DropdownMenu
-        bind:open={themeOpen}
-        items={themeOptions}
-        selectedValue={$settings.skin}
-        onSelect={(value) => ($settings.skin = value)}
-        width="w-50" />
+        <DropdownMenu
+          bind:open={viewModeOpen}
+          items={viewModes}
+          selectedValue={$settings.viewMode}
+          onSelect={(value) => ($settings.viewMode = value)} />
+      </div>
+    {/if}
+
+    {#if $settings.headerToolbarSettings.skin}
+      <!-- 主题选择按钮 -->
+      <div class="relative">
+        <button
+          class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          aria-label="主题选择"
+          onclick={() => {
+            if (!themeOpen) {
+              setTimeout(() => {
+                themeOpen = true
+              })
+            }
+          }}>
+          <ThemeIcon />
+        </button>
+
+        <DropdownMenu
+          bind:open={themeOpen}
+          items={themeOptions}
+          selectedValue={$settings.skin}
+          onSelect={(value) => ($settings.skin = value)}
+          width="w-50" />
+      </div>
+    {/if}
+
+    <div class="flex" class:hidden={!$settings.headerToolbarSettings.theme}>
+      <ThemeSwitcher type="button" />
     </div>
     <!-- 设置按钮 -->
     <button
@@ -168,7 +210,6 @@
     </button>
   </div>
   <SettingsSidebar bind:showSettings />
-  <div class="for-init-theme-switcher hidden"><ThemeSwitcher /></div>
 </div>
 
 <style>

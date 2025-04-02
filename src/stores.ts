@@ -10,13 +10,35 @@ import {
 import { type BookmarksStore } from './types/bookmarks.js'
 
 export const settings = persisted(STORAGE_KEY_SETTINGS, {
+  theme: 'system',
   sortBy: 'updated',
   sidebarPosition: 'left',
   viewMode: 'compact',
   skin: 'skin1',
   isFirstRun: true,
   lang: 'en',
+  headerToolbarSettings: {
+    theme: false,
+    sortBy: true,
+    sidebarPosition: false,
+    viewMode: true,
+    skin: true,
+    addButton: true,
+  },
 })
+
+if (!get(settings).headerToolbarSettings) {
+  const $settings = get(settings)
+  const headerToolbarSettings = {
+    theme: false,
+    sortBy: true,
+    sidebarPosition: false,
+    viewMode: true,
+    skin: true,
+    addButton: true,
+  }
+  settings.set({ ...$settings, headerToolbarSettings })
+}
 
 export const filters = persisted(STORAGE_KEY_FILTERS, [])
 

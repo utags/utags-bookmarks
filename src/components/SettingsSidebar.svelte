@@ -9,6 +9,7 @@
   import { languageOptions } from '../config/languageOptions'
   import ThemeSwitcher from './ThemeSwitcher.svelte'
   import DropdownMenu from './DropdownMenu.svelte'
+  import Switch from './Switch.svelte'
   import CloseIcon from './svg/CloseIcon.svelte'
   import InfoIcon from './svg/InfoIcon.svelte'
   import GitHubIcon from './svg/GitHubIcon.svelte'
@@ -19,6 +20,8 @@
   import ThemeIcon from './svg/ThemeIcon.svelte'
   import FilterListIcon from './svg/FilterListIcon.svelte'
   import LanguageIcon from './svg/LanguageIcon.svelte'
+  import AddIcon from './svg/AddIcon.svelte'
+  import DarkModeIcon from './svg/DarkModeIcon.svelte'
 
   let { showSettings = $bindable() } = $props()
 
@@ -102,14 +105,7 @@
               class="relative flex items-center justify-between px-1 py-1.25">
               <div
                 class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor">
-                  <path
-                    d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
+                <DarkModeIcon />
                 <span>深色主题</span>
               </div>
               <ThemeSwitcher type="button" />
@@ -231,6 +227,74 @@
                   (opt) => opt.value === ($settings.language || 'zh')
                 )?.label || '选择语言'}
                 width="w-50" />
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-group gap-y-6">
+          <h4
+            class="text-md mb-4 font-semibold text-gray-900 dark:text-gray-100">
+            工具栏显示设置
+          </h4>
+
+          <!-- 新增Header工具栏设置 -->
+          <div class="gap-y-4">
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <DarkModeIcon />
+                <span>深色主题按钮</span>
+              </div>
+              <Switch bind:checked={$settings.headerToolbarSettings.theme} />
+            </div>
+
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <ThemeIcon />
+                <span>主题风格按钮</span>
+              </div>
+              <Switch bind:checked={$settings.headerToolbarSettings.skin} />
+            </div>
+
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <ViewModeIcon />
+                <span>视图模式按钮</span>
+              </div>
+              <Switch bind:checked={$settings.headerToolbarSettings.viewMode} />
+            </div>
+
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <SortIcon />
+                <span>排序方式按钮</span>
+              </div>
+              <Switch bind:checked={$settings.headerToolbarSettings.sortBy} />
+            </div>
+
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <FilterListIcon />
+                <span>筛选栏位置按钮</span>
+              </div>
+              <Switch
+                bind:checked={
+                  $settings.headerToolbarSettings.sidebarPosition
+                } />
+            </div>
+
+            <div class="flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <AddIcon />
+                <span>添加操作按钮</span>
+              </div>
+              <Switch
+                bind:checked={$settings.headerToolbarSettings.addButton} />
             </div>
           </div>
         </div>
