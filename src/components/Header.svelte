@@ -9,6 +9,7 @@
   import SortIcon from './svg/SortIcon.svelte'
   import ViewModeIcon from './svg/ViewModeIcon.svelte'
   import SettingsIcon from './svg/SettingsIcon.svelte'
+  import { appConfig } from '../config/appConfig'
 
   let {
     collapsed = false,
@@ -23,12 +24,16 @@
 </script>
 
 <div
-  class="header fixed top-0 right-0 left-0 z-50 flex h-14 items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-4 shadow-sm dark:bg-black">
+  class="header fixed top-0 right-0 left-0 z-50 flex h-12 items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-5 shadow-xs dark:bg-black">
   <!-- 桌面端导航 -->
   <div class="hidden md:flex md:items-center md:gap-6">
-    <span
-      class="logo-text bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-xl font-bold text-transparent"
-      >UTags</span>
+    <a href="/" class="flex items-center gap-2 hover:opacity-80">
+      <img src="/logo.svg" alt="UTags Logo" class="h-8 w-8" />
+      <span
+        class="logo-text text-xl font-bold text-gray-800 dark:text-gray-200">
+        {appConfig.title}
+      </span>
+    </a>
   </div>
 
   <!-- 移动端汉堡菜单 -->
@@ -131,7 +136,7 @@
         onSelect={(value) => ($settings.viewMode = value)} />
     </div>
 
-    <div class="flex hidden items-center gap-2">
+    <div class="flex items-center gap-2">
       <span class="text-sm text-gray-700 dark:text-gray-200">主题: </span>
       <select
         class="rounded-md bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"

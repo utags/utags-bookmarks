@@ -400,7 +400,7 @@
     max-width: 100%;
     height: 100vh;
     margin: 0 auto;
-    padding: 57px 20px 0;
+    padding: 49px 20px 0;
     position: relative;
     overflow: hidden;
     /* background-color: white; */
