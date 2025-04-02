@@ -11,5 +11,8 @@ module.exports = {
   bracketSpacing: true,
   bracketSameLine: true,
   plugins: ['prettier-plugin-svelte', 'prettier-plugin-tailwindcss'],
-  overrides: [{ files: '*.svelte', options: { parser: 'svelte' } }],
+  overrides: [
+    { files: '*.svelte', options: { parser: 'svelte' } },
+    { files: '*.html', options: { printWidth: 200 } },
+  ],
 }
