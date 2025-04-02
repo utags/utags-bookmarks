@@ -6,6 +6,7 @@
   import { viewModes } from '../config/viewModes'
   import { sortOptions } from '../config/sortOptions'
   import { themeOptions } from '../config/themeOptions'
+  import { languageOptions } from '../config/languageOptions'
   import ThemeSwitcher from './ThemeSwitcher.svelte'
   import DropdownMenu from './DropdownMenu.svelte'
   import CloseIcon from './svg/CloseIcon.svelte'
@@ -17,6 +18,7 @@
   import ViewModeIcon from './svg/ViewModeIcon.svelte'
   import ThemeIcon from './svg/ThemeIcon.svelte'
   import FilterListIcon from './svg/FilterListIcon.svelte'
+  import LanguageIcon from './svg/LanguageIcon.svelte'
 
   let { showSettings = $bindable() } = $props()
 
@@ -53,6 +55,7 @@
   let themeOpen = $state(false)
   let viewModeOpen = $state(false)
   let sortByOpen = $state(false)
+  let languageOpen = $state(false)
 </script>
 
 {#if showSettings}
@@ -193,7 +196,7 @@
                     bind:group={$settings.sidebarPosition} />
                   <span
                     class="block cursor-pointer rounded-md px-4 py-1.5 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
-                    左侧
+                    左
                   </span>
                 </label>
                 <label class="flex-1">
@@ -204,10 +207,30 @@
                     bind:group={$settings.sidebarPosition} />
                   <span
                     class="block cursor-pointer rounded-md px-4 py-1.5 text-center text-sm transition-colors peer-checked:bg-white peer-checked:text-gray-800 dark:peer-checked:bg-gray-600 dark:peer-checked:text-gray-100">
-                    右侧
+                    右
                   </span>
                 </label>
               </div>
+            </div>
+          </div>
+
+          <div class="gap-y-4">
+            <div class="relative flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <LanguageIcon />
+                <span>界面语言</span>
+              </div>
+              <DropdownMenu
+                bind:open={languageOpen}
+                items={languageOptions}
+                selectedValue={$settings.language || 'zh'}
+                onSelect={(value) => ($settings.language = value)}
+                showButton={true}
+                buttonLabel={languageOptions.find(
+                  (opt) => opt.value === ($settings.language || 'zh')
+                )?.label || '选择语言'}
+                width="w-50" />
             </div>
           </div>
         </div>
