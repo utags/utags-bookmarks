@@ -1,8 +1,16 @@
 <script>
   import { onMount } from 'svelte'
   import { settings } from '../stores.ts'
+  import DropdownMenu from './DropdownMenu.svelte'
   let { type = '' } = $props()
   let theme = $state($settings.theme || 'system')
+  let themeOpen = $state(false)
+
+  const themeOptions = [
+    { value: 'system', label: 'System' },
+    { value: 'light', label: 'Light' },
+    { value: 'dark', label: 'Dark' },
+  ]
 
   $effect(() => {
     // 同步多个窗口的状态
@@ -47,7 +55,7 @@
     id="headlessui-radiogroup-:Rcaulb:"
     role="radiogroup">
     <button
-      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
+      class="rounded-full p-1.5 *:size-7 hover:bg-gray-200 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:hover:bg-gray-500 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
       aria-label="System theme"
       id="headlessui-radio-:Rdcaulb:"
       role="radio"
@@ -72,7 +80,7 @@
         ></svg
       ></button
     ><button
-      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
+      class="rounded-full p-1.5 *:size-7 hover:bg-gray-200 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:hover:bg-gray-500 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
       aria-label="Light theme"
       id="headlessui-radio-:Rlcaulb:"
       role="radio"
@@ -113,7 +121,7 @@
         ></svg
       ></button
     ><button
-      class="rounded-full p-1.5 *:size-7 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
+      class="rounded-full p-1.5 *:size-7 hover:bg-gray-200 data-checked:bg-white data-checked:ring data-checked:inset-ring data-checked:ring-gray-950/10 data-checked:inset-ring-white/10 sm:p-0 dark:hover:bg-gray-500 dark:data-checked:bg-gray-800 dark:data-checked:text-white dark:data-checked:ring-transparent"
       aria-label="Dark theme"
       id="headlessui-radio-:Rtcaulb:"
       role="radio"
@@ -145,11 +153,13 @@
       ></button>
   </div>
 {:else}
-  <select
-    class="rounded-md bg-transparent px-3 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-    bind:value={theme}>
-    <option value="system">系统默认</option>
-    <option value="light">浅色</option>
-    <option value="dark">深色</option>
-  </select>
+  <DropdownMenu
+    bind:open={themeOpen}
+    items={themeOptions}
+    selectedValue={theme}
+    onSelect={(value) => (theme = value)}
+    showButton={true}
+    buttonLabel={themeOptions.find((opt) => opt.value === theme)?.label ||
+      '选择主题'}
+    width="w-32" />
 {/if}

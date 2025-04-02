@@ -1,14 +1,21 @@
 <script>
   import { onMount } from 'svelte'
-  import ThemeSwitcher from './ThemeSwitcher.svelte'
   import { $ as _$ } from 'browser-extension-utils'
   import { initFocusTrap } from 'focus-trap-lite'
   import { settings, importData, exportData, clearAll } from '../stores.ts'
+  import { viewModes } from '../config/viewModes'
+  import { sortOptions } from '../config/sortOptions'
+  import { themeOptions } from '../config/themeOptions'
+  import ThemeSwitcher from './ThemeSwitcher.svelte'
+  import DropdownMenu from './DropdownMenu.svelte'
   import CloseIcon from './svg/CloseIcon.svelte'
   import InfoIcon from './svg/InfoIcon.svelte'
   import GitHubIcon from './svg/GitHubIcon.svelte'
   import IssueIcon from './svg/IssueIcon.svelte'
   import RoadmapIcon from './svg/RoadmapIcon.svelte'
+  import SortIcon from './svg/SortIcon.svelte'
+  import ViewModeIcon from './svg/ViewModeIcon.svelte'
+  import ThemeIcon from './svg/ThemeIcon.svelte'
 
   let { showSettings = $bindable() } = $props()
 
@@ -41,6 +48,10 @@
       })
     }, 10)
   })
+
+  let themeOpen = $state(false)
+  let viewModeOpen = $state(false)
+  let sortByOpen = $state(false)
 </script>
 
 {#if showSettings}
@@ -83,11 +94,86 @@
             界面设置
           </h3>
           <div class="gap-y-4">
-            <div class="flex items-center justify-between px-1 py-1.5">
-              <span class="text-gray-700 dark:text-gray-300">主题</span>
+            <div class="relative flex items-center justify-between px-1 py-1.25">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor">
+                  <path
+                    d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                </svg>
+                <span>深色主题</span>
+              </div>
               <ThemeSwitcher type="button" />
             </div>
           </div>
+
+          <div class="gap-y-4">
+            <div class="relative flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <ThemeIcon />
+                <span>主题风格</span>
+              </div>
+              <DropdownMenu
+                bind:open={themeOpen}
+                items={themeOptions}
+                selectedValue={$settings.skin}
+                onSelect={(value) => ($settings.skin = value)}
+                showButton={true}
+                buttonLabel={themeOptions.find(
+                  (opt) => opt.value === $settings.skin
+                )?.label || '选择主题'}
+                width="w-50" />
+            </div>
+          </div>
+
+          <div class="gap-y-4">
+            <div class="relative flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <ViewModeIcon />
+                <span>视图模式</span>
+              </div>
+              <DropdownMenu
+                bind:open={viewModeOpen}
+                items={viewModes}
+                selectedValue={$settings.viewMode}
+                onSelect={(value) => ($settings.viewMode = value)}
+                showButton={true}
+                buttonLabel={viewModes.find(
+                  (opt) => opt.value === $settings.viewMode
+                )?.label || '选择视图模式'}
+                width="w-50" />
+            </div>
+          </div>
+
+          <div class="gap-y-4">
+            <div class="relative flex items-center justify-between px-1 py-1.5">
+              <div
+                class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                <SortIcon />
+                <span>排序方式</span>
+              </div>
+              <DropdownMenu
+                bind:open={sortByOpen}
+                items={sortOptions}
+                selectedValue={$settings.sortBy}
+                onSelect={(value) => {
+                  $settings.sortBy = value
+                  window.dispatchEvent(new CustomEvent('sortByChanged'))
+                }}
+                showButton={true}
+                buttonLabel={sortOptions.find(
+                  (opt) => opt.value === $settings.sortBy
+                )?.label || '选择排序方式'}
+                width="w-50" />
+            </div>
+          </div>
+
           <div class="gap-y-4">
             <div class="flex items-center justify-between px-1 py-1.5">
               <span class="text-gray-700 dark:text-gray-300">筛选栏位置</span>

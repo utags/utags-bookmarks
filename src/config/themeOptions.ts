@@ -4,5 +4,5 @@ export const themeOptions = [
   { value: 'skin3', label: '🧪 主题3' },
   { value: 'skin4', label: '🧪 目前还是实验阶段' },
   { value: 'skin5', label: '🧪 日后会提供各种风格' },
-  { value: 'skin6', label: '🧪 你可以自定义界面' },
+  { value: 'skin6', label: '🧪 提供自定义界面功能' },
 ] as const

@@ -6,7 +6,9 @@
     items,
     selectedValue,
     onSelect,
-    position = 'right-0',
+    showButton = false,
+    buttonLabel = '',
+    position = 'right-0 top-full',
     width = 'w-40',
   } = $props<{
     open?: boolean
@@ -15,6 +17,8 @@
       | readonly { readonly value: string; readonly label: string }[]
     selectedValue: string
     onSelect: (value: string) => void
+    showButton?: boolean
+    buttonLabel?: string
     position?: string
     width?: string
   }>()
@@ -43,12 +47,42 @@
   })
 </script>
 
-{#if open}
-  <div
-    bind:this={menuRef}
-    class={`absolute ${position} z-50 mt-2 ${width} rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800`}
-    role="menu"
-    tabindex="0">
+{#if showButton}
+  <button
+    class="flex items-center gap-1 rounded-md px-3 py-1 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+    aria-label="下拉菜单"
+    onclick={() => {
+      if (!open) {
+        setTimeout(() => {
+          open = true
+        })
+      }
+    }}>
+    <span>{buttonLabel}</span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-4 w-4 transition-transform duration-200"
+      class:rotate-180={open}
+      viewBox="0 0 20 20"
+      fill="currentColor">
+      <path
+        fill-rule="evenodd"
+        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+        clip-rule="evenodd" />
+    </svg>
+  </button>
+{/if}
+
+<div
+  bind:this={menuRef}
+  class={`absolute ${position} z-50 mt-2 ${width} ease origin-top transform rounded-md border border-gray-200 bg-white shadow-lg transition-all duration-200 dark:border-gray-700 dark:bg-gray-800 ${
+    open
+      ? 'scale-y-100 opacity-100'
+      : 'pointer-events-none scale-y-80 opacity-0'
+  }`}
+  role={open ? 'menu' : undefined}
+  tabindex={open ? 0 : undefined}>
+  {#if open}
     {#each items as item}
       <div
         role="menuitemradio"
@@ -85,5 +119,5 @@
         {item.label}
       </div>
     {/each}
-  </div>
-{/if}
+  {/if}
+</div>
