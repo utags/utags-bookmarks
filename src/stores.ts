@@ -13,6 +13,7 @@ export const settings = persisted(STORAGE_KEY_SETTINGS, {
   sortBy: 'updated',
   sidebarPosition: 'left',
   viewMode: 'compact',
+  skin: 'skin1',
   isFirstRun: true,
   lang: 'en',
 })

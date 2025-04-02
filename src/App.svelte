@@ -248,7 +248,7 @@
 </script>
 
 <main class="{$settings.sidebarPosition}-sidebar">
-  <Header bind:showAddModal bind:skin={$settings.skin} />
+  <Header bind:showAddModal />
   <div class="container bg-white dark:bg-black">
     <div class="vertical-seperator-line"></div>
     <div class="aside-area">
