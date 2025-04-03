@@ -99,14 +99,17 @@
     close()
   }
 
+  function reset() {
+    // 重置表单
+    url = title = tags = error = tagError = ''
+  }
+
   function close() {
     show = false
 
     // 因为 onblur 事件发生时会校验，所以需要延迟重置表单
-    setTimeout(() => {
-      // 重置表单
-      url = title = tags = error = tagError = ''
-    })
+    setTimeout(reset)
+    setTimeout(reset, 300)
   }
 
   function handleKeydown(e) {
@@ -145,7 +148,7 @@
           id="url-input"
           type="text"
           bind:value={url}
-          onblur={validateUrl}
+          onblur={() => setTimeout(validateUrl, 200)}
           placeholder="https://example.com"
           class="rounded border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none dark:border-gray-700 dark:text-gray-300 dark:focus:border-blue-600 dark:focus:ring-blue-600 {error
             ? 'border-red-500 ring-red-500'

@@ -13,7 +13,7 @@
   import BookmarkList from './components/BookmarkList.svelte'
   import CompositeFilters from './components/CompositeFilters.svelte'
   import SavedFilters from './components/SavedFilters.svelte'
-  import Statistics from './components/Statistics.svelte'
+  import Toolbar from './components/Toolbar.svelte'
   import { settings, bookmarks } from './stores.ts'
 
   const console = new Console({
@@ -197,11 +197,10 @@
   })
 
   const stats = $derived({
-    totalBookmarks: filteredBookmarks.length,
-    selectedTagsCount: new Set(
-      filteredBookmarks.flatMap(([_, entry]) => entry.tags)
-    ).size,
-    selectedDomainsCount: new Set(
+    bookmarksCount: filteredBookmarks.length,
+    tagsCount: new Set(filteredBookmarks.flatMap(([_, entry]) => entry.tags))
+      .size,
+    domainsCount: new Set(
       filteredBookmarks.map(([url, _]) => new URL(url).hostname)
     ).size,
   })
@@ -245,10 +244,25 @@
   $effect(() => {
     document.documentElement.dataset.theme = $settings.skin || 'skin1'
   })
+
+  window.addEventListener('ondblclickHeader', (e) => {
+    // 自定义双击处理逻辑
+    console.log('Header 被双击了，执行自定义操作')
+    // add bookmark
+    // scroll to top
+    // start sync
+    // start dino game
+    // none
+    setTimeout(() => {
+      showAddModal = true
+    }, 100)
+  })
 </script>
 
-<main class="{$settings.sidebarPosition}-sidebar">
+<main
+  class="{$settings.sidebarPosition}-sidebar flex h-[100vh] flex-col overflow-hidden">
   <Header bind:showAddModal />
+  <Toolbar {stats} />
   <div class="container bg-white dark:bg-black">
     <div class="vertical-seperator-line"></div>
     <div class="aside-area">
@@ -281,15 +295,6 @@
     </div>
     <div class="vertical-seperator-line"></div>
     <div class="content-area flex flex-col">
-      <div
-        style="flex-wrap: wrap"
-        class="toolbar mb-6 flex items-center justify-between rounded-lg border border-(color:--seperator-line-color) bg-white/90 px-4 py-3 shadow-sm backdrop-blur-sm dark:bg-black/90">
-        <Statistics
-          totalBookmarks={stats.totalBookmarks}
-          selectedTagsCount={stats.selectedTagsCount}
-          selectedDomainsCount={stats.selectedDomainsCount} />
-      </div>
-
       {#if importProgress.total > 0}
         <div class="import-progress" out:fade={{ duration: 1000 }}>
           导入进度: {importProgress.current}/{importProgress.total}
@@ -387,10 +392,6 @@
     --seperator-line-color: #364153;
   }
 
-  main {
-    /* background-color: var(--main-background-color); */
-  }
-
   .container {
     display: flex;
     flex-direction: var(--container-flex-direction);
@@ -398,9 +399,10 @@
     gap: 20px;
     /* max-width: min(calc(100vw - 100px), 1842px); */
     max-width: 100%;
-    height: 100vh;
+    /* height: calc(100vh - 47px); */
+    /* height: 100%; */
     margin: 0 auto;
-    padding: 49px 20px 0;
+    padding: 0 20px 0;
     position: relative;
     overflow: hidden;
     /* background-color: white; */
@@ -445,7 +447,6 @@
   }
 
   .toolbar {
-    display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
@@ -455,7 +456,7 @@
   }
 
   .bookmark-list {
-    height: calc(100% - 198px);
+    height: calc(100% - 8px);
     overflow-y: auto;
     margin-left: 2px;
   }

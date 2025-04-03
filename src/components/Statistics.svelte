@@ -1,41 +1,27 @@
 <script>
-  let {
-    totalBookmarks = 0,
-    selectedTagsCount = 0,
-    selectedDomainsCount = 0,
-  } = $props()
+  import BookmarkIcon from './svg/BookmarkIcon.svelte'
+  import TagIcon from './svg/TagIcon.svelte'
+  import DomainIcon from './svg/DomainIcon.svelte'
+
+  let { bookmarksCount = 0, tagsCount = 0, domainsCount = 0 } = $props()
 </script>
 
-<div class="flex gap-4 px-4 py-3">
-  <div class="flex items-center gap-2">
-    <span class="flex items-center text-lg text-blue-500">🔖</span>
-    <div class="flex flex-col justify-center">
-      <span class="text-xs font-medium text-gray-500 dark:text-gray-300"
-        >书签总数</span>
-      <span class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        {totalBookmarks}</span>
-    </div>
-  </div>
-  <div class="my-auto h-full w-px self-stretch bg-gray-200 dark:bg-gray-700">
-  </div>
-  <div class="flex items-center gap-2">
-    <span class="flex items-center text-lg text-green-500">🏷️</span>
-    <div class="flex flex-col justify-center">
-      <span class="text-xs font-medium text-gray-500 dark:text-gray-300"
-        >使用标签</span>
-      <span class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        {selectedTagsCount}</span>
-    </div>
-  </div>
-  <div class="my-auto h-full w-px self-stretch bg-gray-200 dark:bg-gray-700">
-  </div>
-  <div class="flex items-center gap-2">
-    <span class="flex items-center text-lg text-purple-500">🌐</span>
-    <div class="flex flex-col justify-center">
-      <span class="text-xs font-medium text-gray-500 dark:text-gray-300"
-        >来源域名</span>
-      <span class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        {selectedDomainsCount}</span>
-    </div>
-  </div>
+<div class="flex items-center gap-3 text-sm">
+  <span class="flex items-center gap-1 text-blue-500">
+    <BookmarkIcon />
+    <span class="font-medium text-gray-700 dark:text-gray-300"
+      >{bookmarksCount}</span>
+  </span>
+  <span class="text-gray-300 dark:text-gray-600">|</span>
+  <span class="flex items-center gap-1 text-green-500">
+    <TagIcon />
+    <span class="font-medium text-gray-700 dark:text-gray-300"
+      >{tagsCount}</span>
+  </span>
+  <span class="text-gray-300 dark:text-gray-600">|</span>
+  <span class="flex items-center gap-1 text-purple-500">
+    <DomainIcon />
+    <span class="font-medium text-gray-700 dark:text-gray-300"
+      >{domainsCount}</span>
+  </span>
 </div>

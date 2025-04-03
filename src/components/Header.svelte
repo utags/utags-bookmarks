@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { hasClass } from 'browser-extension-utils'
   import { settings } from '../stores'
   import { appConfig } from '../config/appConfig'
   import { viewModes } from '../config/viewModes'
@@ -24,7 +25,13 @@
 </script>
 
 <div
-  class="header fixed top-0 right-0 left-0 z-50 flex h-12 items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-5 shadow-xs dark:bg-black">
+  class="header z-50 flex h-11.75 flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-5 dark:bg-black"
+  role="banner"
+  ondblclick={(event) => {
+    if (hasClass(event.target as HTMLElement, 'header')) {
+      window.dispatchEvent(new CustomEvent('ondblclickHeader'))
+    }
+  }}>
   <!-- 桌面端导航 -->
   <div class="hidden md:flex md:items-center md:gap-6">
     <a href="/" class="flex items-center gap-2 hover:opacity-80">
