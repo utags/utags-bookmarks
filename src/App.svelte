@@ -159,7 +159,7 @@
     }
     timeoutId = setTimeout(() => {
       updateFilteredBookmarks()
-    }, 100)
+    }, 1)
 
     const originalBookmarksLength = originalBookmarks.length
     const filteredBookmarks1Length = filteredBookmarks1.length
