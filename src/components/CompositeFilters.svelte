@@ -311,23 +311,23 @@
   <div class="filter-controls flex h-full flex-col gap-4">
     {#if tagCounts && tagCounts.size}
       <div
-        class="filter-group filter-group-tags relative overflow-y-auto"
+        class="filter-group filter-group-tags relative overflow-y-auto pr-2 flex flex-col gap-1"
         data-showOnlySelectedTags={showOnlySelectedTags ? '' : null}>
         <h4
-          class="sticky top-0 m-0 flex items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+          class="sticky top-0 m-0 flex flex-none items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
           <span>标签筛选</span>
           <div class="flex items-center gap-2">
             {#if selectedTags.size > 0}
               <button
                 class="flex h-5 w-5 items-center justify-center rounded-full {showOnlySelectedTags
-                  ? 'bg-blue-500'
-                  : 'bg-gray-500'} text-xs font-medium text-white"
+                  ? 'bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
+                  : 'bg-gray-500 hover:bg-gray-700 dark:hover:bg-gray-600'} text-xs font-medium text-white transition-colors duration-200 transform hover:scale-105"
                 onclick={() => (showOnlySelectedTags = !showOnlySelectedTags)}>
                 {selectedTags.size}
               </button>
             {/if}
             <button
-              class="mr-2 flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+              class="flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
               title="切换单选/多选模式"
               onclick={() => (multiSelectTagsMode = !multiSelectTagsMode)}>
               {#if multiSelectTagsMode}
@@ -372,7 +372,7 @@
 
     {#if domainCounts && domainCounts.size}
       <div
-        class="filter-group filter-group-domains relative overflow-y-auto"
+        class="filter-group filter-group-domains relative overflow-y-auto pr-2 flex flex-col gap-1"
         data-showOnlySelectedDomains={showOnlySelectedDomains ? '' : null}>
         <h4
           class="sticky top-0 m-0 flex items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
@@ -381,15 +381,15 @@
             {#if selectedDomains.size > 0}
               <button
                 class="flex h-5 w-5 items-center justify-center rounded-full {showOnlySelectedDomains
-                  ? 'bg-blue-500'
-                  : 'bg-gray-500'} text-xs font-medium text-white"
+                  ? 'bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
+                  : 'bg-gray-500 hover:bg-gray-700 dark:hover:bg-gray-600'} text-xs font-medium text-white transition-colors duration-200 transform hover:scale-105"
                 onclick={() =>
                   (showOnlySelectedDomains = !showOnlySelectedDomains)}>
                 {selectedDomains.size}
               </button>
             {/if}
             <button
-              class="mr-2 flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+              class="flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
               title="切换域名单选/多选模式"
               onclick={() =>
                 (multiSelectDomainsMode = !multiSelectDomainsMode)}>

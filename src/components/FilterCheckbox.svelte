@@ -5,7 +5,9 @@
 <label
   data-key={value}
   data-checked={checked ? '' : null}
-  class="flex items-center gap-2 truncate rounded-md px-1 py-1.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
+  class="flex flex-none items-center gap-2 truncate rounded-md px-1 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 select-none {checked
+    ? 'bg-blue-50 dark:bg-gray-700/60'
+    : ''}">
   <input type="checkbox" class="peer hidden" {checked} {onchange} />
   <div
     class="relative h-3.25 w-3.25 shrink-0 rounded-xs border border-gray-300 bg-white peer-checked:border-blue-500 peer-checked:text-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:peer-checked:border-blue-400 dark:peer-checked:text-blue-400">
@@ -29,6 +31,6 @@
       </svg>
     {/if}
   </div>
-  <span class="truncate">{value}</span>
-  <span class="text-xs font-medium text-gray-400">{count}</span>
+  <span class="flex-1 truncate">{value}</span>
+  <span class="ml-auto text-xs font-medium text-gray-400">{count}</span>
 </label>
