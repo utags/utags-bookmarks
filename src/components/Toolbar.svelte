@@ -135,7 +135,7 @@
 </script>
 
 <div
-  class="toolbar z-40 min-h-11 flex flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white/95 px-5 shadow-xs backdrop-blur-sm dark:bg-gray-900/95">
+  class="toolbar z-40 flex min-h-11 flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white/95 px-5 shadow-xs backdrop-blur-sm dark:bg-gray-900/95">
   <div
     class="left-tools flex flex-none items-center gap-2 border-r border-(color:--seperator-line-color) py-1">
     <!-- 左侧工具按钮区域 -->

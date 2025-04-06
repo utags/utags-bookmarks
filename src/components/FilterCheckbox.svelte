@@ -5,7 +5,7 @@
 <label
   data-key={value}
   data-checked={checked ? '' : null}
-  class="flex flex-none items-center gap-2 truncate rounded-md px-1 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 select-none {checked
+  class="flex flex-none items-center gap-2 truncate rounded-md px-1 py-1 text-sm text-gray-700 select-none hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800 {checked
     ? 'bg-blue-50 dark:bg-gray-700/60'
     : ''}">
   <input type="checkbox" class="peer hidden" {checked} {onchange} />

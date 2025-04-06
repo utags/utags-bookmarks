@@ -311,7 +311,7 @@
   <div class="filter-controls flex h-full flex-col gap-4">
     {#if tagCounts && tagCounts.size}
       <div
-        class="filter-group filter-group-tags relative overflow-y-auto pr-2 flex flex-col gap-1"
+        class="filter-group filter-group-tags relative flex flex-col gap-1 overflow-y-auto pr-2"
         data-showOnlySelectedTags={showOnlySelectedTags ? '' : null}>
         <h4
           class="sticky top-0 m-0 flex flex-none items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
@@ -321,7 +321,7 @@
               <button
                 class="flex h-5 w-5 items-center justify-center rounded-full {showOnlySelectedTags
                   ? 'bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
-                  : 'bg-gray-500 hover:bg-gray-700 dark:hover:bg-gray-600'} text-xs font-medium text-white transition-colors duration-200 transform hover:scale-105"
+                  : 'bg-gray-500 hover:bg-gray-700 dark:hover:bg-gray-600'} transform text-xs font-medium text-white transition-colors duration-200 hover:scale-105"
                 onclick={() => (showOnlySelectedTags = !showOnlySelectedTags)}>
                 {selectedTags.size}
               </button>
@@ -372,7 +372,7 @@
 
     {#if domainCounts && domainCounts.size}
       <div
-        class="filter-group filter-group-domains relative overflow-y-auto pr-2 flex flex-col gap-1"
+        class="filter-group filter-group-domains relative flex flex-col gap-1 overflow-y-auto pr-2"
         data-showOnlySelectedDomains={showOnlySelectedDomains ? '' : null}>
         <h4
           class="sticky top-0 m-0 flex items-center justify-between border-b border-gray-100 bg-white py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
@@ -382,7 +382,7 @@
               <button
                 class="flex h-5 w-5 items-center justify-center rounded-full {showOnlySelectedDomains
                   ? 'bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
-                  : 'bg-gray-500 hover:bg-gray-700 dark:hover:bg-gray-600'} text-xs font-medium text-white transition-colors duration-200 transform hover:scale-105"
+                  : 'bg-gray-500 hover:bg-gray-700 dark:hover:bg-gray-600'} transform text-xs font-medium text-white transition-colors duration-200 hover:scale-105"
                 onclick={() =>
                   (showOnlySelectedDomains = !showOnlySelectedDomains)}>
                 {selectedDomains.size}
