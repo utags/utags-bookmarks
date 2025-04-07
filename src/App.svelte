@@ -9,10 +9,11 @@
   import { cleanFilterString } from './utils/index.js'
   import { HASH_DELIMITER } from './constants.js'
   import Header from './components/Header.svelte'
+  import NavigationSidebar from './components/NavigationSidebar.svelte'
   import AddBookmark from './components/AddBookmark.svelte'
   import BookmarkList from './components/BookmarkList.svelte'
   import CompositeFilters from './components/CompositeFilters.svelte'
-  import SavedFilters from './components/SavedFilters.svelte'
+
   import Toolbar from './components/Toolbar.svelte'
   import { settings, bookmarks } from './stores.ts'
 
@@ -262,12 +263,11 @@
 <main
   class="{$settings.sidebarPosition}-sidebar flex h-[100vh] flex-col overflow-hidden">
   <Header bind:showAddModal />
-  <Toolbar {stats} />
+  <!-- <Toolbar {stats} /> -->
   <div class="container bg-white dark:bg-black">
+    <NavigationSidebar />
     <div class="vertical-seperator-line"></div>
     <div class="aside-area">
-      <SavedFilters />
-
       <CompositeFilters
         level="1"
         paused={importProgress.total > 0}

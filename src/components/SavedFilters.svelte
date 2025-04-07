@@ -1,4 +1,15 @@
 <script>
+  import {
+    ChevronDown,
+    ChevronRight,
+    Bookmark,
+    Tag,
+    List,
+    Clock,
+    Star,
+    Globe,
+    Folder,
+  } from 'lucide-svelte'
   import Modal from './Modal.svelte'
   import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
   import { filters } from '../stores.js'
@@ -109,106 +120,136 @@
       saveFilter()
     })
   }
+  // 在脚本部分添加
+  let filtersOpen = $state(true)
+
+  function toggleFilters() {
+    filtersOpen = !filtersOpen
+  }
 </script>
 
 <div class="saved-filters">
-  <div class="mb-4 space-y-3">
-    <div class="flex items-center justify-between pb-2">
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-        筛选器收藏夹
-      </h2>
-      <button
-        class="flex items-center justify-center rounded-lg p-2 text-indigo-600
-               transition-colors hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-gray-700"
-        aria-label="新建筛选条件"
-        onclick={showAddModal}>
-        <svg
-          class="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
+  <div class="group">
+    <div
+      class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+      onclick={() => toggleFilters()}
+      onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleFilters()}
+      role="button"
+      tabindex="0">
+      <span class="h-5 w-5">
+        <Bookmark size={20} />
+      </span>
+      <span class="flex-1 text-left">筛选器收藏夹</span>
+      <div class="relative flex-none">
+        <button
+          class="absolute top-1/2 right-0 flex -translate-y-1/2 items-center justify-center rounded-lg p-1.5 text-indigo-600
+                 transition-colors hover:bg-indigo-100 dark:text-indigo-400 dark:hover:bg-gray-700"
+          aria-label="新建筛选条件"
+          onclick={(e) => {
+            e.stopPropagation()
+            showAddModal()
+          }}>
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      </div>
+      {#if filtersOpen}
+        <ChevronDown size={16} />
+      {:else}
+        <ChevronRight size={16} />
+      {/if}
     </div>
   </div>
 
-  <ul class="max-h-[calc(100%-76px)] space-y-2 overflow-y-auto">
-    {#each $filters as filter}
-      <li
-        class="group flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2
-               transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
-        <button
-          onclick={() => applyFilter(filter)}
-          class="truncate text-sm text-gray-600 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400">
-          {filter.name}
-        </button>
-        {#if filter.description}
-          <div class="mt-1 text-xs text-gray-400 dark:text-gray-400">
-            {filter.description}
+  {#if filtersOpen}
+    <ul class="space-y-1">
+      {#each $filters as filter}
+        <li class="group pr-2">
+          <div class="ml-3 flex items-center justify-between">
+            <button
+              onclick={() => applyFilter(filter)}
+              class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
+              <span class="h-4 w-4">
+                <Folder size={16} />
+              </span>
+              <span class="flex-1 truncate text-left">{filter.name}</span>
+            </button>
+
+            <div class="relative flex items-center gap-1">
+              <button
+                class="rounded-md p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                onclick={(e) => {
+                  e.stopPropagation()
+                  activeMenuId = activeMenuId === filter.id ? null : filter.id
+                }}
+                aria-label="更多操作">
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 5v.01M12 12v.01M12 19v.01" />
+                </svg>
+              </button>
+              {#if activeMenuId === filter.id}
+                <div
+                  data-menu-id={filter.id}
+                  class="absolute top-full right-0 z-50 w-32 origin-top-right rounded-md border border-gray-200 bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800"
+                  onclick={(event) => {
+                    event.stopPropagation()
+                  }}>
+                  <div class="py-1">
+                    <button
+                      onclick={() => {
+                        activeMenuId = null
+                        showModal = false
+                        filterName = filter.name
+                        description = filter.description
+                        currentFilterId = filter.id
+                        isEditing = true
+                        setTimeout(() => (showModal = true))
+                      }}
+                      class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+                      编辑
+                    </button>
+                    <button
+                      onclick={() => {
+                        if (confirm('确认要删除此筛选器收藏吗？')) {
+                          deleteFilter(filter.id)
+                        }
+                      }}
+                      class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700">
+                      删除
+                    </button>
+                  </div>
+                </div>
+              {/if}
+            </div>
           </div>
-        {/if}
-        <div class="relative flex items-center gap-1">
-          <button
-            class="rounded-md p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
-            onclick={(e) => {
-              e.stopPropagation()
-              activeMenuId = activeMenuId === filter.id ? null : filter.id
-            }}
-            aria-label="更多操作">
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 5v.01M12 12v.01M12 19v.01" />
-            </svg>
-          </button>
-          {#if activeMenuId === filter.id}
+
+          {#if filter.description}
             <div
-              data-menu-id={filter.id}
-              class="absolute top-full right-0 z-50 w-32 origin-top-right rounded-md border border-gray-200 bg-white focus:outline-none dark:border-gray-700 dark:bg-gray-800"
-              onclick={(event) => {
-                event.stopPropagation()
-              }}>
-              <div class="py-1">
-                <button
-                  onclick={() => {
-                    activeMenuId = null
-                    showModal = false
-                    filterName = filter.name
-                    description = filter.description
-                    currentFilterId = filter.id
-                    isEditing = true
-                    setTimeout(() => (showModal = true))
-                  }}
-                  class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
-                  编辑
-                </button>
-                <button
-                  onclick={() => {
-                    if (confirm('确认要删除此筛选器收藏吗？')) {
-                      deleteFilter(filter.id)
-                    }
-                  }}
-                  class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700">
-                  删除
-                </button>
-              </div>
+              class="mt-1 ml-9 truncate text-xs text-gray-400 dark:text-gray-400">
+              {filter.description}
             </div>
           {/if}
-        </div>
-      </li>
-    {/each}
-  </ul>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </div>
 
 <Modal
@@ -262,7 +303,7 @@
 </Modal>
 
 <style>
-  .saved-filters {
+  /* .saved-filters {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
     border-right: var(--sidebar-border-right);
@@ -272,5 +313,9 @@
     overflow: hidden;
     scroll-snap-align: var(--sidebar-scroll-snap-align);
     padding-top: var(--sidebar-padding-top, 20px);
-  }
+  } */
+
+  /* .saved-filters {
+    padding: 0.5rem 0;
+  } */
 </style>

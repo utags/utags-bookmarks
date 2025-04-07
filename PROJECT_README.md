@@ -34,6 +34,7 @@ UTags 是一个现代化的书签管理工具，专注于：
 | TypeScript   | 4.9+ | 类型检查             |
 | Tailwind CSS | 3.x  | UI 样式系统          |
 | Vite         | 4.x  | 构建工具             |
+| Lucide       | 最新 | 图标系统             |
 
 ### 状态管理
 
@@ -69,8 +70,21 @@ UTags 是一个现代化的书签管理工具，专注于：
 
 <style>
   /* 仅当Tailwind无法满足时才添加 */
-  .custom-style { ... }
+  .custom-style {
+    /* ... */
+  }
 </style>
+```
+
+```svelte
+<script>
+  // 事件处理使用onclick而非on:click
+  function handleClick() {
+    console.log('Button clicked')
+  }
+</script>
+
+<button onclick={handleClick}> Click me </button>
 ```
 
 ### 样式指南
@@ -81,6 +95,29 @@ UTags 是一个现代化的书签管理工具，专注于：
    - 主色：blue-500
    - 辅助色：green-500/purple-500
    - 暗黑模式：dark:前缀
+
+### 图标系统
+
+- **Lucide**：现代化、轻量级的图标库
+- 特性：
+  - 按需导入，优化打包体积
+  - 支持自定义大小和颜色
+  - 与 Tailwind 样式系统完美集成
+  - 提供丰富的常用图标集合
+
+## 导航项样式规范
+
+1. **标题样式**：
+
+   - 使用 `flex w-full items-center gap-2 rounded-md px-2 py-1.5` 基础布局
+   - 文字样式：`text-sm font-medium text-gray-700 dark:text-gray-200`
+   - 悬停效果：`hover:bg-gray-100 dark:hover:bg-gray-800`
+   - 图标尺寸：主图标 20px，箭头图标 16px
+
+2. **子项样式**：
+   - 内边距：`px-2 py-1.5`
+   - 文字样式：`text-sm text-gray-600 dark:text-gray-300`
+   - 图标尺寸：16px
 
 ## 项目结构详解
 
