@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   import {
     ChevronDown,
     ChevronRight,
@@ -19,6 +20,14 @@
   let validationError = $state(false)
   let filterName = $state('')
   let description = $state('')
+
+  onMount(() => {
+    window.addEventListener('clickShowSaveFilterModal', showAddModal)
+    return () => {
+      window.removeEventListener('clickShowSaveFilterModal', showAddModal)
+    }
+  })
+
   $effect(() => {
     if (showModal) {
       description = isEditing ? description : getSubtitle()
@@ -105,10 +114,6 @@
       currentFilterId = null
     })
   }
-
-  window.addEventListener('clickShowSaveFilterModal', () => {
-    showAddModal()
-  })
 
   if ($filters.length === 0) {
     ;[

@@ -5,6 +5,7 @@
     $ as _$,
     addEventListener,
     extendHistoryApi,
+    removeEventListener,
   } from 'browser-extension-utils'
   import Console from 'console-tagger'
   import { cleanFilterString } from './utils/index.js'
@@ -24,10 +25,10 @@
   })
 
   let originalBookmarks = $derived(Object.entries($bookmarks.data))
-  globalThis.addEventListener('bookmarksInitialized', (event) => {
+  const bookmarksInitializedHandler = (event) => {
     console.log('bookmarks initialized')
     originalBookmarks = Object.entries($bookmarks.data)
-  })
+  }
 
   let scrollTop = $state(0)
   let showAddModal = $state(false)
@@ -51,7 +52,7 @@
   let filterStringLevel2 = $state('')
   let filterStringLevel3 = $state('')
 
-  function handleHashChange() {
+  function locationChangeHandler() {
     console.log(
       '>>>>>> location changed',
       globalThis.lastHash !== location.hash,
@@ -93,7 +94,7 @@
     filterComponentsCount = Math.round(asideAreaWidth / compositeFiltersWidth)
   }
 
-  function handleWindowResize() {
+  function windowResizeHandler() {
     const width = globalThis.innerWidth
     const height = globalThis.innerHeight
     console.log(`window resized: ${width}x${height}`)
@@ -104,17 +105,73 @@
   onMount(() => {
     console.log('onMount')
     // 使浏览器支持 locationchange 自定义事件
-    extendHistoryApi()
+    if (!globalThis.locationchange) {
+      globalThis.locationchange = true
+      extendHistoryApi()
+    }
 
-    addEventListener(globalThis, 'locationchange', handleHashChange)
+    addEventListener(globalThis, 'locationchange', locationChangeHandler)
+    addEventListener(globalThis, 'resize', windowResizeHandler)
+    addEventListener(globalThis, 'sortByChanged', updateFilteredBookmarks)
+    addEventListener(
+      globalThis,
+      'filterOutputChange',
+      filterOutputChangeHandler
+    )
+    addEventListener(globalThis, 'ondblclickHeader', ondblclickHeaderHandler)
+    // 监听导入状态变化
+    addEventListener(
+      globalThis,
+      'importProgressUpdated',
+      importProgressUpdatedHandler
+    )
+    addEventListener(globalThis, 'importFinished', importFinishedHandler)
+    addEventListener(
+      globalThis,
+      'bookmarksInitialized',
+      bookmarksInitializedHandler
+    )
+
     // 初始化时触发一次
-    handleHashChange()
-
-    addEventListener(globalThis, 'resize', handleWindowResize)
+    locationChangeHandler()
     updateFilterComponentsCount()
 
     return () => {
-      console.log(`onDestroy`)
+      console.log('onDestroy - cleaning up')
+      // 移除事件监听器
+      removeEventListener(globalThis, 'locationchange', locationChangeHandler)
+      removeEventListener(globalThis, 'resize', windowResizeHandler)
+      removeEventListener(globalThis, 'sortByChanged', updateFilteredBookmarks)
+      removeEventListener(
+        globalThis,
+        'filterOutputChange',
+        filterOutputChangeHandler
+      )
+      removeEventListener(
+        globalThis,
+        'ondblclickHeader',
+        ondblclickHeaderHandler
+      )
+      removeEventListener(
+        globalThis,
+        'importProgressUpdated',
+        importProgressUpdatedHandler
+      )
+      removeEventListener(globalThis, 'importFinished', importFinishedHandler)
+      removeEventListener(
+        globalThis,
+        'bookmarksInitialized',
+        bookmarksInitializedHandler
+      )
+
+      // 清除定时器
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
+
+      // 其他清理逻辑
+      globalThis.lastHash = null
     }
   })
 
@@ -171,7 +228,7 @@
     }, 10)
   }
 
-  addEventListener(globalThis, 'filterOutputChange', (e) => {
+  const filterOutputChangeHandler = (e) => {
     console.log('filterOutputChange', e.detail)
     if (timeoutId) {
       // console.log('filterOutputChange clearTimeout')
@@ -206,11 +263,7 @@
       console.log('clear level 3')
       filteredBookmarks3 = []
     }
-  })
-
-  window.addEventListener('sortByChanged', () => {
-    updateFilteredBookmarks()
-  })
+  }
 
   const stats = $derived({
     bookmarksCount: filteredBookmarks.length,
@@ -233,10 +286,10 @@
   })
 
   // 监听导入状态变化
-  window.addEventListener('importProgressUpdated', (e) => {
+  const importProgressUpdatedHandler = (e) => {
     importProgress = e.detail
-  })
-  window.addEventListener('importFinished', () => {
+  }
+  const importFinishedHandler = () => {
     console.log('importFinished')
     // 显示统计结果
     alert(`
@@ -255,13 +308,13 @@
         newTags: new Set(),
       },
     }
-  })
+  }
 
   $effect(() => {
     document.documentElement.dataset.theme = $settings.skin || 'skin1'
   })
 
-  window.addEventListener('ondblclickHeader', (e) => {
+  const ondblclickHeaderHandler = (e) => {
     // 自定义双击处理逻辑
     console.log('Header 被双击了，执行自定义操作')
     // add bookmark
@@ -272,13 +325,13 @@
     setTimeout(() => {
       showAddModal = true
     }, 100)
-  })
+  }
 </script>
 
 <main
   class="{$settings.sidebarPosition}-sidebar flex h-[100vh] flex-col overflow-hidden">
   <Header bind:showAddModal />
-  <!-- <Toolbar {stats} /> -->
+  <Toolbar {stats} />
   <div class="container bg-white dark:bg-black">
     <NavigationSidebar />
     <div class="aside-area">
