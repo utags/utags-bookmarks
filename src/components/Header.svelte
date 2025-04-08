@@ -25,7 +25,7 @@
 </script>
 
 <div
-  class="header z-50 flex h-11.75 flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-5 dark:bg-black"
+  class="header z-50 flex h-11.75 flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white px-5 dark:bg-black shadow-sm dark:shadow-gray-900/30"
   role="banner"
   ondblclick={(event) => {
     if (hasClass(event.target as HTMLElement, 'header')) {

@@ -383,7 +383,7 @@
         </div>
       {/if}
 
-      <div class="bookmark-list shadow-lg dark:border dark:border-gray-700">
+      <div class="bookmark-list _shadow-lg _dark:border _dark:border-gray-700">
         <BookmarkList
           filteredBookmarks={fullList
             ? filteredBookmarks
@@ -440,6 +440,7 @@
     --sidebar-scroll-snap-align: end;
     --main-background-color: #f6f8fc;
     --shadow-color: white;
+    --content-margin-right: -20px;
   }
 
   .right-sidebar {
@@ -457,6 +458,7 @@
     --sidebar-padding-right: 20px;
     --sidebar-reset-filter-align-self: flex-start;
     --sidebar-scroll-snap-align: start;
+    --content-margin-right: 0px;
   }
 
   :root.dark {
@@ -507,7 +509,7 @@
     border-left: var(--seperator-line);
     box-shadow: 0px -15px 15px 15px var(--shadow-color);
     display: block;
-    z-index: 2;
+    /* z-index: 2; */
     /* order: var(--vertical-seperator-line-order); */
     align-self: var(--vertical-seperator-line-align-self);
   }
@@ -516,7 +518,8 @@
     flex: 1;
     width: calc(100% - var(--aside-area-width) - 20px);
     overflow: hidden;
-    padding-top: 20px;
+    /* padding-top: 20px; */
+    margin-right: var(--content-margin-right);
   }
 
   .toolbar {
@@ -529,9 +532,9 @@
   }
 
   .bookmark-list {
-    height: calc(100% - 8px);
+    height: calc(100% - 0px);
     overflow-y: auto;
-    margin-left: 2px;
+    /* margin-left: 2px; */
   }
 
   :root[data-theme='skin1'] {
