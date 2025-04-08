@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
   import Console from 'console-tagger'
   import { $ as _$ } from 'browser-extension-utils'
@@ -14,7 +15,15 @@
     },
   })
 
-  let { level, input, output = $bindable(), filterString, paused } = $props()
+  let {
+    level,
+    input,
+    output = $bindable(),
+    useNextLevel = $bindable(false),
+    filterString,
+    disabled = false,
+    paused = false,
+  } = $props()
 
   console.log(`component loaded`)
 
@@ -24,11 +33,17 @@
   let selectedDomains = $state(new Set())
   let tagCounts = $state(new Map())
   let domainCounts = $state(new Map())
-  let statesInited = false
   let showOnlySelectedTags = $state(false)
   let showOnlySelectedDomains = $state(false)
   let multiSelectTagsMode = $state(false)
   let multiSelectDomainsMode = $state(false)
+
+  onMount(() => {
+    console.log(`onMount`)
+    return () => {
+      console.log(`onDestroy`)
+    }
+  })
 
   function scrollTagIntoView(tag) {
     const element = _$(
@@ -72,22 +87,22 @@
         scrollDomainIntoView(Array.from(domains)[0])
       }, 5)
     }
+
+    updateUrlHash()
   }
 
   // update url hash
   function updateUrlHash() {
+    if (paused || disabled) {
+      return
+    }
+    console.log('updateUrlHash')
     // hash sample: #tag1,tag2/domain1,domain2/keywod#tag3,tag4/domain3,domain4/keyword2#...
     const filterString = convertToFilterString(
       selectedTags,
       selectedDomains,
       searchKeyword
     )
-
-    // 第一次执行时，selectedTags, selectedDomains, searchKeyword 还是初始化状态，不更新 url hash
-    if (!statesInited) {
-      statesInited = true
-      return
-    }
 
     let newUrlHash
     if (level === '1' && filterString === '') {
@@ -114,15 +129,9 @@
 
     if (location.hash !== newUrlHash) {
       console.log(`new url hash [${newUrlHash}]`)
-      globalThis.currentUrlHash = newUrlHash
       location.hash = newUrlHash
     }
   }
-
-  $effect(() => {
-    console.log(`call updateUrlHash()`)
-    updateUrlHash()
-  })
 
   // 监听 input 变化并更新 tagCounts 和 domainCounts
   $effect(() => {
@@ -199,19 +208,21 @@
   // 监听筛选条件变化并更新 output
   $effect(() => {
     if (paused) {
-      console.log(`paused`)
+      console.log(`paused:`, paused, `disabled:`, disabled)
       return
     }
-    console.log(
-      `current filter:`,
-      `'${searchKeyword}'`,
-      selectedTags,
-      selectedDomains
-    )
 
-    if (searchKeyword || selectedTags.size || selectedDomains.size) {
-      console.log(`=> apply filter`)
-      output = input.filter(([url, entry]) => {
+    if (
+      !disabled &&
+      (searchKeyword || selectedTags.size || selectedDomains.size)
+    ) {
+      console.log(
+        `current filter:`,
+        `'${searchKeyword}'`,
+        selectedTags,
+        selectedDomains
+      )
+      const result = input.filter(([url, entry]) => {
         const lowerKeyword = searchKeyword.trim().toLowerCase()
         const hasKeyword =
           lowerKeyword === '' ||
@@ -229,8 +240,14 @@
 
         return hasKeyword && hasAllTags && hasDomain
       })
+
+      useNextLevel = result.length > 1 && result.length < input.length
+      output = result
     } else {
-      output = [...input]
+      console.log(`current filter: no filter`)
+      // output = [...input]
+      output = input
+      useNextLevel = false
     }
 
     if (selectedTags.size === 0) {
@@ -241,7 +258,9 @@
     }
 
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('filterUpdated'))
+      window.dispatchEvent(
+        new CustomEvent('filterOutputChange', { detail: { level: level } })
+      )
     }, 1)
   })
 
@@ -255,6 +274,7 @@
       // 单选模式
       selectedTags = selectedTags.has(tag) ? new Set() : new Set([tag])
     }
+    updateUrlHash()
   }
 
   function toggleDomain(domain) {
@@ -267,12 +287,21 @@
         ? new Set()
         : new Set([domain])
     }
+    updateUrlHash()
   }
 </script>
 
 <aside
-  class="composite-filters composite-filters-{level} flex flex-col gap-4"
-  out:fade={{ duration: 200 }}>
+  class="composite-filters composite-filters-{level} relative flex flex-col gap-4"
+  out:fade={{ duration: 200 }}
+  inert={disabled}>
+  {#if disabled}
+    <div
+      class="absolute inset-0 z-10 bg-white/50 dark:bg-gray-900/50"
+      aria-hidden="true">
+    </div>
+  {/if}
+
   <div class="flex flex-col gap-2">
     <button
       class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -286,11 +315,18 @@
         type="text"
         placeholder="搜索 URL/标题/标签..."
         class="w-full rounded-md border border-gray-300 bg-transparent py-1.5 pr-8 pl-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-        bind:value={searchKeyword} />
+        oninput={(e) => {
+          searchKeyword = e.target.value.trim()
+          updateUrlHash()
+        }}
+        value={searchKeyword} />
       {#if searchKeyword}
         <button
           class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-gray-100 p-1 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-          onclick={() => (searchKeyword = '')}
+          onclick={() => {
+            searchKeyword = ''
+            updateUrlHash()
+          }}
           aria-label="清除搜索关键词">
           <svg
             class="h-3.5 w-3.5"

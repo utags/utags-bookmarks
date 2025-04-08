@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
   import {
     $ as _$,
@@ -24,7 +25,7 @@
 
   let originalBookmarks = $derived(Object.entries($bookmarks.data))
   globalThis.addEventListener('bookmarksInitialized', (event) => {
-    console.log('bookmarksInitialized')
+    console.log('bookmarks initialized')
     originalBookmarks = Object.entries($bookmarks.data)
   })
 
@@ -34,17 +35,14 @@
   let allDomains = $state(new Set())
   // allTags = new Set(input.flatMap((entry) => entry[1].tags))
   //   allDomains = new Set(input.map((entry) => new URL(entry[0]).hostname))
+  let filterComponentsCount = $state(1)
   let filteredBookmarks1 = $state([])
   let filteredBookmarks2 = $state([])
   let filteredBookmarks3 = $state([])
-  let useLevel2 = $derived(
-    filteredBookmarks1.length &&
-      filteredBookmarks1.length !== originalBookmarks.length
-  )
-  let useLevel3 = $derived(
-    filteredBookmarks2.length &&
-      filteredBookmarks2.length !== filteredBookmarks1.length
-  )
+  let useLevel2 = $state(false)
+  let showLevel2 = $derived(filterComponentsCount >= 2 || useLevel2)
+  let useLevel3 = $state(false)
+  let showLevel3 = $derived(filterComponentsCount >= 3 || useLevel3)
   let timeoutId
   let filteredBookmarks = $state([])
   const maxBookmarksPerPage = 100
@@ -56,10 +54,8 @@
   function handleHashChange() {
     console.log(
       '>>>>>> location changed',
-      globalThis.currentUrlHash === location.hash,
-      globalThis.lastHash === location.hash,
-      location.href,
-      location.hash
+      globalThis.lastHash !== location.hash,
+      location.href
     )
     if (globalThis.lastHash !== location.hash) {
       console.log(
@@ -90,15 +86,37 @@
     }
   }
 
-  if (!globalThis.locationchange) {
-    globalThis.locationchange = true
+  function updateFilterComponentsCount() {
+    const asideAreaWidth = _$('.aside-area').offsetWidth
+    const compositeFiltersWidth = _$('.composite-filters').offsetWidth
+
+    filterComponentsCount = Math.round(asideAreaWidth / compositeFiltersWidth)
+  }
+
+  function handleWindowResize() {
+    const width = globalThis.innerWidth
+    const height = globalThis.innerHeight
+    console.log(`window resized: ${width}x${height}`)
+
+    updateFilterComponentsCount()
+  }
+
+  onMount(() => {
+    console.log('onMount')
     // 使浏览器支持 locationchange 自定义事件
     extendHistoryApi()
 
     addEventListener(globalThis, 'locationchange', handleHashChange)
     // 初始化时触发一次
     handleHashChange()
-  }
+
+    addEventListener(globalThis, 'resize', handleWindowResize)
+    updateFilterComponentsCount()
+
+    return () => {
+      console.log(`onDestroy`)
+    }
+  })
 
   function updateFilteredBookmarks() {
     console.log('!!! updateFilteredBookmarks')
@@ -153,12 +171,15 @@
     }, 10)
   }
 
-  window.addEventListener('filterUpdated', () => {
+  addEventListener(globalThis, 'filterOutputChange', (e) => {
+    console.log('filterOutputChange', e.detail)
     if (timeoutId) {
+      // console.log('filterOutputChange clearTimeout')
       clearTimeout(timeoutId)
       timeoutId = null
     }
     timeoutId = setTimeout(() => {
+      timeoutId = null
       updateFilteredBookmarks()
     }, 1)
 
@@ -167,29 +188,23 @@
     const filteredBookmarks2Length = filteredBookmarks2.length
     const filteredBookmarks3Length = filteredBookmarks3.length
 
-    console.log(
-      'filterUpdated',
-      originalBookmarksLength,
-      filteredBookmarks1Length,
-      filteredBookmarks2Length,
-      filteredBookmarks3Length
-    )
+    // console.log(
+    //   'filterOutputChange',
+    //   originalBookmarksLength,
+    //   filteredBookmarks1Length,
+    //   filteredBookmarks2Length,
+    //   showLevel2,
+    //   filteredBookmarks3Length,
+    //   showLevel3
+    // )
 
-    if (
-      filteredBookmarks1Length === 0 ||
-      filteredBookmarks1Length === originalBookmarksLength
-    ) {
+    if (!showLevel2) {
       console.log('clear level 2, level 3')
       filteredBookmarks2 = []
       filteredBookmarks3 = []
-    } else if (filteredBookmarks1Length > 0) {
-      if (
-        filteredBookmarks2Length === 0 ||
-        filteredBookmarks2Length === filteredBookmarks1Length
-      ) {
-        console.log('clear level 3')
-        filteredBookmarks3 = []
-      }
+    } else if (!showLevel3) {
+      console.log('clear level 3')
+      filteredBookmarks3 = []
     }
   })
 
@@ -266,26 +281,29 @@
   <!-- <Toolbar {stats} /> -->
   <div class="container bg-white dark:bg-black">
     <NavigationSidebar />
-    <div class="vertical-seperator-line"></div>
     <div class="aside-area">
       <CompositeFilters
         level="1"
         paused={importProgress.total > 0}
         filterString={filterStringLevel1}
         input={originalBookmarks}
-        bind:output={filteredBookmarks1} />
+        bind:output={filteredBookmarks1}
+        bind:useNextLevel={useLevel2} />
 
-      {#if useLevel2 && importProgress.total === 0}
+      {#if showLevel2 && importProgress.total === 0}
         <CompositeFilters
           level="2"
+          disabled={!useLevel2}
           paused={importProgress.total > 0}
           filterString={filterStringLevel2}
           input={filteredBookmarks1}
-          bind:output={filteredBookmarks2} />
+          bind:output={filteredBookmarks2}
+          bind:useNextLevel={useLevel3} />
 
-        {#if useLevel3}
+        {#if showLevel3}
           <CompositeFilters
             level="3"
+            disabled={!useLevel3}
             paused={importProgress.total > 0}
             filterString={filterStringLevel3}
             input={filteredBookmarks2}
@@ -353,10 +371,11 @@
     --seperator-line: 1px solid var(--seperator-line-color);
     --container-justify-content: flex-start;
     --container-flex-direction: row;
+    --navigation-sidebar-order: 0;
     --vertical-seperator-line-order: 0;
     --aside-area-order: 0;
     --aside-area-flex-direction: row;
-    --aside-area-margin-left: -20px;
+    --aside-area-margin-left: -21px;
     --aside-area-margin-right: -20px;
     --aside-area-width: calc(var(--sidebar-width) * 2);
     --sidebar-width: max(280px, 15vw);
@@ -373,11 +392,12 @@
   .right-sidebar {
     --container-justify-content: flex-end;
     --container-flex-direction: row-reverse;
+    --navigation-sidebar-order: 1;
     --vertical-seperator-line-order: 1;
     --aside-area-order: 2;
     --aside-area-flex-direction: row-reverse;
-    /* --aside-area-margin-left: -20px;
-    --aside-area-margin-right: 0px; */
+    --aside-area-margin-left: -20px;
+    --aside-area-margin-right: -21px;
     --sidebar-border-left: none;
     --sidebar-border-right: var(--seperator-line);
     --sidebar-padding-left: 20px;

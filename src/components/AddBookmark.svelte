@@ -2,17 +2,7 @@
   import { fade } from 'svelte/transition'
   import { splitTags, trimTitle } from 'utags-utils'
   import { initFocusTrap } from 'focus-trap-lite'
-  import Console from 'console-tagger'
   import { bookmarks, checkBookmarksDataReady } from '../stores.ts'
-  const console = new Console({
-    prefix: 'AddBookmark',
-    color: {
-      line: 'white',
-      background: 'pink',
-    },
-  })
-
-  console.log(`component loaded`)
 
   let { show = $bindable(false) } = $props()
   let modalElement = $state()

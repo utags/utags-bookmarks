@@ -42,7 +42,7 @@
 </script>
 
 <aside
-  class="navigation-sidebar h-full w-[var(--sidebar-width)] overflow-x-hidden overflow-y-auto border-r border-gray-200 bg-white py-4 pr-2 select-none dark:border-gray-700 dark:bg-gray-900">
+  class="navigation-sidebar z-2 h-full w-[var(--sidebar-width)] overflow-x-hidden overflow-y-auto bg-white py-4 pr-2 select-none dark:bg-gray-900">
   <nav class="flex w-[calc(var(--sidebar-width)-11px)] flex-col gap-1">
     {#each navGroups as group, i}
       <div class="group">
@@ -101,6 +101,8 @@
 <style>
   .navigation-sidebar {
     --sidebar-width: 260px;
+    order: var(--navigation-sidebar-order);
+    border-right: var(--seperator-line);
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;

@@ -1,5 +1,6 @@
 import { get } from 'svelte/store'
 import { persisted, type Persisted } from 'svelte-persisted-store'
+import Console from 'console-tagger'
 import { initialBookmarks } from './data/initial-bookmarks.js'
 import { initialBookmarks as initialBookmarksCN } from './data/initial-bookmarks-zh-CN.js'
 import {
@@ -8,6 +9,11 @@ import {
   STORAGE_KEY_FILTERS,
 } from './constants.js'
 import { type BookmarksStore } from './types/bookmarks.js'
+
+const console = new Console({
+  prefix: 'stores',
+  color: { line: 'white', background: 'black' },
+})
 
 export const settings = persisted(STORAGE_KEY_SETTINGS, {
   theme: 'system',
@@ -71,6 +77,7 @@ export let bookmarks: Persisted<BookmarksStore> = persisted(
 
 // 延迟初始化，避免阻塞主线程
 setTimeout(() => {
+  console.log('initalizing bookmarks')
   bookmarks = persisted(STORAGE_KEY_BOOKMARKS, {
     data: {},
     meta: {

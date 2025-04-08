@@ -18,7 +18,6 @@
   })
 
   $effect(() => {
-    console.log('call $effect')
     $settings.theme = theme
     const root = document.documentElement
 
@@ -33,7 +32,6 @@
   })
 
   onMount(() => {
-    console.log('call onMount')
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const systemThemeHandler = () => {
       if (theme === 'system') {
