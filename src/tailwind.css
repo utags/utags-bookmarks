@@ -35,3 +35,10 @@
   --scrollbar-thumb: #475569;
   --scrollbar-thumb-hover: #64748b;
 }
+
+button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}

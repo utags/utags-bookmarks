@@ -3,8 +3,10 @@
   import { fade } from 'svelte/transition'
   import {
     $ as _$,
+    addClass,
     addEventListener,
     extendHistoryApi,
+    removeClass,
     removeEventListener,
   } from 'browser-extension-utils'
   import Console from 'console-tagger'
@@ -212,10 +214,10 @@
       document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
       document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
       const selector = useLevel3
-        ? '.aside-area aside:nth-of-type(3)'
+        ? '.aside-area .composite-filters-3'
         : useLevel2
-          ? '.aside-area aside:nth-of-type(2)'
-          : '.aside-area aside:nth-of-type(1)'
+          ? '.aside-area .composite-filters-2'
+          : '.aside-area .composite-filters-1'
       const lastSidebar = _$(selector)
       console.log(lastSidebar)
       if (lastSidebar) {
@@ -326,43 +328,99 @@
       showAddModal = true
     }, 100)
   }
+
+  let activeFilterLevel = $state(0) // 当前激活的筛选器级别
+  const maxVisibleFilters = $derived(useLevel3 ? 3 : useLevel2 ? 2 : 1) // 最大可见筛选器数量
+
+  function focusFilterLevel(level) {
+    activeFilterLevel = level
+    // // 确保相关筛选器已启用
+    // if (level >= 2) useLevel2 = true
+    // if (level >= 3) useLevel3 = true
+
+    // 滚动到对应筛选器
+    setTimeout(() => {
+      const selector = `.composite-filters-${level}`
+      const filterEl = _$(selector)
+      if (filterEl) {
+        // unset 'scroll-snap-align' while call scrollIntoView to fix Firefox issue
+        addClass(_$('main'), 'onscroll')
+        filterEl.focus()
+        filterEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: $settings.sidebarPosition === 'right' ? 'end' : 'start',
+        })
+        setTimeout(() => {
+          removeClass(_$('main'), 'onscroll')
+        }, 200)
+      }
+    }, 50)
+  }
 </script>
 
 <main
   class="{$settings.sidebarPosition}-sidebar flex h-[100vh] flex-col overflow-hidden">
   <Header bind:showAddModal />
   <Toolbar {stats} />
+
   <div class="container bg-white dark:bg-black">
     <NavigationSidebar />
-    <div class="aside-area">
-      <CompositeFilters
-        level="1"
-        paused={importProgress.total > 0}
-        filterString={filterStringLevel1}
-        input={originalBookmarks}
-        bind:output={filteredBookmarks1}
-        bind:useNextLevel={useLevel2} />
-
-      {#if showLevel2 && importProgress.total === 0}
+    <div class="flex flex-col">
+      <!-- 添加筛选器切换控制栏 -->
+      <div
+        class="filter-switcher border-b border-gray-200 bg-white/90 px-4 py-2 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+        <div class="mx-auto flex items-center justify-end gap-2">
+          {#each [1, 2, 3] as level}
+            <button
+              class={`rounded-md px-3 py-1 text-sm transition-colors ${
+                activeFilterLevel === level && false
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+              } ${level > maxVisibleFilters ? 'cursor-not-allowed opacity-50' : ''}`}
+              onclick={() => focusFilterLevel(level)}
+              disabled={level > maxVisibleFilters}>
+              <span>筛选器</span> #{level}
+            </button>
+          {/each}
+        </div>
+      </div>
+      <div class="aside-area">
         <CompositeFilters
-          level="2"
-          disabled={!useLevel2}
+          level="1"
           paused={importProgress.total > 0}
-          filterString={filterStringLevel2}
-          input={filteredBookmarks1}
-          bind:output={filteredBookmarks2}
-          bind:useNextLevel={useLevel3} />
+          active={activeFilterLevel === 1}
+          filterString={filterStringLevel1}
+          input={originalBookmarks}
+          bind:output={filteredBookmarks1}
+          bind:useNextLevel={useLevel2}
+          onfocus={() => (activeFilterLevel = 1)} />
 
-        {#if showLevel3}
+        {#if showLevel2 && importProgress.total === 0}
           <CompositeFilters
-            level="3"
-            disabled={!useLevel3}
+            level="2"
+            disabled={!useLevel2}
             paused={importProgress.total > 0}
-            filterString={filterStringLevel3}
-            input={filteredBookmarks2}
-            bind:output={filteredBookmarks3} />
+            active={activeFilterLevel === 2}
+            filterString={filterStringLevel2}
+            input={filteredBookmarks1}
+            bind:output={filteredBookmarks2}
+            bind:useNextLevel={useLevel3}
+            onfocus={() => (activeFilterLevel = 2)} />
+
+          {#if showLevel3}
+            <CompositeFilters
+              level="3"
+              disabled={!useLevel3}
+              paused={importProgress.total > 0}
+              active={activeFilterLevel === 3}
+              filterString={filterStringLevel3}
+              input={filteredBookmarks2}
+              bind:output={filteredBookmarks3}
+              onfocus={() => (activeFilterLevel = 3)} />
+          {/if}
         {/if}
-      {/if}
+      </div>
     </div>
     <div class="vertical-seperator-line"></div>
     <div class="content-area flex flex-col">
@@ -441,6 +499,7 @@
     --main-background-color: #f6f8fc;
     --shadow-color: white;
     --content-margin-right: -20px;
+    --filter-switcher-justify-content: flex-end;
   }
 
   .right-sidebar {
@@ -459,6 +518,7 @@
     --sidebar-reset-filter-align-self: flex-start;
     --sidebar-scroll-snap-align: start;
     --content-margin-right: 0px;
+    --filter-switcher-justify-content: flex-end;
   }
 
   :root.dark {
@@ -483,9 +543,19 @@
     /* background-color: white; */
   }
 
+  .filter-switcher {
+    margin: 0 -20px;
+  }
+
+  .filter-switcher > div {
+    flex-direction: var(--container-flex-direction);
+    justify-content: var(--filter-switcher-justify-content);
+  }
+
   .aside-area {
     /* background-color: #f1f5f9; */
     overflow-x: auto;
+    overflow-y: hidden;
     display: flex;
     flex-direction: var(--aside-area-flex-direction);
     width: var(--aside-area-width);
@@ -538,7 +608,7 @@
   }
 
   :root[data-theme='skin1'] {
-    --sidebar-padding-top: 20px;
+    --sidebar-padding-top: 10px;
   }
   :root[data-theme='skin2'] {
     --vertical-seperator-line-padding-bottom: 20px;
@@ -555,6 +625,10 @@
   @media (max-width: 1300px) {
     :root {
       --aside-area-width: var(--sidebar-width);
+    }
+
+    .filter-switcher button span {
+      display: none;
     }
   }
   @media (min-width: 2100px) {

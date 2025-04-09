@@ -23,6 +23,9 @@
     filterString,
     disabled = false,
     paused = false,
+    active = false,
+    class: className,
+    onfocus: onFocus,
   } = $props()
 
   console.log(`component loaded`)
@@ -291,8 +294,12 @@
   }
 </script>
 
-<aside
-  class="composite-filters composite-filters-{level} relative flex flex-col gap-4"
+<div
+  class="composite-filters {className} composite-filters-{level} group relative flex flex-col gap-4"
+  role="listbox"
+  aria-label="新书签筛选器"
+  tabindex="0"
+  onfocusin={onFocus}
   out:fade={{ duration: 200 }}
   inert={disabled}>
   {#if disabled}
@@ -304,11 +311,13 @@
 
   <div class="flex flex-col gap-2">
     <button
-      class="reset-filter rounded-md border border-gray-200 bg-gray-100 px-2 py-1 text-xs text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+      class="reset-filter rounded-md bg-gray-100 px-3 py-1 text-sm text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
       onclick={() => {
         resetFilterWith()
       }}>
-      重置筛选 #{level}
+      重置筛选 <span
+        class="group-focus-within:border-blue-500 group-focus-within:text-blue-500 dark:group-focus-within:border-blue-400 dark:group-focus-within:text-blue-400"
+        >#{level}</span>
     </button>
     <div class="relative w-full" style="padding-right: 1px;">
       <input
@@ -469,7 +478,7 @@
       </div>
     {/if}
   </div>
-</aside>
+</div>
 
 <style>
   .composite-filters {
@@ -482,6 +491,27 @@
     scroll-snap-align: var(--sidebar-scroll-snap-align);
     padding-top: var(--sidebar-padding-top, 20px);
     padding-bottom: 20px;
+    transition: all 0.2s ease;
+    height: calc(100vh - 92px);
+  }
+
+  /* unset 'scroll-snap-align' while call scrollIntoView to fix Firefox issue */
+  :global(.onscroll) .composite-filters {
+    scroll-snap-align: unset;
+  }
+
+  .composite-filters:focus-visible {
+    outline: none;
+  }
+
+  .composite-filters:focus-within::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-blue-500);
   }
 
   .filter-controls {
