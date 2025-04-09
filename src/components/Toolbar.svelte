@@ -181,8 +181,9 @@
       <DropdownMenu
         bind:open={menuOpen}
         items={[
-          { value: 'selectMode', label: '选择模式' },
+          { value: 'selectMode', label: '选择' },
           { value: 'openAll', label: '打开所有书签' },
+          { value: 'exportCurrent', label: '导出当前筛选结果' },
         ]}
         selectedValue=""
         onSelect={(value) => {
@@ -194,9 +195,11 @@
             // 选择逻辑
             window.dispatchEvent(new CustomEvent('enterSelectionMode'))
             alert('Comming soon! 功能还未完成，敬请期待！')
+          } else {
+            alert('Comming soon! 功能还未完成，敬请期待！')
           }
         }}
-        width="w-32" />
+        width="w-45" />
     </div>
   </div>
 </div>

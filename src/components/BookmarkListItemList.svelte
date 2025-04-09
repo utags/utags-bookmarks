@@ -15,7 +15,7 @@
 </script>
 
 <div
-  class="list-default group relative mr-[10px] ml-[10px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-800">
+  class="list-default group relative mr-[12px] ml-[12px] rounded-md bg-white p-2 transition-colors duration-50 hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-800">
   <div class="flex items-center gap-3">
     <div class="min-w-0 flex-1 space-y-0.5">
       <div class="flex items-center gap-2 truncate">

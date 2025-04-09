@@ -4,7 +4,7 @@
   let { href, tags, title, formatedUpdated, dateTitleText } = $props()
 </script>
 
-<div class="list-simple group relative mx-[6px] p-2">
+<div class="list-simple group relative mx-[12px] p-2">
   <div class="title flex items-center gap-2 truncate">
     <Favicon {href} classNames="h-4 w-4 flex-none" />
     <a {href} {title} target="_blank" rel="noopener">

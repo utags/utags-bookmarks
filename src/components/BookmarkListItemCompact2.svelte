@@ -5,7 +5,7 @@
 </script>
 
 <div
-  class="list-compact group relative mx-[6px] rounded-md p-2 transition-colors duration-50">
+  class="list-compact group relative mx-[12px] rounded-md p-2 transition-colors duration-50">
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2 truncate">
       <Favicon {href} classNames="h-4 w-4 flex-none" />
