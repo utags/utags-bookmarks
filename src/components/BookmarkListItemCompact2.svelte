@@ -12,7 +12,7 @@
       <h3
         class="flex-none truncate text-sm font-normal text-gray-900 underline dark:text-gray-300">
         <a {href} {title} target="_blank" rel="noopener">
-          {title}
+          <span>{title}</span>
         </a>
       </h3>
       <div class="tags flex flex-nowrap gap-2 overflow-x-auto">
@@ -20,7 +20,7 @@
           <a
             href="#{encodeURIComponent(tag)}"
             class="tag border border-gray-200 p-1 pr-2 font-mono text-xs dark:border-gray-600">
-            {tag}
+            <span>{tag}</span>
           </a>
         {/each}
       </div>

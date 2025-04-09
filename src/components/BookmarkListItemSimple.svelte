@@ -12,12 +12,12 @@
     </a>
   </div>
   <div class="url-path mt-1 truncate text-xs">
-    <a {href} target="_blank" rel="noopener">{href}</a>
+    <a {href} target="_blank" rel="noopener"><span>{href}</span></a>
   </div>
   <div class="description mt-1 flex flex-wrap items-baseline gap-1 truncate">
     <span class="tags flex flex-wrap gap-1">
       {#each tags as tag}
-        <a href="#{encodeURIComponent(tag)}" class="tag">{tag}</a>
+        <a href="#{encodeURIComponent(tag)}" class="tag"><span>{tag}</span></a>
       {/each}
     </span>
     <span class="datetime text-gray-500" title={dateTitleText}

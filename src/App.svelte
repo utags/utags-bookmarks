@@ -440,7 +440,8 @@
         </div>
       {/if}
 
-      <div class="bookmark-list _shadow-lg _dark:border _dark:border-gray-700 pt-2.5">
+      <div
+        class="bookmark-list _shadow-lg _dark:border _dark:border-gray-700 pt-2.5">
         <BookmarkList
           filteredBookmarks={fullList
             ? filteredBookmarks

@@ -42,7 +42,7 @@
           target="_blank"
           rel="noopener"
           class="truncate pt-0.5 text-xs text-gray-800 hover:text-gray-300 dark:text-gray-400">
-          {humanizeUrl(href)}
+          <span>{humanizeUrl(href)}</span>
         </a>
       </div>
       <div class="tags mt-2 flex flex-wrap gap-2">
