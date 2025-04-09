@@ -362,15 +362,13 @@
 <main
   class="{$settings.sidebarPosition}-sidebar flex h-[100vh] flex-col overflow-hidden">
   <Header bind:showAddModal />
-  <Toolbar {stats} />
-
   <div class="container bg-white dark:bg-black">
     <NavigationSidebar />
-    <div class="flex flex-col">
+    <div class="filter-container flex flex-col px-5">
       <!-- 添加筛选器切换控制栏 -->
       <div
-        class="filter-switcher border-b border-gray-200 bg-white/90 px-4 py-2 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
-        <div class="mx-auto flex items-center justify-end gap-2">
+        class="filter-switcher flex h-11.25 flex-none items-center justify-end border-b border-(color:--seperator-line-color) bg-white/95 px-5 backdrop-blur-sm dark:bg-gray-900/95">
+        <div class="flex items-center justify-end gap-2">
           {#each [1, 2, 3] as level}
             <button
               class={`rounded-md px-3 py-1 text-sm transition-colors ${
@@ -424,6 +422,7 @@
     </div>
     <div class="vertical-seperator-line"></div>
     <div class="content-area flex flex-col">
+      <Toolbar {stats} />
       {#if importProgress.total > 0}
         <div class="import-progress" out:fade={{ duration: 1000 }}>
           导入进度: {importProgress.current}/{importProgress.total}
@@ -531,7 +530,7 @@
     display: flex;
     flex-direction: var(--container-flex-direction);
     justify-content: var(--container-justify-content);
-    gap: 20px;
+    /* gap: 20px; */
     /* max-width: min(calc(100vw - 100px), 1842px); */
     max-width: 100%;
     /* height: calc(100vh - 47px); */

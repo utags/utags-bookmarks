@@ -149,22 +149,21 @@
 </script>
 
 <div
-  class="toolbar z-40 flex hidden min-h-11 flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white/95 px-5 shadow-xs backdrop-blur-sm dark:bg-gray-900/95">
-  <div
-    class="left-tools flex flex-none items-center gap-2 border-r border-(color:--seperator-line-color) py-1">
+  class="toolbar z-40 flex h-11.25 flex-none items-center justify-between border-b border-(color:--seperator-line-color) bg-white/95 px-5 backdrop-blur-sm dark:bg-gray-900/95">
+  <div class="left-tools flex flex-none items-center gap-2 py-1">
     <!-- 左侧工具按钮区域 -->
+    <Statistics
+      bookmarksCount={stats.bookmarksCount}
+      tagsCount={stats.tagsCount}
+      domainsCount={stats.domainsCount} />
   </div>
   <div
-    class="right-tools flex flex-grow-1 flex-nowrap items-center justify-between gap-2 py-1 pl-5">
+    class="right-tools flex flex-grow-1 flex-nowrap items-center justify-end gap-2 py-1 pl-5">
     <!-- <div
       class="filters-container flex flex-grow-1 flex-wrap items-center gap-1">
       <FilterChips {nestedFilterExpression} onRemove={handleFilterRemove} />
     </div> -->
     <!-- 右侧工具按钮区域 -->
-    <Statistics
-      bookmarksCount={stats.bookmarksCount}
-      tagsCount={stats.tagsCount}
-      domainsCount={stats.domainsCount} />
 
     <div class="relative flex flex-none">
       <button
