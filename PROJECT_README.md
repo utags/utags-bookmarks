@@ -35,6 +35,91 @@ UTags 是一个现代化的书签管理工具，专注于：
 | Tailwind CSS | 3.x  | UI 样式系统          |
 | Vite         | 4.x  | 构建工具             |
 | Lucide       | 最新 | 图标系统             |
+| Workbox      | 6.x  | PWA 支持             |
+
+### PWA 支持规范
+
+1. **核心要求**
+
+   - 必须提供完整的 Web App Manifest
+   - 必须注册 Service Worker
+   - 必须支持 HTTPS 协议
+   - 必须实现离线缓存策略
+
+2. **缓存策略**
+
+   - 使用 Workbox 进行资源预缓存
+   - 核心应用资源采用"缓存优先"策略
+   - API 请求采用"网络优先"策略
+   - 静态资源缓存有效期 30 天
+
+3. **开发注意事项**
+
+   - Service Worker 文件必须放在项目根目录
+   - 避免在 Service Worker 中缓存过大文件
+   - 每次发布新版本需更新缓存版本号
+   - 实现适当的缓存清理机制
+
+4. **测试要求**
+
+   - 验证离线状态下核心功能可用性
+   - 测试安装到主屏幕流程
+   - 检查不同网络条件下的降级处理
+   - 验证缓存更新机制
+
+5. **性能优化**
+   - 关键资源预加载
+   - 使用 Compression 压缩静态资源
+   - 实现骨架屏提升感知性能
+   - 避免同步的 localStorage 操作
+
+## 扩展说明
+
+### PWA 实现细节
+
+```typescript
+// Service Worker 注册示例
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").then((registration) => {
+      // 处理更新
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "activated") {
+            // 通知用户刷新页面
+          }
+        });
+      });
+    });
+  });
+}
+```
+
+### 最佳实践
+
+1. **缓存策略选择**
+
+   - 静态资源: CacheFirst + 版本控制
+   - API 数据: NetworkFirst + 回退缓存
+   - 用户生成内容: StaleWhileRevalidate
+
+2. **更新处理**
+
+   - 使用 skipWaiting 自动更新
+   - 实现版本提示 UI
+   - 重大更新强制刷新
+
+3. **离线体验**
+
+   - 提供有意义的离线页面
+   - 缓存关键 API 响应
+   - 实现后台同步机制
+
+4. **安装提示**
+   - 自定义安装引导流程
+   - 跟踪安装事件
+   - 提供安装后的引导
 
 ### 状态管理
 

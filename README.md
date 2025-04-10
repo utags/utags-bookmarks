@@ -17,10 +17,18 @@ Visit our [official website (https://utags.link)](https://utags.link/) to explor
 - Multi-dimensional tag management system
 - Composite filtering system with AND/OR logic
 - Local data persistence via LocalStorage
+- **Progressive Web App (PWA) support**:
+  - Installable on desktop/mobile devices
+  - Offline access to bookmarks
+  - Automatic background updates
 - Powered by the [UTags extension/userscript](https://github.com/utags/utags)
 
 ### Other Features
 
+- Progressive Web App capabilities:
+  - Add to Home Screen (A2HS)
+  - Offline mode with Service Worker caching
+  - Web App Manifest for native-like experience
 - Fully open source and free to use
 - Easy self-hosting deployment
 - Saved filter presets
