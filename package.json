@@ -5,9 +5,9 @@
   "namespace": "https://utags.pipecraft.net/",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/utags/utags/issues"
+    "url": "https://github.com/utags/utags-bookmarks/issues"
   },
-  "homepage": "https://github.com/utags/utags#readme",
+  "homepage": "https://github.com/utags/utags-bookmarks#readme",
   "type": "module",
   "scripts": {
     "p": "prettier --write . && npx prettier@2.8.8 --config .prettierrc-markdown.cjs --write *.md",

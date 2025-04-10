@@ -349,7 +349,7 @@
             </div>
             <div class="flex items-center justify-between px-1 py-1.5">
               <a
-                href="https://github.com/utags/utags"
+                href="https://github.com/utags/utags-bookmarks"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
@@ -359,7 +359,7 @@
             </div>
             <div class="flex items-center justify-between px-1 py-1.5">
               <a
-                href="https://github.com/utags/utags/issues"
+                href="https://github.com/utags/utags-bookmarks/issues"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300">
