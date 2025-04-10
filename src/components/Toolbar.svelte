@@ -206,11 +206,11 @@
 
 <style>
   .left-tools {
-    width: calc(var(--aside-area-width) + var(--sidebar-width) - 28px);
-    height: 100%;
+    /* width: calc(var(--aside-area-width) + var(--sidebar-width) - 28px); */
+    /* height: 100%; */
   }
   .right-tools {
     /* width: calc(100% - var(--aside-area-width) - 20px); */
-    height: 100%;
+    /* height: 100%; */
   }
 </style>

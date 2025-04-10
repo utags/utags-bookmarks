@@ -14,6 +14,16 @@
   import SettingsIcon from './svg/SettingsIcon.svelte'
   import ThemeIcon from './svg/ThemeIcon.svelte'
   import FilterListIcon from './svg/FilterListIcon.svelte'
+  import {
+    LayoutList,
+    PanelLeftOpen,
+    PanelLeftClose,
+    ListTodo,
+    ArrowDown01,
+    ArrowDown10,
+    ArrowDownAZ,
+    ArrowDownZA,
+  } from 'lucide-svelte'
 
   let { collapsed = false, showAddModal = $bindable() } = $props()
 
@@ -97,6 +107,24 @@
       </div>
     {/if}
 
+    <!-- 添加导航栏切换按钮 -->
+    <button
+      class="rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+      aria-label="切换导航栏"
+      onclick={() => {
+        $settings.navigationSidebarCollapsed =
+          !$settings.navigationSidebarCollapsed
+      }}>
+      {#if $settings.navigationSidebarCollapsed}
+        <PanelLeftOpen size={22} absoluteStrokeWidth={true} strokeWidth={1.5} />
+      {:else}
+        <PanelLeftClose
+          size={22}
+          absoluteStrokeWidth={true}
+          strokeWidth={1.5} />
+      {/if}
+    </button>
+
     {#if $settings.headerToolbarSettings.sidebarPosition}
       <div
         class="flex gap-2 rounded-lg bg-gray-100 p-1 shadow-inner dark:bg-gray-700/90 dark:shadow-gray-900/30">
@@ -167,7 +195,7 @@
               })
             }
           }}>
-          <ViewModeIcon />
+          <LayoutList size={20} />
         </button>
 
         <DropdownMenu

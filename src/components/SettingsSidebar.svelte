@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import { $ as _$ } from 'browser-extension-utils'
   import { initFocusTrap } from 'focus-trap-lite'
+  import { LayoutList } from 'lucide-svelte'
   import { settings, importData, exportData, clearAll } from '../stores.ts'
   import { viewModes } from '../config/viewModes'
   import { sortOptions } from '../config/sortOptions'
@@ -136,7 +137,7 @@
             <div class="relative flex items-center justify-between px-1 py-1.5">
               <div
                 class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                <ViewModeIcon />
+                <LayoutList size={24} />
                 <span>视图模式</span>
               </div>
               <DropdownMenu
@@ -260,7 +261,7 @@
             <div class="flex items-center justify-between px-1 py-1.5">
               <div
                 class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                <ViewModeIcon />
+                <LayoutList size={24} />
                 <span>视图模式按钮</span>
               </div>
               <Switch bind:checked={$settings.headerToolbarSettings.viewMode} />
