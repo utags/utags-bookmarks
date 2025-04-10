@@ -212,7 +212,6 @@
         document.querySelectorAll('.composite-filters').length
       )
       document.querySelector('.bookmark-list').scrollTo(0, scrollTop)
-      document.querySelector('.bookmark-list > *').scrollTo(0, scrollTop)
       const selector = useLevel3
         ? '.aside-area .composite-filters-3'
         : useLevel2
@@ -368,7 +367,7 @@
       <!-- 添加筛选器切换控制栏 -->
       <div
         class="filter-switcher flex h-11.25 flex-none items-center justify-end border-b border-(color:--seperator-line-color) bg-white/95 px-5 backdrop-blur-sm dark:bg-gray-900/95">
-        <div class="flex items-center justify-end gap-2">
+        <div class="flex flex-grow-1 items-center justify-end gap-2">
           {#each [1, 2, 3] as level}
             <button
               class={`rounded-md px-3 py-1 text-sm transition-colors ${
@@ -440,8 +439,7 @@
         </div>
       {/if}
 
-      <div
-        class="bookmark-list _shadow-lg _dark:border _dark:border-gray-700 pt-2.5">
+      <div class="bookmark-list _shadow-lg _dark:border _dark:border-gray-700">
         <BookmarkList
           filteredBookmarks={fullList
             ? filteredBookmarks
@@ -489,7 +487,7 @@
     --aside-area-margin-left: -21px;
     --aside-area-margin-right: -20px;
     --aside-area-width: calc(var(--sidebar-width) * 2);
-    --sidebar-width: max(280px, 15vw);
+    --sidebar-width: max(280px, 12vw);
     --sidebar-border-left: var(--seperator-line);
     --sidebar-border-right: none;
     --sidebar-padding-left: 20px;
@@ -499,6 +497,7 @@
     --main-background-color: #f6f8fc;
     --shadow-color: white;
     --content-margin-right: -20px;
+    --bookmark-list-margin-right: 0;
     --filter-switcher-justify-content: flex-end;
   }
 
@@ -518,6 +517,7 @@
     --sidebar-reset-filter-align-self: flex-start;
     --sidebar-scroll-snap-align: start;
     --content-margin-right: 0px;
+    --bookmark-list-margin-right: 20px;
     --filter-switcher-justify-content: flex-end;
   }
 
@@ -586,7 +586,7 @@
 
   .content-area {
     flex: 1;
-    width: calc(100% - var(--aside-area-width) - 20px);
+    /* width: calc(100% - var(--aside-area-width) - 20px); */
     overflow: hidden;
     /* padding-top: 20px; */
     margin-right: var(--content-margin-right);
@@ -604,7 +604,11 @@
   .bookmark-list {
     height: calc(100% - 0px);
     overflow-y: auto;
-    /* margin-left: 2px; */
+    margin-right: var(--bookmark-list-margin-right);
+  }
+
+  :global(.bookmark-list > *) {
+    padding-top: 10px;
   }
 
   :root[data-theme='skin1'] {
