@@ -35,7 +35,7 @@ export function sortBookmarks(
           {
             sensitivity: 'base',
             ignorePunctuation: true,
-            numeric: true,
+            numeric: false,
           }
         )
       case 'titleDesc':
@@ -45,7 +45,7 @@ export function sortBookmarks(
           {
             sensitivity: 'base',
             ignorePunctuation: true,
-            numeric: true,
+            numeric: false,
           }
         )
       default:

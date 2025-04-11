@@ -9,6 +9,7 @@ import {
   STORAGE_KEY_FILTERS,
 } from '../config/constants.js'
 import { type BookmarksStore, type BookmarksData } from '../types/bookmarks.js'
+import { sortBookmarks } from '../utils/sort-bookmarks'
 
 const console = new Console({
   prefix: 'stores',
@@ -106,11 +107,25 @@ setTimeout(() => {
 export function exportData(bookmarksData: BookmarksData) {
   checkBookmarksDataReady()
 
+  const now = new Date()
   let bookmarksStore = get(bookmarks)
   if (bookmarksData) {
     bookmarksStore = {
       data: bookmarksData,
-      meta: bookmarksStore.meta,
+      meta: {
+        ...bookmarksStore.meta,
+        exported: now.getTime(),
+      },
+    }
+  } else {
+    bookmarksStore = {
+      data: Object.fromEntries(
+        sortBookmarks(Object.entries(bookmarksStore.data), 'createdDesc')
+      ),
+      meta: {
+        ...bookmarksStore.meta,
+        exported: now.getTime(),
+      },
     }
   }
 
@@ -118,7 +133,6 @@ export function exportData(bookmarksData: BookmarksData) {
   const blob = new Blob([dataString], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  const now = new Date()
   const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
   a.href = url
   a.download = `utags-backup-${timestamp}.json`

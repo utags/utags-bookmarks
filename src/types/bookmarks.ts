@@ -28,5 +28,6 @@ export type BookmarksStore = {
   meta: {
     databaseVersion: number
     created: number
+    exported?: number
   }
 }
