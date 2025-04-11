@@ -17,7 +17,7 @@ const console = new Console({
 
 export const settings = persisted(STORAGE_KEY_SETTINGS, {
   theme: 'system',
-  sortBy: 'updated',
+  sortBy: 'updatedDesc',
   sidebarPosition: 'left',
   navigationSidebarCollapsed: false,
   viewMode: 'compact',

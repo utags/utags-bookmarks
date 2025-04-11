@@ -11,6 +11,7 @@
   } from 'browser-extension-utils'
   import Console from 'console-tagger'
   import { cleanFilterString } from './utils/index.js'
+  import { sortBookmarks } from './utils/sort-bookmarks'
   import { HASH_DELIMITER } from './config/constants.js'
   import Header from './components/Header.svelte'
   import NavigationSidebar from './components/NavigationSidebar.svelte'
@@ -182,7 +183,7 @@
   function updateFilteredBookmarks() {
     console.log('!!! updateFilteredBookmarks')
 
-    const temp = [
+    let temp = [
       ...(useLevel3
         ? filteredBookmarks3
         : useLevel2
@@ -193,13 +194,7 @@
     const sortBy = $settings.sortBy
     if (sortBy) {
       console.log(`sort by:`, sortBy)
-      temp.sort((a, b) => {
-        const aTime =
-          sortBy === 'updated' ? a[1].meta.updated : a[1].meta.created
-        const bTime =
-          sortBy === 'updated' ? b[1].meta.updated : b[1].meta.created
-        return bTime - aTime
-      })
+      temp = sortBookmarks(temp, sortBy)
     }
 
     filteredBookmarks = temp
