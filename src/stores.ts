@@ -8,7 +8,7 @@ import {
   STORAGE_KEY_SETTINGS,
   STORAGE_KEY_FILTERS,
 } from './constants.js'
-import { type BookmarksStore } from './types/bookmarks.js'
+import { type BookmarksStore, type BookmarksData } from './types/bookmarks.js'
 
 const console = new Console({
   prefix: 'stores',
@@ -101,12 +101,20 @@ setTimeout(() => {
   const event = new CustomEvent('bookmarksInitialized')
   globalThis.dispatchEvent(event)
   isBookmarksDataReady = true
-}, 2000)
+}, 1000)
 
-export function exportData() {
+export function exportData(bookmarksData: BookmarksData) {
   checkBookmarksDataReady()
 
-  const dataString = JSON.stringify(get(bookmarks), null, 2)
+  let bookmarksStore = get(bookmarks)
+  if (bookmarksData) {
+    bookmarksStore = {
+      data: bookmarksData,
+      meta: bookmarksStore.meta,
+    }
+  }
+
+  const dataString = JSON.stringify(bookmarksStore, null, 2)
   const blob = new Blob([dataString], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

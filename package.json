@@ -69,6 +69,15 @@
       },
       {
         "files": [
+          "src/sw.js"
+        ],
+        "rules": {
+          "unicorn/prefer-global-this": 0,
+          "array-callback-return": 0
+        }
+      },
+      {
+        "files": [
           "vite.config.mjs"
         ],
         "rules": {

@@ -45,17 +45,6 @@
     return () => document.removeEventListener('keydown', keydownHandler)
   })
 
-  $effect(() => {
-    const position = $settings.sidebarPosition
-    setTimeout(() => {
-      document.querySelector('.aside-area aside:last-of-type')?.scrollIntoView({
-        behavior: 'auto',
-        block: 'start',
-        inline: position === 'right' ? 'start' : 'end',
-      })
-    }, 10)
-  })
-
   let themeOpen = $state(false)
   let viewModeOpen = $state(false)
   let sortByOpen = $state(false)
@@ -317,7 +306,7 @@
             <div class="flex items-center justify-between px-1 py-1.5">
               <button
                 class="flex items-center gap-3 text-gray-700 hover:text-blue-600 dark:text-gray-300"
-                onclick={exportData}>
+                onclick={() => exportData()}>
                 <span>📤 导出数据</span>
               </button>
             </div>

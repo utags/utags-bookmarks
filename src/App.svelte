@@ -19,7 +19,7 @@
   import CompositeFilters from './components/CompositeFilters.svelte'
 
   import Toolbar from './components/Toolbar.svelte'
-  import { settings, bookmarks } from './stores.ts'
+  import { settings, bookmarks, exportData } from './stores.ts'
 
   const console = new Console({
     prefix: 'app',
@@ -133,6 +133,7 @@
       'bookmarksInitialized',
       bookmarksInitializedHandler
     )
+    addEventListener(globalThis, 'bookmarksExport', bookmarksExportHandler)
 
     // 初始化时触发一次
     locationChangeHandler()
@@ -165,6 +166,7 @@
         'bookmarksInitialized',
         bookmarksInitializedHandler
       )
+      removeEventListener(globalThis, 'bookmarksExport', bookmarksExportHandler)
 
       // 清除定时器
       if (timeoutId) {
@@ -308,6 +310,17 @@
         newDomains: new Set(),
         newTags: new Set(),
       },
+    }
+  }
+
+  const bookmarksExportHandler = (event) => {
+    const { type } = event.detail
+    if (type === 'current') {
+      exportData(Object.fromEntries(filteredBookmarks))
+    } else if (type === 'all') {
+      exportData()
+    } else {
+      console.error('Invalid export type:', type)
     }
   }
 

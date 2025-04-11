@@ -183,7 +183,8 @@
         items={[
           { value: 'selectMode', label: '选择' },
           { value: 'openAll', label: '打开所有书签' },
-          { value: 'exportCurrent', label: '导出当前筛选结果' },
+          { value: 'bookmarksExportCurrent', label: '导出当前筛选结果' },
+          { value: 'bookmarksExportAll', label: '导出所有书签' },
         ]}
         selectedValue=""
         onSelect={(value) => {
@@ -195,6 +196,16 @@
             // 选择逻辑
             window.dispatchEvent(new CustomEvent('enterSelectionMode'))
             alert('Comming soon! 功能还未完成，敬请期待！')
+          } else if (value === 'bookmarksExportCurrent') {
+            window.dispatchEvent(
+              new CustomEvent('bookmarksExport', {
+                detail: { type: 'current' },
+              })
+            )
+          } else if (value === 'bookmarksExportAll') {
+            window.dispatchEvent(
+              new CustomEvent('bookmarksExport', { detail: { type: 'all' } })
+            )
           } else {
             alert('Comming soon! 功能还未完成，敬请期待！')
           }
