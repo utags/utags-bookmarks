@@ -3,7 +3,7 @@
   import { fade } from 'svelte/transition'
   import Console from 'console-tagger'
   import { $ as _$ } from 'browser-extension-utils'
-  import { HASH_DELIMITER } from '../constants.js'
+  import { HASH_DELIMITER } from '../config/constants.js'
   import { parseFilterString, convertToFilterString } from '../utils/index.js'
   import FilterCheckbox from './FilterCheckbox.svelte'
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
+import { HASH_DELIMITER, FILTER_DELIMITER } from '../config/constants.js'
 import {
   humanizeUrl,
   cleanFilterString,

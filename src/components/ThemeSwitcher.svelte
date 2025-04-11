@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import { settings } from '../stores.ts'
+  import { settings } from '../stores/stores.js'
   import DropdownMenu from './DropdownMenu.svelte'
   let { type = '' } = $props()
   let theme = $state($settings.theme || 'system')

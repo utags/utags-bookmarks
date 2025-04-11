@@ -12,7 +12,7 @@
     PanelLeftOpen,
     PanelLeftClose,
   } from 'lucide-svelte'
-  import { settings } from '../stores'
+  import { settings } from '../stores/stores'
   import SavedFilters from './SavedFilters.svelte'
 
   // 导航组数据结构

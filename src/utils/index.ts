@@ -1,6 +1,6 @@
 import { splitTags, trimTitle } from 'utags-utils'
 import Console from 'console-tagger'
-import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
+import { HASH_DELIMITER, FILTER_DELIMITER } from '../config/constants.js'
 
 const console = new Console({
   prefix: 'utils',

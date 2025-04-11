@@ -11,7 +11,7 @@
   } from 'browser-extension-utils'
   import Console from 'console-tagger'
   import { cleanFilterString } from './utils/index.js'
-  import { HASH_DELIMITER } from './constants.js'
+  import { HASH_DELIMITER } from './config/constants.js'
   import Header from './components/Header.svelte'
   import NavigationSidebar from './components/NavigationSidebar.svelte'
   import AddBookmark from './components/AddBookmark.svelte'
@@ -19,7 +19,7 @@
   import CompositeFilters from './components/CompositeFilters.svelte'
 
   import Toolbar from './components/Toolbar.svelte'
-  import { settings, bookmarks, exportData } from './stores.ts'
+  import { settings, bookmarks, exportData } from './stores/stores.js'
 
   const console = new Console({
     prefix: 'app',

@@ -1,6 +1,6 @@
 <script>
   import { splitTags, trimTitle } from 'utags-utils'
-  import { bookmarks, checkBookmarksDataReady } from '../stores.ts'
+  import { bookmarks, checkBookmarksDataReady } from '../stores/stores.js'
   import Modal from './Modal.svelte'
   import InputField from './ui/InputField.svelte'
   import BaseInputField from './ui/BaseInputField.svelte'

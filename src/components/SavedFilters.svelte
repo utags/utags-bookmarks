@@ -14,8 +14,8 @@
   import Modal from './Modal.svelte'
   import InputField from './ui/InputField.svelte'
   import BaseInputField from './ui/BaseInputField.svelte'
-  import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
-  import { filters } from '../stores.js'
+  import { HASH_DELIMITER, FILTER_DELIMITER } from '../config/constants.js'
+  import { filters } from '../stores/stores.js'
 
   let showModal = $state(false)
   let isEditing = $state(false)

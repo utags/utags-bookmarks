@@ -78,10 +78,12 @@
       },
       {
         "files": [
-          "vite.config.mjs"
+          "vite.config.ts"
         ],
         "rules": {
-          "import/no-anonymous-default-export": 0
+          "import/no-anonymous-default-export": 0,
+          "@typescript-eslint/naming-convention": 0,
+          "new-cap": 0
         }
       }
     ]

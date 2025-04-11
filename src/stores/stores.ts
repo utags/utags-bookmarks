@@ -1,14 +1,14 @@
 import { get } from 'svelte/store'
 import { persisted, type Persisted } from 'svelte-persisted-store'
 import Console from 'console-tagger'
-import { initialBookmarks } from './data/initial-bookmarks.js'
-import { initialBookmarks as initialBookmarksCN } from './data/initial-bookmarks-zh-CN.js'
+import { initialBookmarks } from '../data/initial-bookmarks.js'
+import { initialBookmarks as initialBookmarksCN } from '../data/initial-bookmarks-zh-CN.js'
 import {
   STORAGE_KEY_BOOKMARKS,
   STORAGE_KEY_SETTINGS,
   STORAGE_KEY_FILTERS,
-} from './constants.js'
-import { type BookmarksStore, type BookmarksData } from './types/bookmarks.js'
+} from '../config/constants.js'
+import { type BookmarksStore, type BookmarksData } from '../types/bookmarks.js'
 
 const console = new Console({
   prefix: 'stores',
