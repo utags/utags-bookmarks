@@ -491,7 +491,7 @@
     scroll-snap-align: var(--sidebar-scroll-snap-align);
     padding-top: var(--sidebar-padding-top, 20px);
     padding-bottom: 20px;
-    transition: all 0.2s ease;
+    /* transition: all 0.2s ease; */
     height: calc(100vh - 92px);
   }
 
