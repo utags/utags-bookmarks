@@ -1,6 +1,7 @@
 <script>
   import { defaultFavicon } from '../constants.js'
   let { href, classNames = '' } = $props()
+  // TODO: 获取不到 favicon 时，使用首字母图片作为 favicon。标题或域名首字母
 </script>
 
 <img

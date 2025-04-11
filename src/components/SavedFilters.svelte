@@ -12,6 +12,8 @@
     Folder,
   } from 'lucide-svelte'
   import Modal from './Modal.svelte'
+  import InputField from './ui/InputField.svelte'
+  import BaseInputField from './ui/BaseInputField.svelte'
   import { HASH_DELIMITER, FILTER_DELIMITER } from '../constants.js'
   import { filters } from '../stores.js'
 
@@ -261,50 +263,24 @@
   title={isEditing ? '编辑筛选器收藏' : '收藏当前筛选器'}
   isOpen={showModal}
   onOpen={() => {
-    document.querySelector('.filter-name').focus()
-  }}>
-  <div class="space-y-4">
-    <input
-      type="text"
-      bind:value={filterName}
-      placeholder="输入筛选器名称"
-      class="filter-name w-full rounded-xl border-2 ${validationError
-        ? 'border-red-500'
-        : 'border-gray-200'} bg-white px-4 py-2.5 transition-all outline-none ${validationError
-        ? 'focus:border-red-500'
-        : 'focus:border-indigo-300'} focus:ring-2 ${validationError
-        ? 'ring-red-200'
-        : 'focus:ring-indigo-200'} dark:border-gray-600 dark:bg-gray-700 dark:focus:border-indigo-500"
-      onkeydown={(e) => e.key === 'Enter' && saveFilter()}
-      oninput={() => (validationError = false)} />
-
-    {#if validationError}
-      <div class="mt-1 text-sm text-red-500 dark:text-red-400">
-        必须填写筛选器名称
-      </div>
-    {/if}
-    <input
-      type="text"
-      bind:value={description}
-      placeholder="输入描述（可选）"
-      class="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5
-              transition-all outline-none focus:border-indigo-300 focus:ring-2
-              focus:ring-indigo-200 dark:border-gray-600 dark:bg-gray-700 dark:focus:border-indigo-500"
-      onkeydown={(e) => e.key === 'Enter' && saveFilter()} />
-    <div class="flex justify-end gap-3">
-      <button
-        class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-        onclick={() => (showModal = false)}>
-        取消
-      </button>
-      <button
-        class="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-indigo-700 dark:hover:bg-indigo-600 dark:disabled:bg-indigo-900"
-        onclick={saveFilter}
-        disabled={!filterName}>
-        保存
-      </button>
-    </div>
-  </div>
+    document.getElementById('filter-name').focus()
+  }}
+  onClose={() => (showModal = false)}
+  onInputEnter={saveFilter}
+  onConfirm={saveFilter}
+  disableConfirm={!filterName}
+  confirmText="保存">
+  <InputField
+    id="filter-name"
+    bind:value={filterName}
+    placeholder="输入筛选器名称"
+    error={validationError ? '必须填写筛选器名称' : ''}
+    onInput={() => (validationError = false)}>
+    筛选器名称:
+  </InputField>
+  <BaseInputField bind:value={description} placeholder="输入描述（可选）">
+    描述:
+  </BaseInputField>
 </Modal>
 
 <style>

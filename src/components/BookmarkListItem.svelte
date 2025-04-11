@@ -12,6 +12,7 @@
   const href = $derived(item[0])
   const tags = $derived(item[1].tags)
   const meta = $derived(item[1].meta)
+  // TODO: 无标题显示 url 地址
   const title = $derived(meta.title || '无标题')
   const created = $derived(meta.created)
   const updated = $derived(meta.updated)
