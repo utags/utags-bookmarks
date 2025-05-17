@@ -447,3 +447,188 @@ export function convertCollectionToFilterParams(
 
   return newSearchParams
 }
+
+/**
+ * Appends new search parameters to existing search parameters.
+ *
+ * This function takes an initial set of search parameters and a new set of search parameters,
+ * and returns a new URLSearchParams object with the new parameters appended to the original ones.
+ * If a key from newSearchParams already exists in orgSearchParams, the new value will be added,
+ * potentially resulting in multiple values for that key.
+ *
+ * @param {URLSearchParams | Record<string, string> | string} orgSearchParams - The original search parameters.
+ *   Can be a URLSearchParams object, a record of string key-value pairs, or a query string.
+ * @param {URLSearchParams | Record<string, string> | string} newSearchParams - The new search parameters to append.
+ *   Can be a URLSearchParams object, a record of string key-value pairs, or a query string.
+ * @returns {URLSearchParams} A new URLSearchParams object with the appended parameters.
+ *
+ * @example
+ * // Example 1: Appending a string to URLSearchParams
+ * const original = new URLSearchParams('a=1&b=2');
+ * const newParams = 'c=3&a=4';
+ * const result1 = appendSearchParams(original, newParams);
+ * console.log(result1.toString()); // Output: a=1&b=2&c=3&a=4
+ *
+ * @example
+ * // Example 2: Appending a record to a string
+ * const originalStr = 'x=10';
+ * const newRecord = { y: '20', z: '30' };
+ * const result2 = appendSearchParams(originalStr, newRecord);
+ * console.log(result2.toString()); // Output: x=10&y=20&z=30
+ *
+ * @example
+ * // Example 3: Appending URLSearchParams to URLSearchParams
+ * const params1 = new URLSearchParams('foo=bar');
+ * const params2 = new URLSearchParams('baz=qux&foo=another');
+ * const result3 = appendSearchParams(params1, params2);
+ * console.log(result3.toString()); // Output: foo=bar&baz=qux&foo=another
+ */
+export function appendSearchParams(
+  orgSearchParams: URLSearchParams | Record<string, string> | string,
+  newSearchParams: URLSearchParams | Record<string, string> | string
+): URLSearchParams {
+  // Initialize a new URLSearchParams object with the original parameters.
+  // The URLSearchParams constructor can handle string, Record, or another URLSearchParams instance.
+  const result = new URLSearchParams(orgSearchParams)
+
+  // Convert newSearchParams to a URLSearchParams object to easily iterate over them,
+  // regardless of its original type (string, Record, or URLSearchParams).
+  const paramsToAppend = new URLSearchParams(newSearchParams)
+
+  // Iterate over the new parameters and append them to the result.
+  // The append method adds a new key/value pair, allowing for multiple values for the same key.
+  for (const [key, value] of paramsToAppend.entries()) {
+    result.append(key, value)
+  }
+
+  return result
+}
+
+/**
+ * Removes specified keys from a set of search parameters.
+ *
+ * This function takes an initial set of search parameters and an array of keys to remove.
+ * It returns a new URLSearchParams object with the specified keys removed.
+ * The original search parameters are not modified.
+ *
+ * @param {URLSearchParams | Record<string, string> | string} orgSearchParams - The original search parameters.
+ *   Can be a URLSearchParams object, a record of string key-value pairs, or a query string.
+ * @param {string[]} keysToRemove - An array of string keys to remove from the search parameters.
+ * @returns {URLSearchParams} A new URLSearchParams object with the specified keys removed.
+ *
+ * @example
+ * // Example 1: Removing keys from URLSearchParams
+ * const original = new URLSearchParams('a=1&b=2&c=3&b=4');
+ * const keys = ['b', 'd']; // 'd' does not exist, will be ignored
+ * const result1 = removeSearchParams(original, keys);
+ * console.log(result1.toString()); // Output: a=1&c=3
+ *
+ * @example
+ * // Example 2: Removing keys from a string
+ * const originalStr = 'x=10&y=20&z=30';
+ * const keys2 = ['y'];
+ * const result2 = removeSearchParams(originalStr, keys2);
+ * console.log(result2.toString()); // Output: x=10&z=30
+ *
+ * @example
+ * // Example 3: Removing keys from a Record
+ * const originalRecord = { foo: 'bar', baz: 'qux', key: 'value' };
+ * const keys3 = ['baz', 'nonExistentKey'];
+ * const result3 = removeSearchParams(originalRecord, keys3);
+ * console.log(result3.toString()); // Output: foo=bar&key=value
+ *
+ * @example
+ * // Example 4: Removing all keys
+ * const original4 = new URLSearchParams('a=1&b=2');
+ * const keys4 = ['a', 'b'];
+ * const result4 = removeSearchParams(original4, keys4);
+ * console.log(result4.toString()); // Output: ""
+ *
+ * @example
+ * // Example 5: Empty keysToRemove array
+ * const original5 = new URLSearchParams('a=1&b=2');
+ * const keys5: string[] = [];
+ * const result5 = removeSearchParams(original5, keys5);
+ * console.log(result5.toString()); // Output: a=1&b=2
+ */
+export function removeSearchParams(
+  orgSearchParams: URLSearchParams | Record<string, string> | string,
+  keysToRemove: string[]
+): URLSearchParams {
+  // Create a new URLSearchParams instance from the original parameters
+  // to avoid modifying the original object.
+  const result = new URLSearchParams(orgSearchParams)
+
+  // Iterate over the array of keys that need to be removed.
+  for (const key of keysToRemove) {
+    // Delete each specified key from the new URLSearchParams instance.
+    // If a key does not exist, .delete() does nothing and does not throw an error.
+    result.delete(key)
+  }
+
+  // Return the new URLSearchParams instance with the keys removed.
+  return result
+}
+
+// Keys to be specifically managed (removed and then re-added) by buildTimeQuerySearchParams.
+const timeQueryKeysToRemove = ['time', 'period']
+
+/**
+ * Builds a new URLSearchParams object with specified time and period parameters,
+ * after removing any existing 'time' and 'period' parameters from the original search parameters.
+ *
+ * This function is useful for constructing or updating URL query strings
+ * that involve time-based filtering (e.g., "created in the last month", "updated in the last week").
+ *
+ * @param {URLSearchParams | Record<string, string> | string} orgSearchParams - The original search parameters.
+ *   Can be a URLSearchParams object, a record of string key-value pairs, or a query string.
+ * @param {'updated' | 'created'} [time='updated'] - The time parameter to set. Defaults to 'updated'.
+ *   Indicates whether the filter refers to the creation time or update time.
+ * @param {string} [period='1m'] - The period for the time filter. Defaults to '1m' (1 month).
+ *   Examples: '7d' (7 days), '3m' (3 months), '1y' (1 year).
+ * @returns {URLSearchParams} A new URLSearchParams object with the 'time' and 'period' parameters set,
+ *   and any previous 'time' or 'period' parameters removed.
+ *
+ * @example
+ * // Example 1: Adding time filters to existing params
+ * const original = new URLSearchParams('filter=active');
+ * const result1 = buildTimeQuerySearchParams(original, 'created', '7d');
+ * console.log(result1.toString()); // Output: filter=active&time=created&period=7d
+ *
+ * @example
+ * // Example 2: Overwriting existing time filters
+ * const originalWithTime = new URLSearchParams('time=created&period=3m&user=john');
+ * const result2 = buildTimeQuerySearchParams(originalWithTime, 'updated', '1m');
+ * console.log(result2.toString()); // Output: user=john&time=updated&period=1m
+ *
+ * @example
+ * // Example 3: Using default values
+ * const originalStr = 'q=searchterm';
+ * const result3 = buildTimeQuerySearchParams(originalStr);
+ * console.log(result3.toString()); // Output: q=searchterm&time=updated&period=1m
+ *
+ * @example
+ * // Example 4: Starting with empty params
+ * const result4 = buildTimeQuerySearchParams('', 'created', '2w');
+ * console.log(result4.toString()); // Output: time=created&period=2w
+ */
+export function buildTimeQuerySearchParams(
+  orgSearchParams: URLSearchParams | Record<string, string> | string,
+  time: 'updated' | 'created' = 'updated',
+  period = '1m'
+): URLSearchParams {
+  if (!orgSearchParams) {
+    return new URLSearchParams({ time, period })
+  }
+
+  // First, remove any existing 'time' or 'period' parameters from the original search params.
+  const paramsWithoutTime = removeSearchParams(
+    orgSearchParams,
+    timeQueryKeysToRemove
+  )
+  // Then, append the new 'time' and 'period' parameters.
+  return appendSearchParams(paramsWithoutTime, {
+    time,
+    period,
+  })
+}

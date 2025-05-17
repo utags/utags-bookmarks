@@ -18,7 +18,9 @@
     getCollections,
     deleteCollection,
     saveCollection,
+    getCollectionUrl,
   } from '../stores/collections.js'
+  import { spaNavigateAttachment as spaNavigate } from '../actions/spa-navigate-attachment.js'
 
   let collections = getCollections()
   let showModal = $state(false)
@@ -135,7 +137,8 @@
         <li class="group pr-2">
           <div class="ml-3 flex items-center justify-between">
             <a
-              href={`/c/${collection.pathname}`}
+              href={getCollectionUrl(collection)}
+              {@attach spaNavigate}
               class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
               <span class="h-4 w-4">
                 <Folder size={16} />

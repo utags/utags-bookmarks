@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { spaNavigateAttachment as spaNavigate } from '../../actions/spa-navigate-attachment.js'
   import ExpandableContainer from './ExpandableContainer.svelte'
   import ExpandIcon from './ExpandIcon.svelte'
   import {
@@ -70,6 +71,7 @@
       {#each group.items as item}
         <a
           href={item.href}
+          {@attach spaNavigate}
           class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">
           <span class="h-4 w-4">
             {#if item.icon === 'list'}

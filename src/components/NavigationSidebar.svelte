@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { getContext } from 'svelte'
   import { PanelLeftOpen, PanelLeftClose } from 'lucide-svelte'
+  import appConfig from '../config/app-config.js'
+  import { buildTimeQuerySearchParams } from '../utils/url-utils.js'
   import GroupSeparator from './ui/GroupSeparator.svelte'
   import NavigationGroup from './ui/NavigationGroup.svelte'
   import type { TagHierarchyItem } from '../types/bookmarks.js'
@@ -13,6 +16,12 @@
   }: {
     tagHierarchyItems: TagHierarchyItem[]
   } = $props()
+
+  let locationSearchString = $derived(
+    getContext('sharedStatus').locationSearchString as string
+  )
+
+  const preferQueryString = appConfig.preferQueryString
 
   // 导航组数据结构
   // 置顶 Collections (position: fixed or sticky)
@@ -53,7 +62,7 @@
   //   Applications
   //   Tools
   // TODO: collections, saved filters, tag hierarchy 可以在设置里调节顺序
-  let navGroups = $state([
+  let navGroups = $derived([
     {
       title: '收藏夹', // Favorites
       icon: 'bookmark',
@@ -70,8 +79,16 @@
           href: '/?filter=read-later#',
         },
         { name: '笔记', icon: 'note', href: '/?has_note#' },
-        { name: '最近添加', icon: 'clock', href: '?time=created&period=1m#' },
-        { name: '最近修改', icon: 'clock', href: '?time=updated&period=1m#' },
+        {
+          name: '最近添加',
+          icon: 'clock',
+          href: `?${buildTimeQuerySearchParams(locationSearchString, 'created', '1m').toString()}`,
+        },
+        {
+          name: '最近修改',
+          icon: 'clock',
+          href: `?${buildTimeQuerySearchParams(locationSearchString, 'updated', '1m').toString()}`,
+        },
         // { name: '最近修改', icon: 'clock', href: 'updated/2m' },
         // { name: '最近修改', icon: 'clock', href: 'updated/from/2024-12' },
         // { name: '常用书签', icon: 'star' },
@@ -94,9 +111,13 @@
     title: '更多收藏集',
     icon: 'folder',
     items: [
-      { name: '已删除书签', icon: 'list', href: '/c/deleted' },
+      {
+        name: '已删除书签',
+        icon: 'list',
+        href: preferQueryString ? '?collection=deleted' : '/c/deleted',
+      },
       // { name: '更新日志', icon: 'star', href: '?collection=release-notes' },
-      { name: '更新日志', icon: 'star', href: '?t=releas-notes' },
+      { name: '更新日志', icon: 'star', href: '/?t=releas-notes' },
     ],
     open: false,
   })

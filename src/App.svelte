@@ -27,6 +27,7 @@
     getHierachyTags,
   } from './utils/bookmarks.js'
   import { batchDeleteBookmarks } from './utils/bookmark-actions.js'
+  import appConfig from './config/app-config.js'
   import { HASH_DELIMITER } from './config/constants.js'
   import Header from './components/Header.svelte'
   import NavigationSidebar from './components/NavigationSidebar.svelte'
@@ -91,6 +92,7 @@
   let editBookmarkData = $state(null)
   let sharedStatus = $state({
     isViewingDeleted: false,
+    locationSearchString: '',
   })
 
   setContext('sharedStatus', sharedStatus)
@@ -102,14 +104,23 @@
       location.href
     )
 
+    let internalSearchString = location.search
     const newUrl = transformCollectionPathToQueryParams(location.href)
     if (newUrl !== location.href) {
-      console.log('location change, updating url')
-      history.replaceState({}, '', newUrl)
-      return
+      if (appConfig.preferQueryString) {
+        console.log('location change, updating url')
+        history.replaceState({}, '', newUrl)
+        return
+      }
+      const internalUrl = new URL(newUrl)
+      internalSearchString = internalUrl.search
     }
 
-    const urlParams = new URLSearchParams(location.search)
+    if (location.search !== sharedStatus.locationSearchString) {
+      sharedStatus.locationSearchString = location.search
+    }
+
+    const urlParams = new URLSearchParams(internalSearchString)
     const collectionId = urlParams.get('collection') || ''
     const visibility = urlParams.get('v') || undefined // 'shared', 'public', 'private'
     if (
@@ -122,9 +133,9 @@
       sharedStatus.isViewingDeleted = collectionId === 'deleted'
     }
 
-    if (location.search) {
+    if (internalSearchString) {
       const urlParams = convertCollectionToFilterParams(
-        new URLSearchParams(location.search)
+        new URLSearchParams(internalSearchString)
       )
 
       console.log('urlParams', urlParams.toString())

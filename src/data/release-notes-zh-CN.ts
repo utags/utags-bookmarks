@@ -4,9 +4,10 @@ export const releaseNotes = {
       title: 'Release Notes - v0.5',
       note: `
 - 显示已删除书签列表
+- 切换收藏集和内部网站时不刷新页面
       `,
       created: new Date('2025-05-16T15:30:00.000Z').getTime(),
-      updated: new Date('2025-05-16T15:30:00.000Z').getTime(),
+      updated: new Date('2025-05-17T14:00:00.000Z').getTime(),
     },
     tags: ['releas-notes', 'utags'],
   },

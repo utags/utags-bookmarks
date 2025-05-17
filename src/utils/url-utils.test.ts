@@ -10,6 +10,9 @@ import {
   mergeHashFiltersIntoSearchParams,
   transformCollectionPathToQueryParams,
   convertCollectionToFilterParams,
+  appendSearchParams,
+  removeSearchParams,
+  buildTimeQuerySearchParams,
 } from './url-utils.js'
 
 /**
@@ -1048,5 +1051,353 @@ describe('convertCollectionToFilterParams', () => {
 
     // Verify result is empty
     expect(Array.from(result.entries()).length).toBe(0)
+  })
+})
+
+/**
+ * Tests for appendSearchParams function
+ */
+describe('appendSearchParams', () => {
+  // Test case 1: Appending a string to URLSearchParams
+  it('should append string params to URLSearchParams', () => {
+    const original = new URLSearchParams('a=1&b=2')
+    const newParams = 'c=3&a=4' // 'a' is a duplicate key
+    const result = appendSearchParams(original, newParams)
+    expect(result.toString()).toBe('a=1&b=2&c=3&a=4')
+    expect(result.getAll('a')).toEqual(['1', '4'])
+  })
+
+  // Test case 2: Appending a record (object) to a string
+  it('should append record params to a string', () => {
+    const originalStr = 'x=10'
+    const newRecord = { y: '20', z: '30' }
+    const result = appendSearchParams(originalStr, newRecord)
+    expect(result.toString()).toBe('x=10&y=20&z=30')
+  })
+
+  // Test case 3: Appending URLSearchParams to URLSearchParams
+  it('should append URLSearchParams to URLSearchParams', () => {
+    const params1 = new URLSearchParams('foo=bar')
+    const params2 = new URLSearchParams('baz=qux&foo=another') // 'foo' is a duplicate key
+    const result = appendSearchParams(params1, params2)
+    expect(result.toString()).toBe('foo=bar&baz=qux&foo=another')
+    expect(result.getAll('foo')).toEqual(['bar', 'another'])
+  })
+
+  // Test case 4: Appending to empty original URLSearchParams
+  it('should append to empty original URLSearchParams', () => {
+    const original = new URLSearchParams()
+    const newParams = 'a=1&b=2'
+    const result = appendSearchParams(original, newParams)
+    expect(result.toString()).toBe('a=1&b=2')
+  })
+
+  // Test case 5: Appending to empty original string
+  it('should append to empty original string params', () => {
+    const originalStr = ''
+    const newParams = { a: '1', b: '2' }
+    const result = appendSearchParams(originalStr, newParams)
+    expect(result.toString()).toBe('a=1&b=2')
+  })
+
+  // Test case 6: Appending empty new URLSearchParams
+  it('should return original when appending empty new URLSearchParams', () => {
+    const original = new URLSearchParams('a=1')
+    const newParams = new URLSearchParams()
+    const result = appendSearchParams(original, newParams)
+    expect(result.toString()).toBe('a=1')
+  })
+
+  // Test case 7: Appending empty new string params
+  it('should return original when appending empty new string params', () => {
+    const original = new URLSearchParams('a=1')
+    const newParams = ''
+    const result = appendSearchParams(original, newParams)
+    expect(result.toString()).toBe('a=1')
+  })
+
+  // Test case 8: Appending empty new record params
+  it('should return original when appending empty new record params', () => {
+    const original = new URLSearchParams('a=1')
+    const newParams = {}
+    const result = appendSearchParams(original, newParams)
+    expect(result.toString()).toBe('a=1')
+  })
+
+  // Test case 9: Appending params with special characters
+  it('should handle special characters in keys and values', () => {
+    const original = new URLSearchParams('name=John Doe')
+    const newParams = {
+      email: 'john.doe@example.com',
+      tags: 'tag1,tag2 with space',
+    }
+    const result = appendSearchParams(original, newParams)
+    expect(result.get('name')).toBe('John Doe')
+    expect(result.get('email')).toBe('john.doe@example.com')
+    expect(result.get('tags')).toBe('tag1,tag2 with space')
+    // URLSearchParams automatically encodes spaces to '+' or %20 depending on context,
+    // toString() usually uses '+', but direct comparison is fine.
+    expect(result.toString()).toBe(
+      'name=John+Doe&email=john.doe%40example.com&tags=tag1%2Ctag2+with+space'
+    )
+  })
+
+  // Test case 10: All inputs are empty
+  it('should return empty when all inputs are empty', () => {
+    const result1 = appendSearchParams('', '')
+    expect(result1.toString()).toBe('')
+
+    const result2 = appendSearchParams(new URLSearchParams(), {})
+    expect(result2.toString()).toBe('')
+  })
+
+  // Test case 11: Original params is a Record
+  it('should handle original params as a Record', () => {
+    const originalRecord = { a: '1', b: '2' }
+    const newParams = 'c=3&d=4'
+    const result = appendSearchParams(originalRecord, newParams)
+    expect(result.toString()).toBe('a=1&b=2&c=3&d=4')
+  })
+
+  // Test case 12: New params is a Record, original is URLSearchParams
+  it('should handle new params as a Record with original as URLSearchParams', () => {
+    const original = new URLSearchParams('a=1')
+    const newRecord = { b: '2', c: '3' }
+    const result = appendSearchParams(original, newRecord)
+    expect(result.toString()).toBe('a=1&b=2&c=3')
+  })
+})
+
+/**
+ * Tests for removeSearchParams function
+ */
+describe('removeSearchParams', () => {
+  // Test case 1: Removing keys from URLSearchParams (Example 1 from JSDoc)
+  it('should remove specified keys from URLSearchParams', () => {
+    const original = new URLSearchParams('a=1&b=2&c=3&b=4')
+    const keysToRemove = ['b', 'd'] // 'd' does not exist, will be ignored
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('a=1&c=3')
+  })
+
+  // Test case 2: Removing keys from a string (Example 2 from JSDoc)
+  it('should remove specified keys from a query string', () => {
+    const originalStr = 'x=10&y=20&z=30'
+    const keysToRemove = ['y']
+    const result = removeSearchParams(originalStr, keysToRemove)
+    expect(result.toString()).toBe('x=10&z=30')
+  })
+
+  // Test case 3: Removing keys from a Record (Example 3 from JSDoc)
+  it('should remove specified keys from a Record', () => {
+    const originalRecord = { foo: 'bar', baz: 'qux', key: 'value' }
+    const keysToRemove = ['baz', 'nonExistentKey']
+    const result = removeSearchParams(originalRecord, keysToRemove)
+    expect(result.toString()).toBe('foo=bar&key=value')
+  })
+
+  // Test case 4: Removing all keys (Example 4 from JSDoc)
+  it('should remove all keys if specified', () => {
+    const original = new URLSearchParams('a=1&b=2')
+    const keysToRemove = ['a', 'b']
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('')
+  })
+
+  // Test case 5: Empty keysToRemove array (Example 5 from JSDoc)
+  it('should return original params if keysToRemove is empty', () => {
+    const original = new URLSearchParams('a=1&b=2')
+    const keysToRemove: string[] = []
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('a=1&b=2')
+  })
+
+  // Test case 6: Removing non-existent keys
+  it('should handle removal of non-existent keys gracefully', () => {
+    const original = new URLSearchParams('a=1&b=2')
+    const keysToRemove = ['c', 'd']
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('a=1&b=2')
+  })
+
+  // Test case 7: Removing keys from empty URLSearchParams
+  it('should return empty if original URLSearchParams is empty', () => {
+    const original = new URLSearchParams()
+    const keysToRemove = ['a']
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('')
+  })
+
+  // Test case 8: Removing keys when orgSearchParams is an empty string
+  it('should return empty if original params string is empty', () => {
+    const originalStr = ''
+    const keysToRemove = ['a']
+    const result = removeSearchParams(originalStr, keysToRemove)
+    expect(result.toString()).toBe('')
+  })
+
+  // Test case 9: Removing keys when orgSearchParams is an empty Record
+  it('should return empty if original params Record is empty', () => {
+    const originalRecord = {}
+    const keysToRemove = ['a']
+    const result = removeSearchParams(originalRecord, keysToRemove)
+    expect(result.toString()).toBe('')
+  })
+
+  // Test case 10: Removing a key that has multiple values
+  it('should remove all instances of a key with multiple values', () => {
+    const original = new URLSearchParams('a=1&b=2&a=3&c=4&a=5')
+    const keysToRemove = ['a']
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('b=2&c=4')
+    expect(result.has('a')).toBe(false)
+  })
+
+  // Test case 11: Removing multiple keys, some with multiple values
+  it('should remove multiple keys, some having multiple values', () => {
+    const original = new URLSearchParams('a=1&b=2&a=3&c=4&b=5&d=6')
+    const keysToRemove = ['a', 'b']
+    const result = removeSearchParams(original, keysToRemove)
+    expect(result.toString()).toBe('c=4&d=6')
+    expect(result.has('a')).toBe(false)
+    expect(result.has('b')).toBe(false)
+  })
+
+  // Test case 12: Ensure original URLSearchParams object is not modified
+  it('should not modify the original URLSearchParams object', () => {
+    const original = new URLSearchParams('a=1&b=2')
+    const keysToRemove = ['b']
+    removeSearchParams(original, keysToRemove) // Call the function
+    // Check if the original object remains unchanged
+    expect(original.toString()).toBe('a=1&b=2')
+  })
+
+  // Test case 13: Ensure original Record object is not modified (though it's passed by value for primitives, objects are by reference)
+  // URLSearchParams constructor creates a new object, so original record is safe.
+  it('should not modify the original Record object', () => {
+    const originalRecord = { a: '1', b: '2' }
+    const keysToRemove = ['b']
+    removeSearchParams(originalRecord, keysToRemove) // Call the function
+    // Check if the original record remains unchanged
+    expect(originalRecord).toEqual({ a: '1', b: '2' })
+  })
+})
+
+/**
+ * Tests for buildTimeQuerySearchParams function
+ */
+describe('buildTimeQuerySearchParams', () => {
+  // Test case 1: Adding time filters to existing params (Example 1 from JSDoc)
+  it('should add time and period to existing URLSearchParams', () => {
+    const original = new URLSearchParams('filter=active')
+    const result = buildTimeQuerySearchParams(original, 'created', '7d')
+    expect(result.toString()).toBe('filter=active&time=created&period=7d')
+  })
+
+  // Test case 2: Overwriting existing time filters (Example 2 from JSDoc)
+  it('should overwrite existing time and period parameters', () => {
+    const originalWithTime = new URLSearchParams(
+      'time=created&period=3m&user=john'
+    )
+    const result = buildTimeQuerySearchParams(originalWithTime, 'updated', '1m')
+    // URLSearchParams sorts keys alphabetically, so 'period' might come before 'time' or 'user'
+    const resultMap = new Map(result.entries())
+    expect(resultMap.get('user')).toBe('john')
+    expect(resultMap.get('time')).toBe('updated')
+    expect(resultMap.get('period')).toBe('1m')
+    expect(result.getAll('time').length).toBe(1) // Ensure only one time param
+    expect(result.getAll('period').length).toBe(1) // Ensure only one period param
+  })
+
+  // Test case 3: Using default values (Example 3 from JSDoc)
+  it('should use default time and period if not provided', () => {
+    const originalStr = 'q=searchterm'
+    const result = buildTimeQuerySearchParams(originalStr)
+    expect(result.toString()).toBe('q=searchterm&time=updated&period=1m')
+  })
+
+  // Test case 4: Starting with empty params (Example 4 from JSDoc)
+  it('should build params correctly when original params are empty string', () => {
+    const result = buildTimeQuerySearchParams('', 'created', '2w')
+    expect(result.toString()).toBe('time=created&period=2w')
+  })
+
+  // Test case 5: Starting with empty URLSearchParams object
+  it('should build params correctly when original params are an empty URLSearchParams object', () => {
+    const original = new URLSearchParams()
+    const result = buildTimeQuerySearchParams(original, 'created', '14d')
+    expect(result.toString()).toBe('time=created&period=14d')
+  })
+
+  // Test case 6: Starting with empty Record object
+  it('should build params correctly when original params are an empty Record', () => {
+    const original: Record<string, string> = {}
+    const result = buildTimeQuerySearchParams(original, 'updated', '30d')
+    expect(result.toString()).toBe('time=updated&period=30d')
+  })
+
+  // Test case 7: Using 'created' for time parameter
+  it('should correctly set time to "created"', () => {
+    const original = new URLSearchParams('filter=new')
+    const result = buildTimeQuerySearchParams(original, 'created', '1y')
+    expect(result.toString()).toBe('filter=new&time=created&period=1y')
+  })
+
+  // Test case 8: Using different period value
+  it('should correctly set a custom period', () => {
+    const original = new URLSearchParams('status=pending')
+    const result = buildTimeQuerySearchParams(original, 'updated', '6m')
+    expect(result.toString()).toBe('status=pending&time=updated&period=6m')
+  })
+
+  // Test case 9: Original params as a Record
+  it('should handle original params as a Record<string, string>', () => {
+    const originalRecord = { user: 'test', type: 'report' }
+    const result = buildTimeQuerySearchParams(originalRecord, 'created', '1w')
+    const resultMap = new Map(result.entries())
+    expect(resultMap.get('user')).toBe('test')
+    expect(resultMap.get('type')).toBe('report')
+    expect(resultMap.get('time')).toBe('created')
+    expect(resultMap.get('period')).toBe('1w')
+  })
+
+  // Test case 10: Original params as a query string with existing time/period
+  it('should overwrite time/period in a query string', () => {
+    const originalStr = 'item=book&time=created&period=1y'
+    const result = buildTimeQuerySearchParams(originalStr, 'updated', '1d')
+    const resultMap = new Map(result.entries())
+    expect(resultMap.get('item')).toBe('book')
+    expect(resultMap.get('time')).toBe('updated')
+    expect(resultMap.get('period')).toBe('1d')
+  })
+
+  // Test case 11: Ensure original URLSearchParams object is not modified
+  it('should not modify the original URLSearchParams object', () => {
+    const original = new URLSearchParams('a=1&time=old&period=oldP')
+    buildTimeQuerySearchParams(original, 'updated', 'newP') // Call the function
+    // Check if the original object remains unchanged
+    expect(original.toString()).toBe('a=1&time=old&period=oldP')
+  })
+
+  // Test case 12: Ensure original Record object is not modified
+  it('should not modify the original Record object', () => {
+    const originalRecord = { a: '1', time: 'old', period: 'oldP' }
+    buildTimeQuerySearchParams(originalRecord, 'updated', 'newP') // Call the function
+    // Check if the original record remains unchanged
+    expect(originalRecord).toEqual({ a: '1', time: 'old', period: 'oldP' })
+  })
+
+  // Test case 13: Params with special characters (should be preserved)
+  it('should preserve other parameters with special characters', () => {
+    const original = new URLSearchParams('query=a%26b%3Dc&filter=active')
+    const result = buildTimeQuerySearchParams(original, 'created', '7d')
+    const resultMap = new Map(result.entries())
+    expect(resultMap.get('query')).toBe('a&b=c') // Decoded value
+    expect(resultMap.get('filter')).toBe('active')
+    expect(resultMap.get('time')).toBe('created')
+    expect(resultMap.get('period')).toBe('7d')
+    expect(result.toString()).toBe(
+      'query=a%26b%3Dc&filter=active&time=created&period=7d'
+    )
   })
 })

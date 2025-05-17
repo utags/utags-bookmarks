@@ -25,6 +25,7 @@
     ArrowDownAZ,
     ArrowDownZA,
   } from 'lucide-svelte'
+  import { spaNavigateAttachment as spaNavigate } from '../actions/spa-navigate-attachment.js'
 
   let { collapsed = false } = $props()
 
@@ -49,7 +50,10 @@
   }}>
   <!-- 桌面端导航 -->
   <div class="hidden md:flex md:items-center md:gap-6">
-    <a href="/" class="flex items-center gap-2 hover:opacity-80">
+    <a
+      href="/"
+      {@attach spaNavigate}
+      class="flex items-center gap-2 hover:opacity-80">
       <img src="/logo.svg" alt="UTags Logo" class="h-8 w-8" />
       <span
         class="logo-text text-xl font-bold text-gray-800 dark:text-gray-200">
