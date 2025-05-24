@@ -55,7 +55,8 @@
   document.documentElement.lang = getLocale()
 
   const bookmarkService = BookmarkService.getInstance()
-  bookmarkService.setApiBaseUrl('https://utags.link/utags-public-collections')
+  // bookmarkService.setApiBaseUrl('https://utags.link/utags-public-collections')
+  bookmarkService.setApiBaseUrl('https://api.utags.link')
   bookmarkService.setApiSuffix('json')
 
   let store = $state(bookmarkService.getStore())

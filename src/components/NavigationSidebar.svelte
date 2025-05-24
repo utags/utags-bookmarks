@@ -2,6 +2,7 @@
   import { getContext } from 'svelte'
   import { PanelLeftOpen, PanelLeftClose } from 'lucide-svelte'
   import * as m from '../paraglide/messages'
+  import { appConfig } from '../config/app-config.js'
   import {
     buildTimeQuerySearchParams,
     buildCollectionPath,
@@ -14,6 +15,8 @@
   import Collections from './Collections.svelte'
   import SavedFilters from './SavedFilters.svelte'
   import TagHierarchy from './TagHierarchy.svelte'
+
+  const base = appConfig.base
 
   let {
     tagHierarchyItems = [],
@@ -70,7 +73,7 @@
       icon: 'bookmark',
       items: [
         // { name: '默认', icon: 'list', href: '/#' }, // Inbox
-        { name: m.ALL_BOOKMARKS(), icon: 'list', href: '/#' },
+        { name: m.ALL_BOOKMARKS(), icon: 'list', href: `${base}#` },
         // { name: '所有书签', icon: 'list', href: '/all#' },
         // { name: '存档', icon: 'list', href: '/archive#' },
         // { name: '已加星标', icon: 'list', href: '/starred#' },
@@ -78,9 +81,9 @@
         {
           name: m.READ_LATER(),
           icon: 'bookmark-plus',
-          href: '/?filter=read-later#',
+          href: `${base}?filter=read-later#`,
         },
-        { name: m.NOTES(), icon: 'note', href: '/?has_note#' },
+        { name: m.NOTES(), icon: 'note', href: `${base}?has_note#` },
         {
           name: m.RECENTLY_ADDED(),
           icon: 'clock',

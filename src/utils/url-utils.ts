@@ -446,7 +446,7 @@ export function buildCollectionPath(
       params.set('v', visibility)
     }
 
-    return `/?${params.toString()}`
+    return `${appConfig.base}?${params.toString()}`
   }
 
   // Path-based construction
@@ -717,4 +717,64 @@ export function buildTimeQuerySearchParams(
     time,
     period,
   })
+}
+
+/**
+ * Checks if the current web application is running in a dedicated domain context.
+ * This determination is based on the current URL's pathname.
+ *
+ * A dedicated domain context is assumed if the pathname is:
+ * - Exactly '/' (root)
+ * - Exactly '/index.html'
+ * - Matches the pattern '/collections/{collectionId}' (e.g., /collections/my-collection)
+ * - Matches the pattern '/c/{collectionId}' (e.g., /c/another-collection)
+ *
+ * @param {string} [pathname=window.location.pathname] - The URL pathname to check. Defaults to the current window's pathname.
+ * @returns {boolean} True if the pathname indicates a dedicated domain context, false otherwise.
+ *
+ * @example
+ * // Assuming window.location.pathname is '/'
+ * isRunningInDedicatedDomain(); // true
+ *
+ * @example
+ * // Assuming window.location.pathname is '/index.html'
+ * isRunningInDedicatedDomain(); // true
+ *
+ * @example
+ * // Assuming window.location.pathname is '/collections/some-id'
+ * isRunningInDedicatedDomain(); // true
+ *
+ * @example
+ * // Assuming window.location.pathname is '/c/other-id'
+ * isRunningInDedicatedDomain(); // true
+ *
+ * @example
+ * // Assuming window.location.pathname is '/settings'
+ * isRunningInDedicatedDomain(); // false
+ *
+ * @example
+ * // Explicitly passing a pathname
+ * isRunningInDedicatedDomain('/collections/123'); // true
+ * isRunningInDedicatedDomain('/c/abc'); // true
+ * isRunningInDedicatedDomain('/about'); // false
+ */
+export function isRunningInDedicatedDomain(
+  pathname: string = typeof globalThis !== 'undefined' && globalThis.location
+    ? globalThis.location.pathname
+    : ''
+): boolean {
+  pathname = pathname.replace(/[?#].*$/, '')
+  if (pathname === '/' || pathname === '/index.html') {
+    return true
+  }
+
+  // Regex to match /collections/{collectionId} or /c/{collectionId}
+  // where {collectionId} is one or more characters that are not a slash.
+  const collectionPathRegex =
+    /^\/(?:collections?|c)\/(?:(shared|public|private)\/)?([^/]+)(?:\/(.*))?$/
+  if (collectionPathRegex.test(pathname)) {
+    return true
+  }
+
+  return false
 }

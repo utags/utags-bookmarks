@@ -35,7 +35,8 @@ jobs:
       - name: Copy 404.html
         run: cp dist/index.html dist/404.html
 
-      - name: Create CNAME
+      - name: Create CNAME file
+        if: "${{ vars.CNAME != '' }}"
         run: echo "${{ vars.CNAME }}" > dist/CNAME
 
       - name: Deploy to GitHub Pages

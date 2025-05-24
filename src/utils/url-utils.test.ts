@@ -14,7 +14,8 @@ import {
   appendSearchParams,
   removeSearchParams,
   buildTimeQuerySearchParams,
-  buildCollectionPath, // Added import for buildCollectionPath
+  buildCollectionPath,
+  isRunningInDedicatedDomain,
 } from './url-utils.js'
 
 // Import appConfig to allow modification in tests
@@ -24,8 +25,17 @@ vi.mock('../config/app-config.js', () => ({
   __esModule: true, // Important for ES modules
   default: {
     preferQueryString: false, // Default mock value, can be changed per test
+    base: '/',
   },
 }))
+
+// Define a type for our mock location
+type MockLocation = {
+  href: string
+  origin: string
+  assign?: (url: string) => void // For fallback navigation spy
+}
+let mockLocation: MockLocation
 
 /**
  * Tests for getHostName function
@@ -1502,5 +1512,135 @@ describe('buildCollectionPath', () => {
     it('should handle empty collectionId for path', () => {
       expect(buildCollectionPath('')).toBe('/')
     })
+  })
+})
+
+describe('isRunningInDedicatedDomain', () => {
+  // Mock globalThis.location.pathname
+  let originalPathname: string
+
+  beforeEach(() => {
+    mockLocation = {
+      href: 'http://localhost:3000/current-page',
+      origin: 'http://localhost:3000',
+      assign: vi.fn(), // Mock for location.assign for fallback
+    }
+
+    // Stub global objects. Vitest's `vi.stubGlobal` is preferred.
+    vi.stubGlobal('location', mockLocation)
+    // `window.location` should also point to `mockLocation`
+    vi.stubGlobal('window', {
+      location: mockLocation,
+    })
+
+    // Store original pathname and set a default mock
+    originalPathname = globalThis.location.pathname
+    Object.defineProperty(globalThis, 'location', {
+      writable: true,
+      value: { ...globalThis.location, pathname: '' },
+    })
+  })
+
+  afterEach(() => {
+    // Restore original pathname
+    Object.defineProperty(globalThis, 'location', {
+      writable: true,
+      value: { ...globalThis.location, pathname: originalPathname },
+    })
+  })
+
+  it('should return true for root path', () => {
+    Object.defineProperty(globalThis.location, 'pathname', {
+      writable: true,
+      value: '/',
+    })
+    expect(isRunningInDedicatedDomain()).toBe(true)
+    expect(isRunningInDedicatedDomain('/')).toBe(true)
+  })
+
+  it('should return true for /index.html', () => {
+    Object.defineProperty(globalThis.location, 'pathname', {
+      writable: true,
+      value: '/index.html',
+    })
+    expect(isRunningInDedicatedDomain()).toBe(true)
+    expect(isRunningInDedicatedDomain('/index.html')).toBe(true)
+  })
+
+  it('should return true for /collections/{collectionId}', () => {
+    const paths = [
+      '/collections/my-collection',
+      '/collections/12345',
+      '/collections/public/12345',
+      '/collections/another-collection-with-hyphens',
+    ]
+    for (const path of paths) {
+      Object.defineProperty(globalThis.location, 'pathname', {
+        writable: true,
+        value: path,
+      })
+      expect(isRunningInDedicatedDomain()).toBe(true)
+      expect(isRunningInDedicatedDomain(path)).toBe(true)
+    }
+  })
+
+  it('should return true for /c/{collectionId}', () => {
+    const paths = [
+      '/c/my-collection',
+      '/c/67890',
+      '/c/shared/67890',
+      '/c/short-id',
+    ]
+    for (const path of paths) {
+      Object.defineProperty(globalThis.location, 'pathname', {
+        writable: true,
+        value: path,
+      })
+      expect(isRunningInDedicatedDomain()).toBe(true)
+      expect(isRunningInDedicatedDomain(path)).toBe(true)
+    }
+  })
+
+  it('should return false for other paths', () => {
+    const paths = [
+      '/settings',
+      '/about',
+      '/collections/', // Missing collectionId
+      '/c/', // Missing collectionId
+      // '/collections/id/details', // Extra segments
+      // '/c/id/edit', // Extra segments
+      '/some/other/path',
+      '', // Empty path
+    ]
+    for (const path of paths) {
+      Object.defineProperty(globalThis.location, 'pathname', {
+        writable: true,
+        value: path,
+      })
+      expect(isRunningInDedicatedDomain()).toBe(false)
+      expect(isRunningInDedicatedDomain(path)).toBe(false)
+    }
+  })
+
+  it('should handle paths with query parameters and hash fragments correctly', () => {
+    // These should still be considered dedicated if the base path matches
+    expect(isRunningInDedicatedDomain('/?query=param')).toBe(true)
+    expect(isRunningInDedicatedDomain('/index.html#hash')).toBe(true)
+    expect(isRunningInDedicatedDomain('/collections/abc?query=1')).toBe(true)
+    expect(isRunningInDedicatedDomain('/c/def#section')).toBe(true)
+
+    // These should be false as the base path does not match
+    expect(isRunningInDedicatedDomain('/settings?query=param')).toBe(false)
+    expect(isRunningInDedicatedDomain('/about#hash')).toBe(false)
+  })
+
+  it('should handle undefined globalThis object gracefully (e.g., in Node.js environment without DOM)', () => {
+    const originalWindow = globalThis.window
+    // @ts-expect-error: Simulate non-browser environment
+    delete globalThis.window
+    expect(isRunningInDedicatedDomain()).toBe(false) // Defaults to empty string, which is false
+    expect(isRunningInDedicatedDomain('/specific/path')).toBe(false) // Still respects passed arg
+    expect(isRunningInDedicatedDomain('/')).toBe(true) // Still respects passed arg
+    globalThis.window = originalWindow
   })
 })
