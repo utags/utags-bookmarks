@@ -1,9 +1,9 @@
 import {
   createClient,
-  type WebDAVClient,
+  type WebDAVClient as WebDAVClientType,
   type FileStat,
   type PutFileContentsOptions,
-} from 'webdav'
+} from './webdav-client.js'
 import type {
   AuthStatus,
   SyncAdapter,
@@ -19,7 +19,7 @@ export class WebDAVSyncAdapter
   implements SyncAdapter<WebDAVCredentials, WebDAVTarget>
 {
   private config: SyncServiceConfig<WebDAVCredentials, WebDAVTarget> | undefined
-  private client: WebDAVClient | undefined
+  private client: WebDAVClientType | undefined
 
   /**
    * Initializes the WebDAV sync adapter with the given configuration.
@@ -86,7 +86,7 @@ export class WebDAVSyncAdapter
 
     const filePath = this.getFilePath() // + Use getFilePath
     try {
-      const stat = (await this.client.stat(filePath)) as FileStat
+      const stat = await this.client.stat(filePath)
       return {
         version: stat.etag!,
         sha: stat.etag!,
@@ -121,7 +121,7 @@ export class WebDAVSyncAdapter
 
     const filePath = this.getFilePath() // + Use getFilePath
     try {
-      const stat = (await this.client.stat(filePath)) as FileStat
+      const stat = await this.client.stat(filePath)
       const fileContents = (await this.client.getFileContents(filePath, {
         format: 'text',
       })) as string
@@ -171,7 +171,7 @@ export class WebDAVSyncAdapter
     try {
       // Check if parent directory exists, create if not
       try {
-        const testStat = (await this.client.stat(parentPath)) as FileStat
+        const testStat = await this.client.stat(parentPath)
         if (testStat.type !== 'directory') {
           // Path component is a file, not a directory
           throw new Error(
@@ -239,7 +239,7 @@ export class WebDAVSyncAdapter
       }
 
       // After successful upload, get the new metadata (ETag and Last-Modified)
-      const stat = (await this.client.stat(filePath)) as FileStat
+      const stat = await this.client.stat(filePath)
       return {
         version: stat.etag!,
         sha: stat.etag!, // Using ETag as SHA for WebDAV

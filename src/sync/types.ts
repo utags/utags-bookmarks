@@ -39,6 +39,97 @@ export type SyncServiceConfig<
 }
 
 /**
+ * GitHub API response for getting file contents
+ * Based on GitHub Contents API: https://docs.github.com/en/rest/repos/contents
+ */
+export type GitHubContentsResponse = {
+  name: string // File name
+  path: string // File path in repository
+  sha: string // SHA of the file blob
+  size: number // File size in bytes
+  url: string // API URL for this file
+  html_url: string // GitHub web URL for this file
+  git_url: string // Git API URL for this file
+  download_url: string // Direct download URL for file content
+  type: 'file' | 'dir' | 'symlink' | 'submodule' // Content type
+  content?: string // Base64 encoded file content (for files)
+  encoding?: 'base64' // Content encoding
+  _links: {
+    self: string
+    git: string
+    html: string
+  }
+}
+
+/**
+ * GitHub API response for getting blob content
+ * Based on GitHub Git Blobs API: https://docs.github.com/en/rest/git/blobs
+ */
+export type GitHubBlobResponse = {
+  sha: string // SHA of the blob
+  node_id: string // Node ID of the blob
+  size: number // Size of the blob in bytes
+  url: string // API URL for this blob
+  content: string // Base64 encoded content
+  encoding: 'base64' // Content encoding
+}
+
+/**
+ * GitHub API response for creating or updating a file
+ * Based on GitHub Create/Update File API: https://docs.github.com/en/rest/repos/contents
+ */
+export type GitHubCreateUpdateFileResponse = {
+  content: {
+    name: string // File name
+    path: string // File path in repository
+    sha: string // SHA of the new file blob
+    size: number // File size in bytes
+    url: string // API URL for this file
+    html_url: string // GitHub web URL for this file
+    git_url: string // Git API URL for this file
+    download_url: string // Direct download URL for file content
+    type: 'file'
+    _links: {
+      self: string
+      git: string
+      html: string
+    }
+  }
+  commit: {
+    sha: string // SHA of the commit
+    node_id: string // Node ID of the commit
+    url: string // API URL for the commit
+    html_url: string // GitHub web URL for the commit
+    author: {
+      name: string
+      email: string
+      date: string // ISO 8601 timestamp
+    }
+    committer: {
+      name: string
+      email: string
+      date: string // ISO 8601 timestamp
+    }
+    tree: {
+      sha: string
+      url: string
+    }
+    message: string // Commit message
+    parents: Array<{
+      sha: string
+      url: string
+      html_url: string
+    }>
+    verification: {
+      verified: boolean
+      reason: string
+      signature: string | undefined
+      payload: string | undefined
+    }
+  }
+}
+
+/**
  * Credentials for GitHub synchronization.
  */
 export type GithubCredentials = {

@@ -1,3 +1,4 @@
+import process from 'node:process'
 import express, {
   type Request,
   type Response,
@@ -12,19 +13,24 @@ const app = express()
 const port = process.env.PORT || 3002
 
 // The target WebDAV server
-const WEBDAV_PROXY_CONFIG_JSON = process.env.WEBDAV_PROXY_CONFIG
-console.log(WEBDAV_PROXY_CONFIG_JSON)
-if (!WEBDAV_PROXY_CONFIG_JSON) {
+const webdavProxyConfigJson = process.env.WEBDAV_PROXY_CONFIG
+console.log(webdavProxyConfigJson)
+if (!webdavProxyConfigJson) {
   console.error('WEBDAV_PROXY_CONFIG environment variable is not set.')
+  // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1)
 }
 
 let webdavProxyConfig: Record<string, string>
 
 try {
-  webdavProxyConfig = JSON.parse(WEBDAV_PROXY_CONFIG_JSON)
+  webdavProxyConfig = JSON.parse(webdavProxyConfigJson) as Record<
+    string,
+    string
+  >
 } catch (error) {
   console.error('Failed to parse WEBDAV_PROXY_CONFIG:', error)
+  // eslint-disable-next-line unicorn/no-process-exit
   process.exit(1)
 }
 
@@ -39,7 +45,8 @@ app.use('/', (req: Request, res: Response, next: NextFunction) => {
     'Content-Type, Authorization, Depth, If-Match'
   )
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200)
+    res.sendStatus(200)
+    return
   }
 
   next()

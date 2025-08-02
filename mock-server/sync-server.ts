@@ -1,3 +1,4 @@
+import process from 'node:process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import crypto from 'node:crypto'
@@ -55,6 +56,7 @@ async function ensureMockDataDir(): Promise<void> {
  * @param data - The data to hash (string or Buffer).
  * @returns The hex-encoded SHA256 hash.
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 function calculateSha(data: string | Buffer): string {
   return crypto.createHash('sha256').update(data).digest('hex')
 }
@@ -66,7 +68,7 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization
   const token = authHeader && authHeader.split(' ')[1] // Bearer TOKEN
 
-  if (token == null && req.headers['x-api-key'] == null) {
+  if (!token && !req.headers['x-api-key']) {
     // Allow if no token and no api key, for simpler testing of some endpoints
     // Or enforce token for all protected routes
     // If you want to allow access, call next() and return
@@ -145,7 +147,10 @@ app.put(
   async (req: Request, res: Response) => {
     const { filePath } = req.params
     const fullPath = path.join(MOCK_DATA_DIR, filePath)
-    const dataToSave = req.body
+    const dataToSave: Record<string, unknown> = req.body as Record<
+      string,
+      unknown
+    >
 
     const ifMatchSha = req.headers['if-match']
 
@@ -172,7 +177,7 @@ app.put(
         }
       }
 
-      await fs.writeFile(fullPath, JSON.stringify(dataToSave, null, 2), 'utf-8')
+      await fs.writeFile(fullPath, JSON.stringify(dataToSave, null, 2), 'utf8')
       const stats = await fs.stat(fullPath)
       const newSha = calculateSha(JSON.stringify(dataToSave, null, 2))
 

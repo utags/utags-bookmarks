@@ -1,6 +1,6 @@
 {
   "name": "utags-app",
-  "version": "0.14.7-25072501",
+  "version": "0.17.0-25080201",
   "author": "Pipecraft",
   "namespace": "https://utags.pipecraft.net/",
   "license": "MIT",
@@ -70,7 +70,6 @@
     "vite": "^6.3.5",
     "vite-plugin-pwa": "^1.0.1",
     "vitest": "^3.2.4",
-    "webdav": "^5.8.0",
     "xo": "^0.60.0"
   },
   "xo": {

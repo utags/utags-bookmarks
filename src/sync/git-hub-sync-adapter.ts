@@ -4,6 +4,9 @@ import type {
   AuthStatus,
   GithubCredentials,
   GithubTarget,
+  GitHubBlobResponse,
+  GitHubContentsResponse,
+  GitHubCreateUpdateFileResponse,
   SyncAdapter,
   SyncMetadata,
   SyncServiceConfig,
@@ -126,7 +129,8 @@ export class GitHubSyncAdapter
         )
       }
 
-      const content = await response.json()
+      const content: GitHubContentsResponse =
+        (await response.json()) as GitHubContentsResponse
       console.log(
         '[GitHubSyncAdapter] Remote metadata:',
         prettyPrintJson(content)
@@ -322,7 +326,8 @@ export class GitHubSyncAdapter
       }
 
       // Only attempt to parse JSON if the response is OK
-      const responseBody = await response.json()
+      const responseBody: GitHubCreateUpdateFileResponse =
+        (await response.json()) as GitHubCreateUpdateFileResponse
       console.log(
         '[GitHubSyncAdapter] Response of upload:',
         prettyPrintJson(responseBody)
