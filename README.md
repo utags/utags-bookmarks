@@ -6,39 +6,49 @@
 
 ## 🚀 Project Overview
 
-**UTags Bookmark Manager** empowers developers and power users to conquer bookmark chaos. This modern solution moves beyond simple lists, employing a **flexible tagging system** to bring order to your expanding collection of web resources. Unleash **powerful filtering capabilities** to instantly pinpoint the information you need, exactly when you need it.
+**UTags Bookmark Manager** is a modern bookmark management tool designed for developers and power users. Say goodbye to traditional bookmark chaos and embrace **flexible tagging systems** and **powerful filtering engines** to make your web resource management organized, efficient, and convenient.
 
-Visit our [official website (https://utags.link)](https://utags.link/) to explore comprehensive features.
+🌐 [Experience the Official Website](https://utags.link/) | 🔗 [Seamless Integration with UTags Browser Extension](https://github.com/utags/utags)
 
 ## ✨ Core Features
 
-- **Multi-dimensional tag management system**: Support adding multiple tags to bookmarks for multi-dimensional classification
-- **Hierarchical tag support**: Support hierarchical tag structure like `tag/subtag/grandchild-tag` for organizing complex tag systems
-- **Advanced filtering system** supporting:
-  - AND/OR/NOT logical combinations
-  - Regular expression matching
-  - Progressive filtering: Filter within results to gradually narrow down scope with real-time matching results
-- **Local data persistence** via LocalStorage
-- **Progressive Web App (PWA)** support
-- **Seamless integration** with [UTags browser extension/userscript](https://github.com/utags/utags)
+### 🏷️ Smart Tag Management
 
-### Other Features
+- **Multi-dimensional Tagging System**: Add multiple tags to bookmarks for precise multi-dimensional classification
+- **Hierarchical Tag Structure**: Support tree-like organization with `parent-tag/child-tag/grandchild-tag` structure
+- **Tag Auto-completion**: Smart suggestions and quick input to enhance tagging efficiency (Coming soon)
 
-- Fully open source and free to use
-- Easy self-hosting deployment
-- Saved filter presets
-- Create smart collections
-- Data import/export capabilities
-- Multi-device synchronization (TODO) (Paid service)
-- Progressive Web App capabilities:
-  - Add to Home Screen (A2HS)
-  - Offline mode with Service Worker caching
-  - Web App Manifest for native-like experience
-- Visual data statistics dashboard
-- Light/dark theme support
-- Responsive layout with multiple view modes
-- Cross-browser compatibility
-- Browser bookmark import (Chrome/Edge/Firefox/Safari)
+### 🔍 Powerful Filtering Engine
+
+- **Compound Logic Filtering**: Advanced filtering with AND/OR/NOT logical combinations
+- **Regular Expression Matching**: Precise matching for complex search patterns
+- **Progressive Filtering**: Filter within results to gradually narrow down scope
+- **Real-time Search Feedback**: Instant display of matching results and statistics
+- **Filter Preset Saving**: Save common filter conditions for one-click quick application
+- **Smart Collections**: Create dynamic collections based on filter conditions with automatic content updates
+
+### 🔄 Data Sync & Backup
+
+- **Multi-platform Sync**: Cross-device data synchronization via GitHub and WebDAV
+- **Automatic Cloud Backup**: Scheduled backups for data security
+- **Data Import/Export**: Support for mainstream browser bookmark formats (Chrome/Edge/Firefox/Safari)
+
+### 📱 Modern Experience
+
+- **PWA Application**: Support for offline access, add to home screen, and native app experience
+- **Responsive Design**: Perfect adaptation for desktop and mobile devices
+- **Light/Dark Themes**: Eye-friendly modes for different usage scenarios
+- **Multiple View Modes**: List, card, compact, and other display options
+
+## 🎯 Product Advantages
+
+- ✅ **Completely Open Source & Free**: MIT open source license, no registration required, permanently free
+- ✅ **No Ads**: Clean experience, focused purely on bookmark management
+- ✅ **No Bookmark Limit**: Unlimited storage for all your bookmarks
+- ✅ **Privacy & Security**: Local data storage, complete user control
+- ✅ **Easy Deployment**: Support for self-hosting, one-click deployment to personal servers
+- ✅ **Data Visualization**: Intuitive statistics dashboard to understand usage habits
+- ✅ **Cross-browser Compatibility**: Support for all modern browsers
 
 ## ⚡ Quick Start
 
@@ -72,16 +82,17 @@ Visit our [official website (https://utags.link)](https://utags.link/) to explor
 
 - V1.0 TODO
 
+  - [x] Integration with UTags extension/script
+  - [x] Internationalization
   - Batch tag modification
   - Merge processing during bookmark import
-  - Integration with UTags extension/script
-  - [x] Internationalization
 
 - **Bookmark Management Enhancements**
 
-  - Batch modify/delete tags
-  - Batch add tags
-  - Bulk delete bookmarks
+  - [x] Batch delete tags
+  - [x] Batch add tags
+  - [x] Bulk delete bookmarks
+  - Batch rename tags
   - Bulk open all bookmarks
   - Global search functionality. Launch search function through shortcuts on any website to search all bookmarks, tags, and notes
 
@@ -100,10 +111,7 @@ Visit our [official website (https://utags.link)](https://utags.link/) to explor
   - Advanced note editing/viewing interface
 
 - **Data Interoperability**
-  - Gist/GitHub import/export support
-  - WebDAV import/export support
-  - Multi-device sync solution
-  - Cloud sync capability
+  - Official cloud sync capability
   - Bookmark export/import enhancements
   - Use IndexedDB storage when the bookmark volume is extremely large
 
